@@ -24,7 +24,11 @@ namespace Clam
         //private InputAction click;
         public float m_DistanceToQuery = -1.0f;
 
-        public bool Selected { get { return m_IsSelected; } }
+        public bool Selected
+        {
+            get { return m_IsSelected; }
+            set { m_IsSelected = value; }
+        }
 
         private int m_IndexBufferID;
 

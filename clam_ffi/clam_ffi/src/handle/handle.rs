@@ -6,7 +6,8 @@ use std::sync::Arc;
 // use std::thread;
 use std::thread::JoinHandle;
 
-use abd_clam::PartitionCriteria;
+use abd_clam::builder::{detect_edges, select_clusters};
+use abd_clam::{Graph, PartitionCriteria};
 // use abd_clam::cluster::PartitionCriteria;
 // use abd_clam::core::dataset::Dataset;
 use abd_clam::Cakes;
@@ -63,11 +64,12 @@ use spring::Spring;
 //     }
 // }
 
-pub struct Handle {
+pub struct Handle<'a> {
     cakes: Option<Cakes<Vec<f32>, f32, DataSet>>,
     // cakes1: Option<Cakes<Vec<f32>, f32, VecDataset<f32,f32>>>,
     labels: Option<Vec<bool>>,
     graph: Option<HashMap<String, PhysicsNode>>,
+    clam_graph: Option<Graph<'a, f32>>,
     edges: Option<Vec<Spring>>,
     current_query: Option<Vec<f32>>,
     // longest_edge: Option<f32>,
@@ -82,7 +84,7 @@ pub struct Handle {
 //         debug!("DroppingHandle");
 //     }
 // }
-impl Handle {
+impl<'a> Handle<'a> {
     pub fn shutdown(&mut self) {
         self.cakes = None;
         // self.dataset = None;
@@ -136,14 +138,14 @@ impl Handle {
     ) -> Result<Self, FFIError> {
         let criteria = PartitionCriteria::new(true).with_min_cardinality(cardinality);
         match Self::create_dataset(data_name, distance_metric, is_expensive) {
-
             Ok(dataset) => {
-            let cakes = Cakes::new(dataset, Some(1), &criteria);
+                let cakes = Cakes::new(dataset, Some(1), &criteria);
                 let labels = cakes.shards()[0].metadata().unwrap().to_vec();
                 return Ok(Handle {
                     cakes: Some(cakes), //.build(&criteria)),
                     labels: Some(labels),
                     graph: None,
+                    clam_graph: None,
                     edges: None,
                     current_query: None,
                     // longest_edge: None,
@@ -157,24 +159,22 @@ impl Handle {
     }
 
     pub fn load(data_name: &str) -> Result<Self, FFIError> {
-        let c = Cakes::<Vec<f32>, f32, VecDataset<_, _,_>>::load(
+        let c = Cakes::<Vec<f32>, f32, VecDataset<_, _, _>>::load(
             Path::new(data_name),
             utils::distances::euclidean,
             false,
         );
 
-
         match c {
-
             Ok(cakes) => {
-
                 let labels = cakes.shards()[0].metadata().unwrap().to_vec();
 
                 return Ok(Handle {
-
                     cakes: Some(cakes),
                     labels: Some(labels),
                     graph: None,
+                    clam_graph: None,
+
                     edges: None,
                     current_query: None,
                     // longest_edge: None,
@@ -203,7 +203,7 @@ impl Handle {
                 return Err(e);
             }
         };
-        let c = Cakes::<Vec<f32>, f32, VecDataset<_, _,_>>::load(
+        let c = Cakes::<Vec<f32>, f32, VecDataset<_, _, _>>::load(
             Path::new(&data_name),
             metric,
             data.is_expensive,
@@ -216,6 +216,8 @@ impl Handle {
                     cakes: Some(cakes),
                     labels: Some(labels),
                     graph: None,
+                    clam_graph: None,
+
                     edges: None,
                     current_query: None,
                     // longest_edge: None,
@@ -244,8 +246,13 @@ impl Handle {
         match anomaly_readers::read_anomaly_data(data_name, false) {
             Ok((first_data, labels)) => {
                 let labels = labels.iter().map(|x| *x == 1).collect::<Vec<bool>>();
-                let dataset =
-                    VecDataset::new(data_name.to_string(), first_data, metric, is_expensive, Some(labels));
+                let dataset = VecDataset::new(
+                    data_name.to_string(),
+                    first_data,
+                    metric,
+                    is_expensive,
+                    Some(labels),
+                );
 
                 Ok(dataset)
             }
@@ -254,6 +261,26 @@ impl Handle {
                 Err(e)
             }
         }
+    }
+
+    pub fn init_clam_graph(&'a mut self, cluster_selector: CBFnNodeVisitor) -> FFIError {
+        if let Some(cakes) = &self.cakes {
+            if let Some(tree) = cakes.trees().first() {
+                let clusters = select_clusters(tree.root(), tree.depth() / 2);
+                let edges = detect_edges(&clusters, tree.data());
+
+                for cluster in &clusters {
+                    let baton = ClusterDataWrapper::from_cluster(cluster);
+                    cluster_selector(Some(baton.data()));
+                }
+
+                if let Ok(graph) = Graph::new(clusters, edges) {
+                    self.clam_graph = Some(graph);
+                    return FFIError::Ok;
+                }
+            }
+        }
+        return FFIError::GraphBuildFailed;
     }
 
     pub unsafe fn force_physics_shutdown(&mut self) -> FFIError {

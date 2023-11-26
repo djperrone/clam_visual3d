@@ -239,6 +239,19 @@ pub unsafe extern "C" fn shutdown_clam(context_ptr: OutHandlePtr) -> FFIError {
     return shutdown_clam_impl(context_ptr);
 }
 
+// ------------------------------------- Graph Clam Init -------------------------------------
+#[no_mangle]
+pub unsafe extern "C" fn init_clam_graph(
+    context: InHandlePtr,
+    cluster_selector: CBFnNodeVisitor,
+) -> FFIError {
+    if let Some(handle) = context {
+        handle.init_clam_graph(cluster_selector);
+        return FFIError::Ok;
+    }
+    return FFIError::HandleInitFailed;
+}
+
 // -------------------------------------  Tree helpers -------------------------------------
 
 #[no_mangle]

@@ -18,6 +18,7 @@ public class SideMenu : MonoBehaviour
 
     ClusterMenu m_ClusterMenu;
     GraphBuildMenu m_GraphBuildMenu;
+    ClamGraphBuildMenu m_ClamGraphBuildMenu;
     TreeMenu m_TreeMenu;
 
     // Start is called before the first frame update
@@ -29,7 +30,7 @@ public class SideMenu : MonoBehaviour
 
         m_DropdownField.choices = new List<string>()
         {
-            "TreeMenu", "ClusterMenu", "GraphBuildMenu"
+            "TreeMenu", "ClusterMenu", "GraphBuildMenu", "ClamGraphBuildMenu"
         };
 
         var rightField = m_UIDocument.rootVisualElement.Q<VisualElement>("Right");
@@ -51,6 +52,7 @@ public class SideMenu : MonoBehaviour
         m_TreeMenu = new TreeMenu(m_UIDocument);
         m_ClusterMenu = new ClusterMenu(GetComponent<UIDocument>());
         m_GraphBuildMenu = new GraphBuildMenu(GetComponent<UIDocument>(), "GraphBuildMenu");
+        m_ClamGraphBuildMenu = new ClamGraphBuildMenu(GetComponent<UIDocument>(), "ClamGraphBuildMenu");
     }
 
     public void DisplayClusterInfo(ClusterData data)
