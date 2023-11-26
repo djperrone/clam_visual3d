@@ -67,8 +67,9 @@ def get_lib_ext() -> str:
 
 
 def copy_lib(libname, new_libname, is_release):
-
     lib_path = UNITY_PATH / "Assets" / "Plugins" / "lib"
+    print(lib_path)
+
     lib_path.mkdir(exist_ok=True, parents=True)
 
     build_mode = "release" if is_release else "debug"
@@ -118,7 +119,7 @@ def get_lib_prefix() -> str:
 
 def main():
 
-    timestamp = f'{datetime.now():%Y-%m-%d %H:%M:%S%z}'
+    timestamp = f'{datetime.now():%Y-%m-%d%H-%M-%S%z}'
 
     prefix = get_lib_prefix()
     libname = prefix + "clam_ffi"

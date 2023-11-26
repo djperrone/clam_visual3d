@@ -62,16 +62,7 @@
       <change beforePath="$PROJECT_DIR$/clam_ffi/clam/py-clam/python/tests/test_search.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/clam_ffi/clam/py-clam/ruff.toml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/clam_ffi/clam/py-clam/src/lib.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/ffi_impl/lib_impl.rs" beforeDir="false" afterPath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/ffi_impl/lib_impl.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/handle/handle.rs" beforeDir="false" afterPath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/handle/handle.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/tree_layout/reingold_tilford.rs" beforeDir="false" afterPath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/tree_layout/reingold_tilford.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/binaries/annthyroid_EuclideanSQ_False/tree/clusters" beforeDir="false" afterPath="$PROJECT_DIR$/data/binaries/annthyroid_EuclideanSQ_False/tree/clusters" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/binaries/annthyroid_EuclideanSQ_False/tree/dataset" beforeDir="false" afterPath="$PROJECT_DIR$/data/binaries/annthyroid_EuclideanSQ_False/tree/dataset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/binaries/arrhythmia_EuclideanSQ_False/tree/clusters" beforeDir="false" afterPath="$PROJECT_DIR$/data/binaries/arrhythmia_EuclideanSQ_False/tree/clusters" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/binaries/arrhythmia_EuclideanSQ_False/tree/dataset" beforeDir="false" afterPath="$PROJECT_DIR$/data/binaries/arrhythmia_EuclideanSQ_False/tree/dataset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/Core/TreeCache.cs" beforeDir="false" afterPath="$PROJECT_DIR$/unity/Assets/Scripts/Core/TreeCache.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/FFI/NativeMethods.cs" beforeDir="false" afterPath="$PROJECT_DIR$/unity/Assets/Scripts/FFI/NativeMethods.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/UI/Menus/TreeMenu.cs" beforeDir="false" afterPath="$PROJECT_DIR$/unity/Assets/Scripts/UI/Menus/TreeMenu.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/build.py" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/build.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -135,6 +126,7 @@
       <workItem from="1699901840462" duration="3383000" />
       <workItem from="1700054388848" duration="9160000" />
       <workItem from="1700162614025" duration="1292000" />
+      <workItem from="1701037116896" duration="707000" />
     </task>
     <servers />
   </component>
