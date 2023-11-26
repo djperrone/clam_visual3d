@@ -72,8 +72,8 @@ unity/crashlytics-build.properties
 /unity/[Aa]ssets/[Ss]treamingAssets/aa.meta
 /unity/[Aa]ssets/[Ss]treamingAssets/aa/*
 
-/unity/assets/plugins/lib/*.dll
-/unity/assets/plugins/lib/*.dll.meta
+/unity/assets/plugins/lib
+.DS_Store
 
 # unity build
 /unity/build/
