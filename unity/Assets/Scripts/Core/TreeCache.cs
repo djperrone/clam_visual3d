@@ -294,7 +294,7 @@ namespace Clam
             if (hasValue)
             {
                 Debug.Log("setting color to" + nodeData.color.AsVector3.ToString());
-                node.GetComponent<Node>().SetActualColor(nodeData.color.AsColor);
+                node.GetComponent<Node>().SetColor(nodeData.color.AsColor);
             }
             else
             {

@@ -79,7 +79,7 @@ public class TreeMenu
         Debug.Log("color by " + m_ColorOptions.choices.ToList()[changeEvent.newValue]);
         if (changeEvent.newValue == 0)
         {
-            NativeMethods.ForEachDFT(ColorByLabel);
+            NativeMethods.ColorClustersByLabel(ColorByLabel);
             Debug.Log("label");
 
         }
@@ -147,7 +147,7 @@ public class TreeMenu
         {
             //Debug.Log("setting color to" + nodeData.color.AsVector3.ToString());
             node.GetComponent<Node>().Deselect();
-            node.GetComponent<Node>().SetActualColor(nodeData.color.AsColor);
+            node.GetComponent<Node>().SetColor(nodeData.color.AsColor);
         }
         else
         {

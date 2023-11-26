@@ -66,7 +66,7 @@ use spring::Spring;
 pub struct Handle {
     cakes: Option<Cakes<Vec<f32>, f32, DataSet>>,
     // cakes1: Option<Cakes<Vec<f32>, f32, VecDataset<f32,f32>>>,
-    labels: Option<Vec<u8>>,
+    labels: Option<Vec<bool>>,
     graph: Option<HashMap<String, PhysicsNode>>,
     edges: Option<Vec<Spring>>,
     current_query: Option<Vec<f32>>,
@@ -112,7 +112,7 @@ impl Handle {
         };
     }
 
-    pub fn labels(&self) -> Option<&Vec<u8>> {
+    pub fn labels(&self) -> Option<&Vec<bool>> {
         return if let Some(labels) = &self.labels {
             Some(&labels)
         } else {
@@ -136,9 +136,12 @@ impl Handle {
     ) -> Result<Self, FFIError> {
         let criteria = PartitionCriteria::new(true).with_min_cardinality(cardinality);
         match Self::create_dataset(data_name, distance_metric, is_expensive) {
-            Ok((dataset, labels)) => {
+
+            Ok(dataset) => {
+            let cakes = Cakes::new(dataset, Some(1), &criteria);
+                let labels = cakes.shards()[0].metadata().unwrap().to_vec();
                 return Ok(Handle {
-                    cakes: Some(Cakes::new(dataset, Some(1), &criteria)), //.build(&criteria)),
+                    cakes: Some(cakes), //.build(&criteria)),
                     labels: Some(labels),
                     graph: None,
                     edges: None,
@@ -159,11 +162,18 @@ impl Handle {
             utils::distances::euclidean,
             false,
         );
+
+
         match c {
+
             Ok(cakes) => {
+
+                let labels = cakes.shards()[0].metadata().unwrap().to_vec();
+
                 return Ok(Handle {
+
                     cakes: Some(cakes),
-                    labels: None,
+                    labels: Some(labels),
                     graph: None,
                     edges: None,
                     current_query: None,
@@ -200,9 +210,11 @@ impl Handle {
         );
         match c {
             Ok(cakes) => {
+                let labels = cakes.shards()[0].metadata().unwrap().to_vec();
+
                 return Ok(Handle {
                     cakes: Some(cakes),
-                    labels: None,
+                    labels: Some(labels),
                     graph: None,
                     edges: None,
                     current_query: None,
@@ -221,7 +233,7 @@ impl Handle {
         distance_metric: DistanceMetric,
         is_expensive: bool,
         // distance_metric: fn(&Vec<f32>, &Vec<f32>) -> f32,
-    ) -> Result<(DataSet, Vec<u8>), FFIError> {
+    ) -> Result<DataSet, FFIError> {
         let metric = match utils::distances::from_enum(distance_metric) {
             Ok(metric) => metric,
             Err(e) => {
@@ -231,10 +243,11 @@ impl Handle {
         };
         match anomaly_readers::read_anomaly_data(data_name, false) {
             Ok((first_data, labels)) => {
+                let labels = labels.iter().map(|x| *x == 1).collect::<Vec<bool>>();
                 let dataset =
-                    VecDataset::new(data_name.to_string(), first_data, metric, is_expensive, None);
+                    VecDataset::new(data_name.to_string(), first_data, metric, is_expensive, Some(labels));
 
-                Ok((dataset, labels))
+                Ok(dataset)
             }
             Err(e) => {
                 debug!("{:?}", e);

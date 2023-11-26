@@ -15,7 +15,7 @@ use super::reingold_impl;
 
 pub fn run(
     clam_root: &Clusterf32,
-    labels: &Option<Vec<u8>>,
+    labels: &Option<Vec<bool>>,
     max_depth: i32,
     node_visitor: crate::CBFnNodeVisitor,
 ) -> FFIError {
