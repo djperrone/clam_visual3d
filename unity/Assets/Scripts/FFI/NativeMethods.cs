@@ -17,7 +17,7 @@ namespace Clam
 
         public static partial class NativeMethods
         {
-	public const string __DllName = "clam_ffi_2023-11-2617-54-01";
+	public const string __DllName = "clam_ffi_2023-11-2619-42-29";
             private static IntPtr m_Handle;
 
             private static bool m_Initialized = false;
@@ -84,17 +84,17 @@ namespace Clam
                 }
                 return e;
             }
-            public static FFIError LoadCakes(string dataName)
-            {
-                byte[] byteName = Encoding.UTF8.GetBytes(dataName);
-                int len = byteName.Length;
-                var e = load_cakes(out m_Handle, byteName, len);
-                if (e == FFIError.Ok)
-                {
-                    m_Initialized = true;
-                }
-                return e;
-            }
+            //public static FFIError LoadCakes(string dataName)
+            //{
+            //    byte[] byteName = Encoding.UTF8.GetBytes(dataName);
+            //    int len = byteName.Length;
+            //    var e = load_cakes(out m_Handle, byteName, len);
+            //    if (e == FFIError.Ok)
+            //    {
+            //        m_Initialized = true;
+            //    }
+            //    return e;
+            //}
 
             public static FFIError LoadCakes(TreeStartupData data)
             {

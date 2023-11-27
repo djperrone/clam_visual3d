@@ -116,8 +116,8 @@ pub unsafe fn max_lfd_impl(ptr: InHandlePtr) -> f32 {
     // Handle::from_ptr(ptr).get_num_nodes() + 1
 
     if let Some(handle) = ptr {
-        if let Some(cakes) = handle.cakes() {
-            let clusters = cakes.trees().first().unwrap().root().subtree();
+        if let Some(tree) = handle.tree() {
+            let clusters = tree.root().subtree();
             let lfd = clusters.first().unwrap().lfd();
             let max_lfd = clusters
                 .iter()
@@ -127,7 +127,7 @@ pub unsafe fn max_lfd_impl(ptr: InHandlePtr) -> f32 {
             return max_lfd as f32;
         }
     }
-        return -1.0;
+    return -1.0;
 }
 
 pub fn color_clusters_by_label_impl(ptr: InHandlePtr, node_visitor: CBFnNodeVisitor) -> FFIError {
@@ -157,7 +157,6 @@ fn color_helper(root: Option<&Clusterf32>, labels: &Vec<bool>, node_visitor: CBF
 
         let perc_inliers = entropy[0] as f32 / total_entropy as f32;
         let perc_outliers = entropy[1] as f32 / total_entropy as f32;
-        debug!("inliers: {}, outliers: {}", perc_inliers, perc_outliers);
         let mut cluster_data = ClusterDataWrapper::from_cluster(cluster);
         cluster_data.data_mut().color = glam::Vec3::new(perc_outliers, perc_inliers, 0.);
         node_visitor(Some(cluster_data.data()));

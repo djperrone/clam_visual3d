@@ -36,8 +36,7 @@ use utils::{
 };
 
 use crate::handle::entry_point::{
-    init_clam_impl, init_clam_struct_impl, load_cakes_impl, load_cakes_struct_impl,
-    shutdown_clam_impl,
+    init_clam_impl, init_clam_struct_impl, load_cakes_struct_impl, shutdown_clam_impl,
 };
 
 type CBFnNodeVisitor = extern "C" fn(Option<&ClusterData>) -> ();
@@ -209,14 +208,14 @@ pub unsafe extern "C" fn init_clam_struct(
     return init_clam_struct_impl(ptr, data);
 }
 
-#[no_mangle]
-pub unsafe extern "C" fn load_cakes(
-    ptr: OutHandlePtr,
-    data_name: *const u8,
-    name_len: i32,
-) -> FFIError {
-    return load_cakes_impl(ptr, data_name, name_len);
-}
+// #[no_mangle]
+// pub unsafe extern "C" fn load_cakes(
+//     ptr: OutHandlePtr,
+//     data_name: *const u8,
+//     name_len: i32,
+// ) -> FFIError {
+//     return load_cakes_impl(ptr, data_name, name_len);
+// }
 
 #[no_mangle]
 pub unsafe extern "C" fn load_cakes_struct(

@@ -103,30 +103,30 @@ pub unsafe fn init_clam_impl(
     }
 }
 
-pub unsafe fn load_cakes_impl(ptr: OutHandlePtr, data_name: *const u8, name_len: i32) -> FFIError {
-    let data_name = match helpers::csharp_to_rust_utf8(data_name, name_len) {
-        Ok(data_name) => data_name,
-        Err(e) => {
-            debug!("{:?}", e);
-            return FFIError::InvalidStringPassed;
-        }
-    };
-
-    match Handle::load(&data_name) {
-        Ok(handle) => {
-            if let Some(out_handle) = ptr {
-                *out_handle = Box::into_raw(Box::new(handle));
-            }
-
-            debug!("built clam tree for {}", data_name);
-            return FFIError::Ok;
-        }
-        Err(e) => {
-            debug!("{:?}", e);
-            return FFIError::HandleInitFailed;
-        }
-    }
-}
+// pub unsafe fn load_cakes_impl(ptr: OutHandlePtr, data_name: *const u8, name_len: i32) -> FFIError {
+//     let data_name = match helpers::csharp_to_rust_utf8(data_name, name_len) {
+//         Ok(data_name) => data_name,
+//         Err(e) => {
+//             debug!("{:?}", e);
+//             return FFIError::InvalidStringPassed;
+//         }
+//     };
+//
+//     match Handle::load(&data_name) {
+//         Ok(handle) => {
+//             if let Some(out_handle) = ptr {
+//                 *out_handle = Box::into_raw(Box::new(handle));
+//             }
+//
+//             debug!("built clam tree for {}", data_name);
+//             return FFIError::Ok;
+//         }
+//         Err(e) => {
+//             debug!("{:?}", e);
+//             return FFIError::HandleInitFailed;
+//         }
+//     }
+// }
 
 pub unsafe fn load_cakes_struct_impl(
     ptr: OutHandlePtr,

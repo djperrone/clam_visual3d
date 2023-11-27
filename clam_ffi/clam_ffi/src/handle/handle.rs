@@ -10,6 +10,7 @@ use abd_clam::builder::{detect_edges, select_clusters};
 use abd_clam::{Graph, PartitionCriteria};
 // use abd_clam::cluster::PartitionCriteria;
 // use abd_clam::core::dataset::Dataset;
+use abd_clam::cluster_selection::select_clusters_for_visualization;
 use abd_clam::Cakes;
 use abd_clam::Tree;
 use abd_clam::VecDataset;
@@ -65,7 +66,8 @@ use spring::Spring;
 // }
 
 pub struct Handle<'a> {
-    cakes: Option<Cakes<Vec<f32>, f32, DataSet>>,
+    // cakes: Option<Cakes<Vec<f32>, f32, DataSet>>,
+    tree: Option<Tree<Vec<f32>, f32, DataSet>>,
     // cakes1: Option<Cakes<Vec<f32>, f32, VecDataset<f32,f32>>>,
     labels: Option<Vec<bool>>,
     graph: Option<HashMap<String, PhysicsNode>>,
@@ -86,29 +88,35 @@ pub struct Handle<'a> {
 // }
 impl<'a> Handle<'a> {
     pub fn shutdown(&mut self) {
-        self.cakes = None;
+        // self.cakes = None;
+        self.tree = None;
         // self.dataset = None;
         self.labels = None;
     }
 
     pub fn get_tree(&self) -> Option<&Tree<Vec<f32>, f32, VecDataset<Vec<f32>, f32, bool>>> {
-        if let Some(cakes) = &self.cakes {
-            return cakes.trees().first().map(|x| *x);
-        } else {
-            return None;
-        }
+        // if let Some(cakes) = &self.cakes {
+        //     return cakes.trees().first().map(|x| *x);
+        // } else {
+        //     return None;
+        // }
+        self.tree.as_ref()
+    }
+
+    pub fn tree(&self) -> Option<&Tree<Vec<f32>, f32, VecDataset<Vec<f32>, f32, bool>>> {
+        self.tree.as_ref()
     }
 
     pub fn data(&self) -> Option<&DataSet> {
-        return if let Some(c) = &self.cakes {
-            Some(self.get_tree().unwrap().data())
+        return if let Some(tree) = self.tree() {
+            Some(tree.data())
         } else {
             None
         };
     }
     pub fn root(&self) -> Option<&Clusterf32> {
-        return if let Some(c) = &self.cakes {
-            Some(self.get_tree().unwrap().root())
+        return if let Some(t) = self.tree() {
+            Some(t.root())
         } else {
             None
         };
@@ -122,13 +130,13 @@ impl<'a> Handle<'a> {
         };
     }
 
-    pub fn set_cakes(&mut self, cakes: Cakes<Vec<f32>, f32, DataSet>) {
-        self.cakes = Some(cakes);
-    }
+    // pub fn set_cakes(&mut self, cakes: Cakes<Vec<f32>, f32, DataSet>) {
+    //     self.cakes = Some(cakes);
+    // }
 
-    pub fn cakes(&self) -> &Option<Cakes<Vec<f32>, f32, DataSet>> {
-        &self.cakes
-    }
+    // pub fn cakes(&self) -> &Option<Cakes<Vec<f32>, f32, DataSet>> {
+    //     &self.cakes
+    // }
 
     pub fn new(
         data_name: &str,
@@ -139,10 +147,15 @@ impl<'a> Handle<'a> {
         let criteria = PartitionCriteria::new(true).with_min_cardinality(cardinality);
         match Self::create_dataset(data_name, distance_metric, is_expensive) {
             Ok(dataset) => {
-                let cakes = Cakes::new(dataset, Some(1), &criteria);
-                let labels = cakes.shards()[0].metadata().unwrap().to_vec();
+                // let cakes = Cakes::new(dataset, Some(1), &criteria);
+                let tree = Tree::new(dataset, Some(1))
+                    .partition(&criteria)
+                    .with_ratios(false);
+                let labels = tree.data().metadata().unwrap().to_vec();
+                // let labels = cakes.shards()[0].metadata().unwrap().to_vec();
                 return Ok(Handle {
-                    cakes: Some(cakes), //.build(&criteria)),
+                    // cakes: None, //.build(&criteria)),
+                    tree: Some(tree),
                     labels: Some(labels),
                     graph: None,
                     clam_graph: None,
@@ -158,34 +171,36 @@ impl<'a> Handle<'a> {
         }
     }
 
-    pub fn load(data_name: &str) -> Result<Self, FFIError> {
-        let c = Cakes::<Vec<f32>, f32, VecDataset<_, _, _>>::load(
-            Path::new(data_name),
-            utils::distances::euclidean,
-            false,
-        );
-
-        match c {
-            Ok(cakes) => {
-                let labels = cakes.shards()[0].metadata().unwrap().to_vec();
-
-                return Ok(Handle {
-                    cakes: Some(cakes),
-                    labels: Some(labels),
-                    graph: None,
-                    clam_graph: None,
-
-                    edges: None,
-                    current_query: None,
-                    // longest_edge: None,
-                    force_directed_graph: None,
-                    // _test_drop: Some(TestDrop { test: 5 }),
-                    num_edges_in_graph: None,
-                });
-            }
-            Err(_) => Err(FFIError::HandleInitFailed),
-        }
-    }
+    // pub fn load(data_name: &str) -> Result<Self, FFIError> {
+    //     let c = Cakes::<Vec<f32>, f32, VecDataset<_, _, _>>::load(
+    //         Path::new(data_name),
+    //         utils::distances::euclidean,
+    //         false,
+    //     );
+    //
+    //     let t = Tree::load(Path::new(data_name), utils::distances::euclidean, false);
+    //
+    //     match c {
+    //         Ok(cakes) => {
+    //             let labels = cakes.shards()[0].metadata().unwrap().to_vec();
+    //
+    //             return Ok(Handle {
+    //                 // cakes: Some(cakes),
+    //                 labels: Some(labels),
+    //                 graph: None,
+    //                 clam_graph: None,
+    //
+    //                 edges: None,
+    //                 current_query: None,
+    //                 // longest_edge: None,
+    //                 force_directed_graph: None,
+    //                 // _test_drop: Some(TestDrop { test: 5 }),
+    //                 num_edges_in_graph: None,
+    //             });
+    //         }
+    //         Err(_) => Err(FFIError::HandleInitFailed),
+    //     }
+    // }
 
     pub fn load_struct(data: &TreeStartupDataFFI) -> Result<Self, FFIError> {
         let data_name = match data.data_name.as_string() {
@@ -203,31 +218,32 @@ impl<'a> Handle<'a> {
                 return Err(e);
             }
         };
-        let c = Cakes::<Vec<f32>, f32, VecDataset<_, _, _>>::load(
-            Path::new(&data_name),
-            metric,
-            data.is_expensive,
-        );
-        match c {
-            Ok(cakes) => {
-                let labels = cakes.shards()[0].metadata().unwrap().to_vec();
+        // let c = Cakes::<Vec<f32>, f32, VecDataset<_, _, _>>::load(
+        //     Path::new(&data_name),
+        //     metric,
+        //     data.is_expensive,
+        // );
+        let tree =
+            Tree::<Vec<f32>, f32, DataSet>::load(Path::new(&data_name), metric, data.is_expensive)
+                .unwrap()
+                .with_ratios(false);
 
-                return Ok(Handle {
-                    cakes: Some(cakes),
-                    labels: Some(labels),
-                    graph: None,
-                    clam_graph: None,
+        // let labels = t.shards()[0].metadata().unwrap().to_vec();
+        let labels = tree.data().metadata().unwrap().to_vec();
+        return Ok(Handle {
+            // cakes: Some(cakes),
+            tree: Some(tree),
+            labels: Some(labels),
+            graph: None,
+            clam_graph: None,
 
-                    edges: None,
-                    current_query: None,
-                    // longest_edge: None,
-                    force_directed_graph: None,
-                    // _test_drop: Some(TestDrop { test: 5 }),
-                    num_edges_in_graph: None,
-                });
-            }
-            Err(_) => Err(FFIError::HandleInitFailed),
-        }
+            edges: None,
+            current_query: None,
+            // longest_edge: None,
+            force_directed_graph: None,
+            // _test_drop: Some(TestDrop { test: 5 }),
+            num_edges_in_graph: None,
+        });
     }
 
     fn create_dataset(
@@ -264,20 +280,21 @@ impl<'a> Handle<'a> {
     }
 
     pub fn init_clam_graph(&'a mut self, cluster_selector: CBFnNodeVisitor) -> FFIError {
-        if let Some(cakes) = &self.cakes {
-            if let Some(tree) = cakes.trees().first() {
-                let clusters = select_clusters(tree.root(), tree.depth() / 2);
-                let edges = detect_edges(&clusters, tree.data());
+        if let Some(tree) = &self.tree {
+            let clusters = select_clusters_for_visualization(
+                tree.root(),
+                Some(String::from("dt_euclidean_cc")),
+            );
+            debug!("num clusters: {}", clusters.len());
+            let edges = detect_edges(&clusters, tree.data());
+            for cluster in &clusters {
+                let baton = ClusterDataWrapper::from_cluster(cluster);
+                cluster_selector(Some(baton.data()));
+            }
 
-                for cluster in &clusters {
-                    let baton = ClusterDataWrapper::from_cluster(cluster);
-                    cluster_selector(Some(baton.data()));
-                }
-
-                if let Ok(graph) = Graph::new(clusters, edges) {
-                    self.clam_graph = Some(graph);
-                    return FFIError::Ok;
-                }
+            if let Ok(graph) = Graph::new(clusters, edges) {
+                self.clam_graph = Some(graph);
+                return FFIError::Ok;
             }
         }
         return FFIError::GraphBuildFailed;
@@ -392,7 +409,7 @@ impl<'a> Handle<'a> {
         start_node: String,
         max_depth: i32,
     ) -> FFIError {
-        return if let Some(_) = &self.cakes {
+        return if let Some(_) = self.tree() {
             if start_node == "root" {
                 if let Some(node) = self.root() {
                     Self::for_each_dft_helper(&node, node_visitor, max_depth);
@@ -422,7 +439,7 @@ impl<'a> Handle<'a> {
         node_visitor: crate::CBFnNameSetter,
         start_node: String,
     ) -> FFIError {
-        return if let Some(_) = &self.cakes {
+        return if let Some(_) = self.tree() {
             if start_node == "root" {
                 if let Some(node) = self.root() {
                     Self::set_names_helper(&node, node_visitor);
@@ -515,17 +532,17 @@ impl<'a> Handle<'a> {
     // }
 
     pub fn get_num_nodes(&self) -> i32 {
-        if let Some(cakes) = &self.cakes {
+        if let Some(tree) = self.tree() {
             // self.get_tree().unwrap().root.num_descendants() as i32
-            self.get_tree().unwrap().cardinality() as i32
+            tree.cardinality() as i32
         } else {
             0
         }
     }
 
     pub fn tree_height(&self) -> i32 {
-        if let Some(cakes) = &self.cakes {
-            self.get_tree().unwrap().depth() as i32
+        if let Some(tree) = self.tree() {
+            tree.depth() as i32
         } else {
             0
         }
@@ -572,22 +589,18 @@ impl<'a> Handle<'a> {
 
     // why isnt string taken by reference?
     pub unsafe fn get_cluster(&self, cluster_id: String) -> Result<&Clusterf32, FFIError> {
-        if let Some(_) = &self.cakes {
-            let mut parts = cluster_id.split('-');
+        let mut parts = cluster_id.split('-');
 
-            if let (Some(offset_str), Some(cardinality_str)) = (parts.next(), parts.next()) {
-                if let (Ok(offset), Ok(cardinality)) = (
-                    offset_str.parse::<usize>(),
-                    cardinality_str.parse::<usize>(),
-                ) {
-                    println!("Offset: {}", offset);
-                    println!("Cardinality: {}", cardinality);
-                    if let Some(tree) = self.get_tree() {
-                        if let Some(cluster) = tree.get_cluster(offset, cardinality) {
-                            return Ok(cluster);
-                        } else {
-                            return Err(FFIError::InvalidStringPassed);
-                        }
+        if let (Some(offset_str), Some(cardinality_str)) = (parts.next(), parts.next()) {
+            if let (Ok(offset), Ok(cardinality)) = (
+                offset_str.parse::<usize>(),
+                cardinality_str.parse::<usize>(),
+            ) {
+                if let Some(tree) = self.get_tree() {
+                    if let Some(cluster) = tree.get_cluster(offset, cardinality) {
+                        return Ok(cluster);
+                    } else {
+                        return Err(FFIError::InvalidStringPassed);
                     }
                 }
             }
@@ -615,7 +628,7 @@ impl<'a> Handle<'a> {
     // }
 
     pub fn create_reingold_layout(&self, node_visitor: CBFnNodeVisitor) -> FFIError {
-        return if let Some(cakes) = &self.cakes {
+        return if let Some(tree) = self.tree() {
             reingold_tilford::run(
                 self.root()
                     .unwrap_or_else(|| unreachable!("cakes exists - root should exist")),
@@ -635,7 +648,7 @@ impl<'a> Handle<'a> {
         max_depth: i32,
         node_visitor: CBFnNodeVisitor,
     ) -> FFIError {
-        return if let Some(_) = &self.cakes {
+        return if let Some(_) = self.tree() {
             if let Ok(clam_root) = self.get_cluster(root.get_id()) {
                 reingold_tilford::run_offset(
                     &root.pos,

@@ -10,7 +10,7 @@ pub fn load_single_f32(
     handle: &mut Handle,
     path: &String,
 ) -> Result<Cakes<Vec<f32>, f32, VecDataset<Vec<f32>, f32, bool>>, String> {
-    return Cakes::<Vec<f32>, f32, VecDataset<_, _,_>>::load(
+    return Cakes::<Vec<f32>, f32, VecDataset<_, _, _>>::load(
         Path::new(path),
         utils::distances::euclidean,
         false,
@@ -30,9 +30,9 @@ pub unsafe fn save_cakes_single_impl(
             }
         };
 
-        if let Some(cakes) = handle.cakes() {
+        if let Some(tree) = handle.tree() {
             let p = Path::new(&path);
-            match cakes.save(p) {
+            match tree.save(p) {
                 Ok(_) => FFIError::Ok,
                 Err(e) => {
                     debug!("save cakes single error: {:?}", e);
