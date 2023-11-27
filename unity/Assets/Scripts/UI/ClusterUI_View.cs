@@ -56,8 +56,8 @@ public class ClusterUI_View : MonoBehaviour
         //var myDelegate = new Func<string, DialogResult>(MessageBox.Show);
         //TryDo.Do(myDelegate, null)
 
-        bool foundRoot = Clam.FFI.NativeMethods.GetRootData(out var dataWrapper);
-        if (foundRoot)
+        var foundRoot = Clam.FFI.NativeMethods.GetRootData(out var dataWrapper);
+        if (foundRoot == FFIError.Ok)
         {
             m_IntInputFields = new Dictionary<string, IntTextField>
         {

@@ -24,5 +24,6 @@ namespace Clam
         SaveFailed,
         UnsupportedMetric,
         PathNotFound,
+        NotInCache,
     }
 }

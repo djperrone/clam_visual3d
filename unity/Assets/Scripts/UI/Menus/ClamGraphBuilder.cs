@@ -44,7 +44,7 @@ public class ClamGraphBuildMenu
 
         Cakes.BuildGraphWithinParams();
 
-        //MenuEventManager.SwitchState(Menu.DestroyGraph);
+        MenuEventManager.SwitchState(Menu.DestroyGraph);
         MenuEventManager.SwitchState(Menu.DestroyTree);
 
         //List<NodeDataUnity> nodes = new List<NodeDataUnity>();

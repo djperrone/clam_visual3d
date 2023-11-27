@@ -9,6 +9,7 @@
   <component name="ChangeListManager">
     <list default="true" id="7566d7cf-f68a-4c42-82fc-ab4f2f8dbace" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clam_ffi/clam" beforeDir="false" afterPath="$PROJECT_DIR$/clam_ffi/clam" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/clam_ffi/clam/py-clam" beforeDir="false" afterPath="$PROJECT_DIR$/clam_ffi/clam/py-clam" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/clam_ffi/clam/py-clam/.bumpversion.cfg" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/clam_ffi/clam/py-clam/.cargo/config.toml" beforeDir="false" />
@@ -60,13 +61,9 @@
       <change beforePath="$PROJECT_DIR$/clam_ffi/clam/py-clam/python/tests/test_search.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/clam_ffi/clam/py-clam/ruff.toml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/clam_ffi/clam/py-clam/src/lib.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/ffi_impl/lib_impl.rs" beforeDir="false" afterPath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/ffi_impl/lib_impl.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/file_io/load_save.rs" beforeDir="false" afterPath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/file_io/load_save.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/handle/entry_point.rs" beforeDir="false" afterPath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/handle/entry_point.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/handle/handle.rs" beforeDir="false" afterPath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/handle/handle.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/lib.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/FFI/NativeHeader.cs" beforeDir="false" afterPath="$PROJECT_DIR$/unity/Assets/Scripts/FFI/NativeHeader.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/utils/error.rs" beforeDir="false" afterPath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/utils/error.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/FFI/NativeMethods.cs" beforeDir="false" afterPath="$PROJECT_DIR$/unity/Assets/Scripts/FFI/NativeMethods.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/UI/Menus/TreeMenu.cs" beforeDir="false" afterPath="$PROJECT_DIR$/unity/Assets/Scripts/UI/Menus/TreeMenu.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -104,7 +101,7 @@
     "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "graph-sunday",
+    "git-widget-placeholder": "visualization-demo",
     "last_opened_file_path": "C:/uri/clam_visual3d",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -134,7 +131,7 @@
       <workItem from="1699901840462" duration="3383000" />
       <workItem from="1700054388848" duration="9160000" />
       <workItem from="1700162614025" duration="1292000" />
-      <workItem from="1701037116896" duration="7387000" />
+      <workItem from="1701037116896" duration="8251000" />
     </task>
     <servers />
   </component>

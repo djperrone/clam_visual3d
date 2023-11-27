@@ -113,6 +113,11 @@ public class TreeMenu
             node.GetComponent<Node>().Deselect();
             node.GetComponent<Node>().SetColor(new Color(ratio, ratio, ratio));
         }
+        else
+        {
+            Debug.LogWarning("cluster key not found - color by radius - " + nodeData.id);
+
+        }
     }
 
     void ColorByCardinality(ref Clam.FFI.ClusterData nodeData)
@@ -125,6 +130,10 @@ public class TreeMenu
             node.GetComponent<Node>().Deselect();
             node.GetComponent<Node>().SetColor(new Color(ratio, ratio, ratio));
         }
+        else
+        {
+            Debug.LogWarning("cluster key not found - color by lfd - " + nodeData.id);
+        }
     }
     void ColorByLFD(ref Clam.FFI.ClusterData nodeData)
     {
@@ -136,7 +145,7 @@ public class TreeMenu
         }
         else
         {
-            Debug.LogError("cluster key not found - color filler - " + nodeData.id);
+            Debug.LogWarning("cluster key not found - color by lfd - " + nodeData.id);
         }
     }
 
@@ -151,7 +160,7 @@ public class TreeMenu
         }
         else
         {
-            Debug.LogError("cluster key not found - color filler - " + nodeData.id);
+            Debug.LogWarning("cluster key not found - color by label - " + nodeData.id);
         }
     }
 }

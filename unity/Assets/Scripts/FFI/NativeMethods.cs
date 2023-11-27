@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Clam
 {
@@ -182,20 +183,35 @@ namespace Clam
                 return FFIError.Ok;
             }
 
-            public static FFIError CreateClusterDataMustFree(string id, out Clam.FFI.ClusterData clusterData)
+            public static FFIError CreateClusterDataMustFree(string id, out Clam.FFI.ClusterData clusterData, bool addIfNotExists = false)
             {
                 var result = create_cluster_data(m_Handle, id, out var data);
                 if (result != FFIError.Ok)
                 {
-                    Debug.Log(result);
+                    Debug.LogError(result);
                     clusterData = new ClusterData();
                     return result;
                 }
-                var node = Cakes.Tree.GetTree().GetValueOrDefault(data.id.AsString).GetComponent<Node>();
-                data.SetPos(node.GetPosition());
-                data.SetColor(node.GetColor());
-                clusterData = data;
-                return FFIError.Ok;
+                if (Cakes.Tree.GetTree().TryGetValue(data.id.AsString, out var node))
+                {
+                    data.SetPos(node.GetComponent<Node>().GetPosition());
+                    data.SetColor(node.GetComponent<Node>().GetColor());
+                    clusterData = data;
+                    return FFIError.Ok;
+                }
+                //else if (addIfNotExists) 
+                //{
+                    
+                //}
+                else
+                {
+                    clusterData = data;
+                    return FFIError.NotInCache;
+                }
+
+               
+               
+                
             }
 
             public static FFIError DeleteClusterData(ref ClusterData data)
@@ -232,21 +248,22 @@ namespace Clam
                 //ClusterData* data = create_cluster_data("1");
             }
 
-            public static bool GetRootData(out RustResourceWrapper<ClusterData> clusterDataWrapper)
+            public static FFIError GetRootData(out RustResourceWrapper<ClusterData> clusterDataWrapper)
             {
                 string rootID = "0-" + NativeMethods.TreeCardinality().ToString();
 
-                if (Cakes.Tree.GetTree().TryGetValue(rootID, out var root))
+                //if (Cakes.Tree.GetTree().TryGetValue(rootID, out var root))
                 {
                     clusterDataWrapper = new RustResourceWrapper<ClusterData>(ClusterData.Alloc(rootID));
 
-                    if (clusterDataWrapper.result == FFIError.Ok)
+                    if (clusterDataWrapper.result == FFIError.Ok || clusterDataWrapper.result == FFIError.NotInCache)
                     {
-                        return true;
+                        return clusterDataWrapper.result;
                     }
                 }
+                
                 clusterDataWrapper = null;
-                return false;
+                return FFIError.InvalidStringPassed;
             }
 
             public static unsafe float DistanceToOther(string node1, string node2)

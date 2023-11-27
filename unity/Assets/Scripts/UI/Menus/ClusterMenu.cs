@@ -31,8 +31,8 @@ public class ClusterMenu
         InitClusterInfoLabel();
         //var rightField = m_UIDocument.rootVisualElement.Q<VisualElement>("Right");
 
-        bool foundRoot = Clam.FFI.NativeMethods.GetRootData(out var dataWrapper);
-        if (foundRoot)
+        var foundRoot = Clam.FFI.NativeMethods.GetRootData(out var dataWrapper);
+        if (foundRoot == FFIError.Ok)
         {
             m_IntInputFields = new Dictionary<string, IntTextField>
             {

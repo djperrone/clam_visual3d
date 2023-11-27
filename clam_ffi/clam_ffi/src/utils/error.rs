@@ -19,4 +19,5 @@ pub enum FFIError {
     SaveFailed,
     UnsupportedMetric,
     PathNotFound,
+    NotInCache,
 }

@@ -86,7 +86,7 @@ namespace Clam
             Clam.FFI.NativeMethods.ForEachDFT(EdgeDrawer);
             PopulateEdgeDictionary();
 
-            if (Clam.FFI.NativeMethods.GetRootData(out var rootData) == true)
+            if (Clam.FFI.NativeMethods.GetRootData(out var rootData) == FFIError.Ok)
             {
                 Debug.Log(System.String.Format("created tree with num nodes {0}.", rootData.Data.cardinality));
             }
