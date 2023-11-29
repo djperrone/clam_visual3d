@@ -61,9 +61,19 @@
       <change beforePath="$PROJECT_DIR$/clam_ffi/clam/py-clam/python/tests/test_search.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/clam_ffi/clam/py-clam/ruff.toml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/clam_ffi/clam/py-clam/src/lib.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/utils/error.rs" beforeDir="false" afterPath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/utils/error.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/ffi_impl/cluster_data.rs" beforeDir="false" afterPath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/ffi_impl/cluster_data.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/ffi_impl/lib_impl.rs" beforeDir="false" afterPath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/ffi_impl/lib_impl.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/handle/handle.rs" beforeDir="false" afterPath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/handle/handle.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/lib.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/utils/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/utils/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/Core/TreeCache.cs" beforeDir="false" afterPath="$PROJECT_DIR$/unity/Assets/Scripts/Core/TreeCache.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/FFI/NativeHeader.cs" beforeDir="false" afterPath="$PROJECT_DIR$/unity/Assets/Scripts/FFI/NativeHeader.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/FFI/NativeMethods.cs" beforeDir="false" afterPath="$PROJECT_DIR$/unity/Assets/Scripts/FFI/NativeMethods.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/UI/Menus/ClamGraphBuilder.cs" beforeDir="false" afterPath="$PROJECT_DIR$/unity/Assets/Scripts/UI/Menus/ClamGraphBuilder.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/UI/Menus/TreeMenu.cs" beforeDir="false" afterPath="$PROJECT_DIR$/unity/Assets/Scripts/UI/Menus/TreeMenu.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/UI/ClamGraphMenu.uxml" beforeDir="false" afterPath="$PROJECT_DIR$/unity/Assets/UI/ClamGraphMenu.uxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/UI/TreeMenu.uxml" beforeDir="false" afterPath="$PROJECT_DIR$/unity/Assets/UI/TreeMenu.uxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/ProjectSettings/ProjectSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/unity/ProjectSettings/ProjectSettings.asset" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -116,9 +126,6 @@
   <component name="RustProjectSettings">
     <option name="toolchainHomeDirectory" value="$USER_HOME$/.cargo/bin" />
   </component>
-  <component name="RustfmtProjectSettings">
-    <option name="runRustfmtOnSave" value="true" />
-  </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
@@ -131,7 +138,10 @@
       <workItem from="1699901840462" duration="3383000" />
       <workItem from="1700054388848" duration="9160000" />
       <workItem from="1700162614025" duration="1292000" />
-      <workItem from="1701037116896" duration="8251000" />
+      <workItem from="1701037116896" duration="8842000" />
+      <workItem from="1701109595443" duration="474000" />
+      <workItem from="1701195134785" duration="8433000" />
+      <workItem from="1701217954829" duration="1263000" />
     </task>
     <servers />
   </component>

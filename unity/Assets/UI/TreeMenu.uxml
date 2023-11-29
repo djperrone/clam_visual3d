@@ -20,5 +20,6 @@
             <ui:Button text="Less" display-tooltip-when-elided="true" name="TreeDepthLessButton" />
             <ui:Button text="More" display-tooltip-when-elided="true" name="TreeDepthMoreButton" />
         </ui:VisualElement>
+        <ui:Button text="Reset" display-tooltip-when-elided="true" name="ResetTreeLayout" />
     </ui:VisualElement>
 </ui:UXML>

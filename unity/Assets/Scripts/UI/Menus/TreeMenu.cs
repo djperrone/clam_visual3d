@@ -15,6 +15,7 @@ public class TreeMenu
     Label m_DepthValue;
     Button m_ShowLess;
     Button m_ShowMore;
+    Button m_ResetLayout;
 
     TreeLayout m_Layout;
 
@@ -34,12 +35,29 @@ public class TreeMenu
         m_DepthField = new IntTextField("TreeDepth", m_UIDocument, 0, Clam.FFI.NativeMethods.TreeHeight(), InputFieldChangeCallback);
 
         m_ShowMore = m_UIDocument.rootVisualElement.Q<Button>("TreeDepthMoreButton");
+        m_ResetLayout = m_UIDocument.rootVisualElement.Q<Button>("ResetTreeLayout");
         m_ShowLess = m_UIDocument.rootVisualElement.Q<Button>("TreeDepthLessButton");
         m_DepthValue = m_UIDocument.rootVisualElement.Q<Label>("TreeDepthValue");
         m_ShowMore.RegisterCallback<ClickEvent>(ShowMoreCallback);
         m_ShowLess.RegisterCallback<ClickEvent>(ShowLessCallback);
+        m_ResetLayout.RegisterCallback<ClickEvent>(ResetCallback);
 
         m_MaxLFD = NativeMethods.MaxLFD();
+    }
+
+    void ResetCallback(ClickEvent evt)
+    {
+        if (!MenuEventManager.instance.m_IsPhysicsRunning)
+        {
+
+            MenuEventManager.SwitchState(Menu.DestroyGraph);
+            MenuEventManager.SwitchState(Menu.DestroyTree);
+            Cakes.Tree.ResetTree();
+        }
+        else
+        {
+            Debug.LogWarning("Cannot reset tree while physics is running");
+        }
     }
 
     void ShowMoreCallback(ClickEvent evt)

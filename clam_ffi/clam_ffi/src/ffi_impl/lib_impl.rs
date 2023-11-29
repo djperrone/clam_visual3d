@@ -22,14 +22,9 @@ pub unsafe fn for_each_dft_impl(
     if let Some(handle) = ptr {
         if !start_node.is_null() {
             let c_str = unsafe {
-                // assert!(!start_node.is_null());
-
                 CStr::from_ptr(start_node)
             };
             let r_str = c_str.to_str().unwrap();
-            // debug!("start node name {}", r_str);
-
-            // return Handle::from_ptr(ptr).for_each_dft(node_visitor, r_str.to_string());
             return handle.for_each_dft(node_visitor, r_str.to_string(), max_depth);
         } else {
             return FFIError::InvalidStringPassed;
@@ -146,26 +141,31 @@ pub fn color_clusters_by_label_impl(ptr: InHandlePtr, node_visitor: CBFnNodeVisi
     return FFIError::HandleInitFailed;
 }
 
+fn calc_cluster_entropy_color(cluster: &Clusterf32, labels: &Vec<bool>) -> glam::Vec3 {
+    let indices = cluster.indices();
+    let mut entropy = vec![0; 2];
+
+    indices.for_each(|i| entropy[labels[i] as usize] += 1);
+
+    let total_entropy: u32 = entropy.iter().sum();
+
+    let perc_inliers = entropy[0] as f32 / total_entropy as f32;
+    let perc_outliers = entropy[1] as f32 / total_entropy as f32;
+
+    return glam::Vec3::new(perc_outliers, perc_inliers, 0.);
+}
 fn color_helper(root: Option<&Clusterf32>, labels: &Vec<bool>, node_visitor: CBFnNodeVisitor) {
     if let Some(cluster) = root {
-        let indices = cluster.indices();
-        let mut entropy = vec![0; 2];
 
-        indices.for_each(|i| entropy[labels[i] as usize] += 1);
-
-        let total_entropy: u32 = entropy.iter().sum();
-
-        let perc_inliers = entropy[0] as f32 / total_entropy as f32;
-        let perc_outliers = entropy[1] as f32 / total_entropy as f32;
         let mut cluster_data = ClusterDataWrapper::from_cluster(cluster);
-        cluster_data.data_mut().color = glam::Vec3::new(perc_outliers, perc_inliers, 0.);
+        cluster_data.data_mut().color = calc_cluster_entropy_color(cluster, labels);
+
         node_visitor(Some(cluster_data.data()));
 
         if let Some([left, right]) = cluster.children() {
             color_helper(Some(left), labels, node_visitor);
             color_helper(Some(right), labels, node_visitor);
         }
-        // debug!("here4");
     }
 }
 // pub unsafe fn test_mod_struct(context: InHandlePtr, ptr: *mut ClusterData) {

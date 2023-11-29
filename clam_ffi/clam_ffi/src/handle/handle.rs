@@ -35,6 +35,7 @@ use crate::ffi_impl::cluster_data_wrapper::ClusterDataWrapper;
 use crate::ffi_impl::tree_startup_data_ffi::TreeStartupDataFFI;
 use crate::graph::physics_node::PhysicsNode;
 use spring::Spring;
+use crate::utils::scoring_functions::{scoring_function_to_string, ScoringFunction};
 
 // use ForceDirectedGraph;
 
@@ -150,7 +151,7 @@ impl<'a> Handle<'a> {
                 // let cakes = Cakes::new(dataset, Some(1), &criteria);
                 let tree = Tree::new(dataset, Some(1))
                     .partition(&criteria)
-                    .with_ratios(false);
+                    .with_ratios(true);
                 let labels = tree.data().metadata().unwrap().to_vec();
                 // let labels = cakes.shards()[0].metadata().unwrap().to_vec();
                 return Ok(Handle {
@@ -279,11 +280,13 @@ impl<'a> Handle<'a> {
         }
     }
 
-    pub fn init_clam_graph(&'a mut self, cluster_selector: CBFnNodeVisitor) -> FFIError {
+    pub fn init_clam_graph(&'a mut self,scoring_function : ScoringFunction, cluster_selector: CBFnNodeVisitor) -> FFIError {
         if let Some(tree) = &self.tree {
             let clusters = select_clusters_for_visualization(
                 tree.root(),
-                Some(String::from("dt_euclidean_cc")),
+                Some(String::from(scoring_function_to_string(&scoring_function))),
+                // Some(String::from("lr_euclidean_cc")),
+
             );
             debug!("num clusters: {}", clusters.len());
             let edges = detect_edges(&clusters, tree.data());
@@ -491,7 +494,7 @@ impl<'a> Handle<'a> {
         if let Some([left, right]) = root.children() {
             let baton = ClusterDataWrapper::from_cluster(&root);
 
-            node_visitor(Some(&baton.data()));
+            node_visitor(Some(baton.data()));
 
             Self::for_each_dft_helper(left, node_visitor, max_depth);
             Self::for_each_dft_helper(right, node_visitor, max_depth);

@@ -17,8 +17,6 @@ pub struct ClusterData {
     pub color: glam::Vec3,
 
     pub id: StringFFI,
-    // pub left_id: StringFFI,
-    // pub right_id: StringFFI,
     pub message: StringFFI,
 
     pub cardinality: i32,

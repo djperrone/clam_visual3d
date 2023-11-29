@@ -18,7 +18,7 @@ namespace Clam
 
         public static partial class NativeMethods
         {
-	public const string __DllName = "clam_ffi_2023-11-2619-42-29";
+	public const string __DllName = "clam_ffi_2023-11-2819-53-43";
             private static IntPtr m_Handle;
 
             private static bool m_Initialized = false;
@@ -49,9 +49,9 @@ namespace Clam
                 return e;
             }
 
-            public static FFIError InitClamGraph(NodeVisitor clusterSelector)
+            public static FFIError InitClamGraph(ScoringFunction scoringFunction, NodeVisitor clusterSelector)
             {
-                var e = init_clam_graph(m_Handle, clusterSelector);
+                var e = init_clam_graph(m_Handle, scoringFunction, clusterSelector);
                 if (e == FFIError.Ok)
                 {
                     m_Initialized = true;
@@ -201,7 +201,7 @@ namespace Clam
                 }
                 //else if (addIfNotExists) 
                 //{
-                    
+
                 //}
                 else
                 {
@@ -209,9 +209,9 @@ namespace Clam
                     return FFIError.NotInCache;
                 }
 
-               
-               
-                
+
+
+
             }
 
             public static FFIError DeleteClusterData(ref ClusterData data)
@@ -261,7 +261,7 @@ namespace Clam
                         return clusterDataWrapper.result;
                     }
                 }
-                
+
                 clusterDataWrapper = null;
                 return FFIError.InvalidStringPassed;
             }

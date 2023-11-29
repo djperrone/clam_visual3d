@@ -102,6 +102,7 @@ namespace Clam
 
         private void PopulateEdgeDictionary()
         {
+            m_EdgeCache = new Dictionary<string, GameObject>();
             Edge[] edges = GameObject.FindObjectsOfType<Edge>(true);
             foreach (Edge edge in edges)
             {
@@ -117,6 +118,38 @@ namespace Clam
                     Debug.LogWarning("Duplicate edge key found: " + edgeKey);
                 }
             }
+        }
+
+        public void ResetTree()
+        {
+            FFIError e = Clam.FFI.NativeMethods.SetNames(SetNodeNames);
+
+            if (e == FFIError.Ok)
+            {
+                Debug.Log("ok)");
+            }
+            else
+            {
+                Debug.Log("ERROR " + e);
+            }
+            Clam.FFI.NativeMethods.DrawHierarchy(PositionUpdater);
+            Clam.FFI.NativeMethods.ColorClustersByLabel(ColorFiller);
+
+            //Edge[] edges = GameObject.FindObjectsOfType<Edge>(true);
+            var edges = GameObject.FindGameObjectsWithTag(m_SpringPrefab.tag);
+
+            foreach (var obj in edges)
+            {
+                if (obj is GameObject)
+                {
+                    GameObject gameObject = obj as GameObject;
+                    Destroy(gameObject); // or use DestroyImmediate(gameObject) if you want to destroy it immediately
+                }
+                // Add additional checks or actions for other types if needed
+            }
+
+            Clam.FFI.NativeMethods.ForEachDFT(EdgeDrawer);
+            PopulateEdgeDictionary();
         }
 
 
@@ -259,25 +292,23 @@ namespace Clam
         }
         unsafe void SetNodeNames(ref Clam.FFI.ClusterIDs nodeData)
         {
-            GameObject node = Instantiate(m_NodePrefab);
-            //nodeData.LogInfo();
-            node.GetComponent<Node>().SetID(nodeData.id.AsString);
-            node.GetComponent<Node>().SetLeft(nodeData.leftID.AsString);
-            node.GetComponent<Node>().SetRight(nodeData.rightID.AsString);
-            print("setting name here " + node.GetComponent<Node>().GetId());
-            m_Tree.Add(nodeData.id.AsString, node);
+            
+            if (!m_Tree.ContainsKey(nodeData.id.AsString))
+            {
+                GameObject node = Instantiate(m_NodePrefab);
+                //nodeData.LogInfo();
+                node.GetComponent<Node>().SetID(nodeData.id.AsString);
+                node.GetComponent<Node>().SetLeft(nodeData.leftID.AsString);
+                node.GetComponent<Node>().SetRight(nodeData.rightID.AsString);
+                print("setting name here " + node.GetComponent<Node>().GetId());
+                m_Tree.Add(nodeData.id.AsString, node);
+            }
         }
-
-
 
         unsafe void PositionUpdater(ref Clam.FFI.ClusterData nodeData)
         {
-            GameObject node;
-
-            bool hasValue = m_Tree.TryGetValue(nodeData.id.AsString, out node);
-            if (hasValue)
+            if (m_Tree.TryGetValue(nodeData.id.AsString, out var node))
             {
-                //node.GetComponent<Node>().SetColor(nodeData.color.AsColor);
                 node.GetComponent<Node>().SetPosition(nodeData.pos.AsVector3);
             }
             else

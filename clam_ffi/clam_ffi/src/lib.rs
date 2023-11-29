@@ -38,6 +38,7 @@ use utils::{
 use crate::handle::entry_point::{
     init_clam_impl, init_clam_struct_impl, load_cakes_struct_impl, shutdown_clam_impl,
 };
+use crate::utils::scoring_functions::ScoringFunction;
 
 type CBFnNodeVisitor = extern "C" fn(Option<&ClusterData>) -> ();
 type CBFnNameSetter = extern "C" fn(Option<&ClusterIDs>) -> ();
@@ -242,10 +243,11 @@ pub unsafe extern "C" fn shutdown_clam(context_ptr: OutHandlePtr) -> FFIError {
 #[no_mangle]
 pub unsafe extern "C" fn init_clam_graph(
     context: InHandlePtr,
+    scoring_function : ScoringFunction,
     cluster_selector: CBFnNodeVisitor,
 ) -> FFIError {
     if let Some(handle) = context {
-        handle.init_clam_graph(cluster_selector);
+        handle.init_clam_graph(scoring_function, cluster_selector);
         return FFIError::Ok;
     }
     return FFIError::HandleInitFailed;

@@ -5,10 +5,16 @@ using UnityEngine.UIElements;
 
 public class ClamGraphBuildMenu
 {
+    Button m_SelectClusters;
     Button m_CreateGraph;
     Button m_DestroyGraph;
+    DropdownField m_ScoringSelector;
     GameObject m_SpringPrefab;
     Slider m_EdgeScalar;
+
+    //Clam.FFI.ClusterData[] m_SelectedClusters;
+
+    Dictionary<string, GameObject> m_Graph;
 
     //public GameObject m_GraphBuilderPrefab;
 
@@ -18,13 +24,60 @@ public class ClamGraphBuildMenu
 
         m_CreateGraph = document.rootVisualElement.Q<Button>("CreateClamGraphButton");
         m_DestroyGraph = document.rootVisualElement.Q<Button>("DestroyClamGraph");
+        m_SelectClusters = document.rootVisualElement.Q<Button>("SelectClamGraphClusters");
         m_EdgeScalar = document.rootVisualElement.Q<Slider>("ClamEdgeScalar");
+        m_ScoringSelector = document.rootVisualElement.Q<DropdownField>("ScoringFunctionSelector");
 
         m_DestroyGraph.RegisterCallback<ClickEvent>(DestroyGraphCallback);
 
         m_SpringPrefab = Resources.Load("Spring") as GameObject;
 
         m_CreateGraph.RegisterCallback<ClickEvent>(CreateGraphCallback);
+        m_SelectClusters.RegisterCallback<ClickEvent>(SelectClustersForGraphCallback);
+
+        InitScoringSelector();
+    }
+
+    void InitScoringSelector()
+    {
+        List<string> scoringFunctionStrings = new List<string>();
+        foreach (ScoringFunction scoringFunction in System.Enum.GetValues(typeof(ScoringFunction)))
+        {
+            string scoringFunctionString = scoringFunction.ToString();
+            scoringFunctionStrings.Add(scoringFunctionString);
+        }
+
+        m_ScoringSelector.choices = scoringFunctionStrings;
+    }
+
+    
+
+    void SelectClustersForGraphCallback(ClickEvent evt)
+    {
+        if (MenuEventManager.instance.m_IsPhysicsRunning)
+        {
+            //Debug.Log("Error physics already running");
+            return;
+        }
+        foreach ((var id, var node) in Cakes.Tree.GetTree())
+        {
+            node.GetComponent<Node>().Deselect();
+        }
+
+        Clam.FFI.NativeMethods.InitClamGraph((ScoringFunction)System.Enum.Parse(typeof(ScoringFunction), m_ScoringSelector.value), clusterSelector);
+        m_Graph = new Dictionary<string, GameObject>();
+
+        foreach (var (id, node) in Cakes.Tree.GetTree())
+        {
+            if (node.GetComponent<Node>().IsSelected())
+            {
+                if (!node.activeSelf)
+                {
+                    node.SetActive(true);
+                }
+                m_Graph[id] = node;
+            }
+        }
     }
 
 
@@ -35,17 +88,20 @@ public class ClamGraphBuildMenu
             //Debug.Log("Error physics already running");
             return;
         }
+
         foreach ((var id, var node) in Cakes.Tree.GetTree())
         {
-            node.GetComponent<Node>().Selected = false;
+            if (!m_Graph.ContainsKey(id))
+            {
+                GameObject.Destroy(node);
+            }
         }
 
-        Clam.FFI.NativeMethods.InitClamGraph(clusterSelector);
+        Cakes.Tree.Set(m_Graph);
 
-        Cakes.BuildGraphWithinParams();
+        //Cakes.BuildGraphWithinParams();
 
-        MenuEventManager.SwitchState(Menu.DestroyGraph);
-        MenuEventManager.SwitchState(Menu.DestroyTree);
+
 
         //List<NodeDataUnity> nodes = new List<NodeDataUnity>();
         //int numSelected = 0;
@@ -63,10 +119,14 @@ public class ClamGraphBuildMenu
         //        //nodes.Add(node.GetComponent<NodeScript>().ToUnityData());
         //    }
         //}
-        Clam.FFI.ClusterData[] nodes = new Clam.FFI.ClusterData[Cakes.Tree.GetTree().Count];
+
+        MenuEventManager.SwitchState(Menu.DestroyGraph);
+        MenuEventManager.SwitchState(Menu.DestroyTree);
+
+        var selectedClusters = new Clam.FFI.ClusterData[m_Graph.Count];
         int i = 0;
 
-        foreach (var (name, node) in Cakes.Tree.GetTree())
+        foreach (var (name, node) in m_Graph)
         {
             //if (node.activeSelf && node.GetComponent<Node>().Selected)
             {
@@ -80,7 +140,7 @@ public class ClamGraphBuildMenu
                 var result = Clam.FFI.NativeMethods.CreateClusterDataMustFree(node.GetComponent<Node>().GetId(), out var clusterData);
                 if (result == FFIError.Ok)
                 {
-                    nodes[i++] = clusterData;
+                    selectedClusters[i++] = clusterData;
                 }
                 else
                 {
@@ -99,15 +159,18 @@ public class ClamGraphBuildMenu
         //Clam.ClamFFI.LaunchPhysicsThread(nodes, m_EdgeScalar.value, 1000, EdgeDrawer, UpdatePhysicsSim);
         GameObject graphBuilderPrefab = Resources.Load("Graph") as GameObject;
         var graphBuilder = MenuEventManager.Instantiate(graphBuilderPrefab);
-        graphBuilder.GetComponent<GraphBuilder>().Init(nodes, m_EdgeScalar.value, 500);
+        graphBuilder.GetComponent<GraphBuilder>().Init(selectedClusters, m_EdgeScalar.value, 500);
+
+       
+
         //Clam.FFI.NativeMethods.RunForceDirectedSim(nodes, m_EdgeScalar.value, 500, EdgeDrawer);
 
 
-        //for (int K = 0; K < nodes.Length;K++)
+        //for (int K = 0; K < selectedClusters.Length; K++)
         //{
         //    //ref var node = ref node1;
         //    //Debug.Log("freeing all nodes from physics sim");
-        //    Clam.FFI.NativeMethods.DeleteClusterData(ref nodes[K]);
+        //    Clam.FFI.NativeMethods.DeleteClusterData(ref selectedClusters[K]);
         //}
 
 
@@ -182,6 +245,7 @@ public class ClamGraphBuildMenu
         }
         else
         {
+            //var cluster = Cakes.Tree.GetOrAdd(nodeData.id.AsString);
             Debug.LogError("cluster not found");
         }
 
