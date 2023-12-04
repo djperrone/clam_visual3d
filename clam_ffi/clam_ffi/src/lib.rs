@@ -10,7 +10,7 @@ mod tests;
 mod tree_layout;
 mod utils;
 
-use crate::ffi_impl::lib_impl::{free_resource, max_lfd_impl};
+use crate::ffi_impl::lib_impl::{free_resource, max_lfd_impl, max_vertex_degree_impl, vertex_degree_impl};
 use crate::ffi_impl::tree_startup_data_ffi::TreeStartupDataFFI;
 use crate::file_io::load_save::save_cakes_single_impl;
 use ffi_impl::{
@@ -56,7 +56,7 @@ pub unsafe extern "C" fn create_cluster_data(
         // let data = Box::new(ClusterData::default());
 
         // match out_node.id.as_string() {
-        return match handle.get_cluster(id) {
+        return match handle.get_cluster_from_string(id) {
             Ok(cluster) => {
                 let cluster_data = ClusterData::from_clam(cluster);
 
@@ -112,7 +112,7 @@ pub unsafe extern "C" fn create_cluster_ids(
         // let data = Box::new(ClusterData::default());
 
         // match out_node.id.as_string() {
-        return match handle.get_cluster(id) {
+        return match handle.get_cluster_from_string(id) {
             Ok(cluster) => {
                 let cluster_data = ClusterIDs::from_clam(cluster);
 
@@ -243,7 +243,7 @@ pub unsafe extern "C" fn shutdown_clam(context_ptr: OutHandlePtr) -> FFIError {
 #[no_mangle]
 pub unsafe extern "C" fn init_clam_graph(
     context: InHandlePtr,
-    scoring_function : ScoringFunction,
+    scoring_function: ScoringFunction,
     cluster_selector: CBFnNodeVisitor,
 ) -> FFIError {
     if let Some(handle) = context {
@@ -282,6 +282,16 @@ pub unsafe extern "C" fn tree_height(ptr: InHandlePtr) -> i32 {
 #[no_mangle]
 pub unsafe extern "C" fn tree_cardinality(ptr: InHandlePtr) -> i32 {
     return tree_cardinality_impl(ptr);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn vertex_degree(ptr: InHandlePtr, cluster_id: *const c_char) -> i32 {
+    return vertex_degree_impl(ptr, cluster_id);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn max_vertex_degree(ptr: InHandlePtr) -> i32 {
+    return max_vertex_degree_impl(ptr);
 }
 
 #[no_mangle]

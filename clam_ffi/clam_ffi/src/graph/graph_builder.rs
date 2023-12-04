@@ -32,7 +32,7 @@ pub unsafe fn build_force_directed_graph(
         let mut clusters: Vec<&Clusterf32> = Vec::new();
 
         for c in cluster_data_arr.iter() {
-            if let Ok(cluster) = handle.get_cluster(c.id.as_string().unwrap()) {
+            if let Ok(cluster) = handle.get_cluster_from_string(c.id.as_string().unwrap()) {
                 clusters.push(cluster);
             }
         }
@@ -66,7 +66,12 @@ pub unsafe fn build_graph(
     for c in cluster_data_arr {
         graph.insert(
             c.id.as_string().unwrap(),
-            PhysicsNode::new(&c, handle.get_cluster(c.id.as_string().unwrap()).unwrap()),
+            PhysicsNode::new(
+                &c,
+                handle
+                    .get_cluster_from_string(c.id.as_string().unwrap())
+                    .unwrap(),
+            ),
         );
     }
 

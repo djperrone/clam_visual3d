@@ -20,12 +20,13 @@ public class TreeMenu
     TreeLayout m_Layout;
 
     float m_MaxLFD;
+    int m_MaxVertexDegree;
 
     public TreeMenu(UIDocument uidocument)
     {
         m_UIDocument = uidocument;
         m_ColorOptions = m_UIDocument.rootVisualElement.Q<RadioButtonGroup>("TreeColorOptions");
-        m_ColorOptions.choices = new List<string>() { "Label", "Cardinality", "Radius", "LFD" };//, "Component", "Ratios" };
+        m_ColorOptions.choices = new List<string>() { "Label", "Cardinality", "Radius", "LFD", "Depth", "VertexDegree" };//, "Component", "Ratios" };
         m_ColorOptions.RegisterValueChangedCallback(ColorChangeCallback);
 
         // root id
@@ -43,6 +44,7 @@ public class TreeMenu
         m_ResetLayout.RegisterCallback<ClickEvent>(ResetCallback);
 
         m_MaxLFD = NativeMethods.MaxLFD();
+        m_MaxVertexDegree = NativeMethods.MaxVertexDegree();
     }
 
     void ResetCallback(ClickEvent evt)
@@ -81,10 +83,10 @@ public class TreeMenu
 
     void ColorChangeCallback(ChangeEvent<int> changeEvent)
     {
-        //var choices = new List<NodeVisitor>()
-        //{
-        //    ColorByLabel, ColorByCardinality, ColorByRadius,ColorByLFD
-        //};
+        var choices = new List<NodeVisitor>()
+        {
+            ColorByLabel, ColorByCardinality, ColorByRadius,ColorByLFD, ColorByDepth, ColorByVertexDegree
+        };
         //if (changeEvent != null && changeEvent.newValue >=0 && changeEvent.newValue < choices.Count)
         //{
         //    NativeMethods.ForEachDFT(choices[changeEvent.newValue]);
@@ -99,25 +101,28 @@ public class TreeMenu
         {
             NativeMethods.ColorClustersByLabel(ColorByLabel);
             Debug.Log("label");
-
         }
-        else if (changeEvent.newValue == 1)
+        else
         {
-            NativeMethods.ForEachDFT(ColorByCardinality);
-            Debug.Log("cardinality");
+            NativeMethods.ForEachDFT(choices[changeEvent.newValue]);
+        }
+        //else if (changeEvent.newValue == 1)
+        //{
+        //    NativeMethods.ForEachDFT(ColorByCardinality);
+        //    Debug.Log("cardinality");
 
-        }
-        else if (changeEvent.newValue == 2)
-        {
-            Debug.Log("radius");
+        //}
+        //else if (changeEvent.newValue == 2)
+        //{
+        //    Debug.Log("radius");
 
-            NativeMethods.ForEachDFT(ColorByRadius);
-        }
-        else if (changeEvent.newValue == 3)
-        {
-            Debug.Log("lfd");
-            NativeMethods.ForEachDFT(ColorByLFD);
-        }
+        //    NativeMethods.ForEachDFT(ColorByRadius);
+        //}
+        //else if (changeEvent.newValue == 3)
+        //{
+        //    Debug.Log("lfd");
+        //    NativeMethods.ForEachDFT(ColorByLFD);
+        //}
     }
 
 
@@ -134,7 +139,6 @@ public class TreeMenu
         else
         {
             Debug.LogWarning("cluster key not found - color by radius - " + nodeData.id);
-
         }
     }
 
@@ -153,12 +157,43 @@ public class TreeMenu
             Debug.LogWarning("cluster key not found - color by lfd - " + nodeData.id);
         }
     }
+
+    void ColorByDepth(ref Clam.FFI.ClusterData nodeData)
+    {
+        bool hasValue = Cakes.Tree.GetTree().TryGetValue(nodeData.id.AsString, out var node);
+        if (hasValue)
+        {
+            float ratio = 1.0f - (float)nodeData.depth / (float)NativeMethods.TreeHeight();
+            node.GetComponent<Node>().Deselect();
+            node.GetComponent<Node>().SetColor(new Color(ratio, ratio, ratio));
+        }
+        else
+        {
+            Debug.LogWarning("cluster key not found - color by lfd - " + nodeData.id);
+        }
+    }
     void ColorByLFD(ref Clam.FFI.ClusterData nodeData)
     {
         bool hasValue = Cakes.Tree.GetTree().TryGetValue(nodeData.id.AsString, out var node);
         if (hasValue)
         {
             float ratio = 1.0f - nodeData.lfd / m_MaxLFD;
+            node.GetComponent<Node>().SetColor(new Color(ratio, ratio, ratio));
+        }
+        else
+        {
+            Debug.LogWarning("cluster key not found - color by lfd - " + nodeData.id);
+        }
+    }
+
+    void ColorByVertexDegree(ref Clam.FFI.ClusterData nodeData)
+    {
+        bool hasValue = Cakes.Tree.GetTree().TryGetValue(nodeData.id.AsString, out var node);
+        if (hasValue)
+        {
+            int maxVertexDegree = NativeMethods.MaxVertexDegree();
+            int vertexDegree = NativeMethods.VertexDegree(nodeData.id.AsString);
+            float ratio = 1.0f - (float)vertexDegree / (float)maxVertexDegree;
             node.GetComponent<Node>().SetColor(new Color(ratio, ratio, ratio));
         }
         else

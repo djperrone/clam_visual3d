@@ -1,7 +1,6 @@
 #[repr(C)]
 #[derive(Debug, PartialEq, Eq)]
-pub enum ScoringFunction
-{
+pub enum ScoringFunction {
     LrManhattanSc,
     LrManhattanCc,
     LrManhattanGn,
@@ -26,7 +25,6 @@ pub enum ScoringFunction
     DtEuclideanCr,
     DtEuclideanSp,
     DtEuclideanVd,
-
 }
 
 pub fn scoring_function_to_string(scoring_function: &ScoringFunction) -> String {

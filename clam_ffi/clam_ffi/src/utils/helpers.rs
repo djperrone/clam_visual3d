@@ -30,7 +30,24 @@ use super::error::FFIError;
 
 //         CStr::from_ptr(start_node)
 //     };
+fn parse_cluster_id(cluster_id: String) -> Result<(usize, usize), FFIError> {
+    let mut parts = cluster_id.split('-');
 
+    if let (Some(offset_str), Some(cardinality_str)) = (parts.next(), parts.next()) {
+        if let (Ok(offset), Ok(cardinality)) = (
+            offset_str.parse::<usize>(),
+            cardinality_str.parse::<usize>(),
+        ) {
+            return Ok((offset, cardinality));
+        }
+    }
+    return Err(FFIError::InvalidStringPassed);
+}
+
+fn parse_cluster_id_raw(cluster_id: *const c_char) -> Result<(usize, usize), FFIError> {
+    let cluster_id = c_char_to_string(cluster_id);
+    return parse_cluster_id(cluster_id);
+}
 #[no_mangle]
 pub fn c_char_to_string(s: *const c_char) -> String {
     let c_str = unsafe {

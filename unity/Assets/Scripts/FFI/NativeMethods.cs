@@ -18,7 +18,7 @@ namespace Clam
 
         public static partial class NativeMethods
         {
-	public const string __DllName = "clam_ffi_2023-11-2819-53-43";
+	public const string __DllName = "clam_ffi_2023-12-0415-37-29";
             private static IntPtr m_Handle;
 
             private static bool m_Initialized = false;
@@ -147,6 +147,16 @@ namespace Clam
             public static int TreeHeight()
             {
                 return tree_height(m_Handle);
+            }
+
+            public static int VertexDegree(string clusterID)
+            {
+                return vertex_degree(m_Handle, clusterID);
+            }
+
+            public static int MaxVertexDegree()
+            {
+                return max_vertex_degree(m_Handle);
             }
 
             public static float MaxLFD()

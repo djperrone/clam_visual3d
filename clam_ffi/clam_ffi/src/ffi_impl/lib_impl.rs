@@ -21,9 +21,7 @@ pub unsafe fn for_each_dft_impl(
 ) -> FFIError {
     if let Some(handle) = ptr {
         if !start_node.is_null() {
-            let c_str = unsafe {
-                CStr::from_ptr(start_node)
-            };
+            let c_str = unsafe { CStr::from_ptr(start_node) };
             let r_str = c_str.to_str().unwrap();
             return handle.for_each_dft(node_visitor, r_str.to_string(), max_depth);
         } else {
@@ -107,6 +105,44 @@ pub unsafe fn tree_cardinality_impl(ptr: InHandlePtr) -> i32 {
     return -1;
 }
 
+pub unsafe fn vertex_degree_impl(ptr: InHandlePtr, cluster_id: *const c_char) -> i32 {
+    if let Some(handle) = ptr {
+        if let Some(clam_graph) = handle.clam_graph() {
+            let cluster_id = helpers::c_char_to_string(cluster_id);
+            if let Ok(cluster) = handle.get_cluster_from_string(cluster_id) {
+                if let Ok(degree) = clam_graph.vertex_degree(cluster) {
+                    return degree as i32;
+                }
+            }
+        }
+    }
+    debug!("handle not created");
+    return -1;
+}
+
+pub unsafe fn max_vertex_degree_impl(ptr: InHandlePtr) -> i32 {
+    if let Some(handle) = ptr {
+        if let Some(tree) = handle.get_tree() {
+            if let Some(graph) = handle.clam_graph() {
+                let mut max_degree = -1;
+                for c in graph.clusters() {
+                    let vertex_degree = graph.vertex_degree(c).unwrap_or_else(|_| {
+                        unreachable!(
+                            "We are iterating through clusters in graph so it must be there"
+                        )
+                    });
+                    if vertex_degree as i64 > max_degree {
+                        max_degree = vertex_degree as i64;
+                    }
+                }
+                return max_degree as i32;
+            }
+        }
+    }
+    debug!("root not built");
+    return -1;
+}
+
 pub unsafe fn max_lfd_impl(ptr: InHandlePtr) -> f32 {
     // Handle::from_ptr(ptr).get_num_nodes() + 1
 
@@ -156,7 +192,6 @@ fn calc_cluster_entropy_color(cluster: &Clusterf32, labels: &Vec<bool>) -> glam:
 }
 fn color_helper(root: Option<&Clusterf32>, labels: &Vec<bool>, node_visitor: CBFnNodeVisitor) {
     if let Some(cluster) = root {
-
         let mut cluster_data = ClusterDataWrapper::from_cluster(cluster);
         cluster_data.data_mut().color = calc_cluster_entropy_color(cluster, labels);
 
@@ -264,8 +299,8 @@ pub unsafe fn distance_to_other_impl(
     node_name2: *const c_char,
 ) -> f32 {
     if let Some(handle) = ptr {
-        let node1 = handle.get_cluster(helpers::c_char_to_string(node_name1));
-        let node2 = handle.get_cluster(helpers::c_char_to_string(node_name2));
+        let node1 = handle.get_cluster_from_string(helpers::c_char_to_string(node_name1));
+        let node2 = handle.get_cluster_from_string(helpers::c_char_to_string(node_name2));
 
         if let Ok(node1) = node1 {
             if let Ok(node2) = node2 {

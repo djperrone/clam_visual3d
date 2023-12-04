@@ -26,6 +26,8 @@ pub struct ClusterData {
     pub arg_center: i32,
     pub arg_radius: i32,
 
+    pub vertex_degree : i32,
+
     pub dist_to_query: f32,
 }
 
@@ -43,6 +45,7 @@ impl ClusterData {
             lfd: -1.0,
             arg_center: -1,
             arg_radius: -1,
+            vertex_degree : -1,
             dist_to_query: -1f32,
             message: StringFFI::new(std::iter::repeat(' ').take(50).collect()),
         }
@@ -60,6 +63,8 @@ impl ClusterData {
             lfd: -1.0,
             arg_center: -1,
             arg_radius: -1,
+            vertex_degree : -1,
+
             dist_to_query: -1f32,
             message: StringFFI::new(std::iter::repeat(' ').take(50).collect()),
         }
@@ -126,6 +131,8 @@ impl ClusterData {
             lfd: node.lfd() as f32,
             arg_center: (node.arg_center() as i32),
             arg_radius: (node.arg_radial() as i32),
+            vertex_degree : -1,
+
             dist_to_query: -1f32,
             message: StringFFI::new(std::iter::repeat(' ').take(50).collect()),
         }
@@ -145,6 +152,8 @@ impl ClusterData {
             lfd: -1.0,
             arg_center: -1,
             arg_radius: -1,
+            vertex_degree : -1,
+
             dist_to_query: -1f32,
             message: StringFFI::new(std::iter::repeat(' ').take(50).collect()),
         }

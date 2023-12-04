@@ -34,8 +34,8 @@ use crate::ffi_impl::cluster_data_wrapper::ClusterDataWrapper;
 // use super::reingold_impl::{self};
 use crate::ffi_impl::tree_startup_data_ffi::TreeStartupDataFFI;
 use crate::graph::physics_node::PhysicsNode;
-use spring::Spring;
 use crate::utils::scoring_functions::{scoring_function_to_string, ScoringFunction};
+use spring::Spring;
 
 // use ForceDirectedGraph;
 
@@ -151,7 +151,7 @@ impl<'a> Handle<'a> {
                 // let cakes = Cakes::new(dataset, Some(1), &criteria);
                 let tree = Tree::new(dataset, Some(1))
                     .partition(&criteria)
-                    .with_ratios(true);
+                    .with_ratios(false);
                 let labels = tree.data().metadata().unwrap().to_vec();
                 // let labels = cakes.shards()[0].metadata().unwrap().to_vec();
                 return Ok(Handle {
@@ -280,13 +280,16 @@ impl<'a> Handle<'a> {
         }
     }
 
-    pub fn init_clam_graph(&'a mut self,scoring_function : ScoringFunction, cluster_selector: CBFnNodeVisitor) -> FFIError {
+    pub fn init_clam_graph(
+        &'a mut self,
+        scoring_function: ScoringFunction,
+        cluster_selector: CBFnNodeVisitor,
+    ) -> FFIError {
         if let Some(tree) = &self.tree {
             let clusters = select_clusters_for_visualization(
                 tree.root(),
                 Some(String::from(scoring_function_to_string(&scoring_function))),
                 // Some(String::from("lr_euclidean_cc")),
-
             );
             debug!("num clusters: {}", clusters.len());
             let edges = detect_edges(&clusters, tree.data());
@@ -385,7 +388,7 @@ impl<'a> Handle<'a> {
         node_visitor: CBFnNodeVisitor,
     ) -> FFIError {
         for id in id_arr {
-            match self.get_cluster(id.clone()) {
+            match self.get_cluster_from_string(id.clone()) {
                 Ok(cluster) => {
                     if let Some(query) = &self.current_query {
                         let mut baton_data = ClusterDataWrapper::from_cluster(cluster);
@@ -421,7 +424,7 @@ impl<'a> Handle<'a> {
                     FFIError::HandleInitFailed
                 }
             } else {
-                match Self::get_cluster(&self, start_node) {
+                match Self::get_cluster_from_string(&self, start_node) {
                     Ok(root) => {
                         Self::for_each_dft_helper(root, node_visitor, max_depth);
                         FFIError::Ok
@@ -451,7 +454,7 @@ impl<'a> Handle<'a> {
                     FFIError::HandleInitFailed
                 }
             } else {
-                match Self::get_cluster(&self, start_node) {
+                match Self::get_cluster_from_string(&self, start_node) {
                     Ok(root) => {
                         Self::set_names_helper(root, node_visitor);
                         FFIError::Ok
@@ -543,6 +546,10 @@ impl<'a> Handle<'a> {
         }
     }
 
+    pub fn clam_graph(&self) -> Option<&Graph<'a, f32>> {
+        self.clam_graph.as_ref()
+    }
+
     pub fn tree_height(&self) -> i32 {
         if let Some(tree) = self.tree() {
             tree.depth() as i32
@@ -591,7 +598,10 @@ impl<'a> Handle<'a> {
     // }
 
     // why isnt string taken by reference?
-    pub unsafe fn get_cluster(&self, cluster_id: String) -> Result<&Clusterf32, FFIError> {
+    pub unsafe fn get_cluster_from_string(
+        &self,
+        cluster_id: String,
+    ) -> Result<&Clusterf32, FFIError> {
         let mut parts = cluster_id.split('-');
 
         if let (Some(offset_str), Some(cardinality_str)) = (parts.next(), parts.next()) {
@@ -599,14 +609,24 @@ impl<'a> Handle<'a> {
                 offset_str.parse::<usize>(),
                 cardinality_str.parse::<usize>(),
             ) {
-                if let Some(tree) = self.get_tree() {
-                    if let Some(cluster) = tree.get_cluster(offset, cardinality) {
-                        return Ok(cluster);
-                    } else {
-                        return Err(FFIError::InvalidStringPassed);
-                    }
-                }
+                return self.get_cluster(offset, cardinality);
             }
+        }
+        debug!("root not built");
+        return Err(FFIError::HandleInitFailed);
+    }
+
+    pub unsafe fn get_cluster(
+        &self,
+        offset: usize,
+        cardinality: usize,
+    ) -> Result<&Clusterf32, FFIError> {
+        if let Some(tree) = self.get_tree() {
+            return if let Some(cluster) = tree.get_cluster(offset, cardinality) {
+                Ok(cluster)
+            } else {
+                Err(FFIError::InvalidStringPassed)
+            };
         }
         debug!("root not built");
         return Err(FFIError::HandleInitFailed);
@@ -652,7 +672,7 @@ impl<'a> Handle<'a> {
         node_visitor: CBFnNodeVisitor,
     ) -> FFIError {
         return if let Some(_) = self.tree() {
-            if let Ok(clam_root) = self.get_cluster(root.get_id()) {
+            if let Ok(clam_root) = self.get_cluster_from_string(root.get_id()) {
                 reingold_tilford::run_offset(
                     &root.pos,
                     clam_root,

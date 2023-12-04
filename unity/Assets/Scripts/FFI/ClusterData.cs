@@ -55,6 +55,8 @@ namespace Clam
             public int argCenter;
             public int argRadius;
 
+            public int vertexDegree;
+
             public float distToQuery;
 
             public void SetPos(Vector3 pos)

@@ -52,6 +52,12 @@ namespace Clam
             [DllImport(__DllName, EntryPoint = "max_lfd", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
             private static extern float max_lfd(IntPtr handle);
 
+            [DllImport(__DllName, EntryPoint = "max_vertex_degree", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+            private static extern int max_vertex_degree(IntPtr handle);
+
+            [DllImport(__DllName, EntryPoint = "vertex_degree", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+            private static extern int vertex_degree(IntPtr handle, string cluster_id);
+
             [DllImport(__DllName, EntryPoint = "color_clusters_by_label", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
             private static extern FFIError color_clusters_by_label(IntPtr ptr, NodeVisitor callback);
 
