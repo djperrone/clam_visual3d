@@ -75,7 +75,7 @@ public class CreateNewTree : MonoBehaviour
 
         string dataName = m_DatasetField.text;
 
-        if (uint.TryParse(m_CardinalityField.text, out uint cardinality) && validNames.Contains(dataName))
+        if (uint.TryParse(m_CardinalityField.text, out uint cardinality) && validNames.Contains(dataName) && m_DistanceMetricDropdownField.index >= 0)
         {
             Clam.MenuEventManager.SwitchState(Menu.StartClam);
         }

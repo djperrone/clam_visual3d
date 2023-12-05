@@ -219,32 +219,29 @@ impl<'a> Handle<'a> {
                 return Err(e);
             }
         };
-        // let c = Cakes::<Vec<f32>, f32, VecDataset<_, _, _>>::load(
-        //     Path::new(&data_name),
-        //     metric,
-        //     data.is_expensive,
-        // );
-        let tree =
-            Tree::<Vec<f32>, f32, DataSet>::load(Path::new(&data_name), metric, data.is_expensive)
-                .unwrap()
-                .with_ratios(false);
+        if let Ok(tree) =
+            Tree::<Vec<f32>, f32, DataSet>::load(Path::new(&data_name), metric, data.is_expensive){
+            let tree = tree.with_ratios(false);
+            let labels = tree.data().metadata().unwrap().to_vec();
+            return Ok(Handle {
+                // cakes: Some(cakes),
+                tree: Some(tree),
+                labels: Some(labels),
+                graph: None,
+                clam_graph: None,
 
-        // let labels = t.shards()[0].metadata().unwrap().to_vec();
-        let labels = tree.data().metadata().unwrap().to_vec();
-        return Ok(Handle {
-            // cakes: Some(cakes),
-            tree: Some(tree),
-            labels: Some(labels),
-            graph: None,
-            clam_graph: None,
+                edges: None,
+                current_query: None,
+                // longest_edge: None,
+                force_directed_graph: None,
+                // _test_drop: Some(TestDrop { test: 5 }),
+                num_edges_in_graph: None,
+            });
 
-            edges: None,
-            current_query: None,
-            // longest_edge: None,
-            force_directed_graph: None,
-            // _test_drop: Some(TestDrop { test: 5 }),
-            num_edges_in_graph: None,
-        });
+        }
+        else {
+            return Err(FFIError::LoadTreeFailed);
+        }
     }
 
     fn create_dataset(

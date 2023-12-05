@@ -11,7 +11,9 @@ public class ClamGraphBuildMenu
     DropdownField m_ScoringSelector;
     GameObject m_SpringPrefab;
     Slider m_EdgeScalar;
+    Toggle m_ShowEdges;
 
+    GameObject m_GraphBuilder = null;
     //Clam.FFI.ClusterData[] m_SelectedClusters;
 
     Dictionary<string, GameObject> m_Graph;
@@ -27,6 +29,7 @@ public class ClamGraphBuildMenu
         m_SelectClusters = document.rootVisualElement.Q<Button>("SelectClamGraphClusters");
         m_EdgeScalar = document.rootVisualElement.Q<Slider>("ClamEdgeScalar");
         m_ScoringSelector = document.rootVisualElement.Q<DropdownField>("ScoringFunctionSelector");
+        m_ShowEdges = document.rootVisualElement.Q<Toggle>("ShowEdgesToggle");
 
         m_DestroyGraph.RegisterCallback<ClickEvent>(DestroyGraphCallback);
 
@@ -35,7 +38,21 @@ public class ClamGraphBuildMenu
         m_CreateGraph.RegisterCallback<ClickEvent>(CreateGraphCallback);
         m_SelectClusters.RegisterCallback<ClickEvent>(SelectClustersForGraphCallback);
 
+        m_ShowEdges.RegisterValueChangedCallback(ShowEdgesCallback);
+
         InitScoringSelector();
+    }
+
+    void ShowEdgesCallback(ChangeEvent<bool> evt)
+    {
+        if (m_GraphBuilder != null)
+        {
+            m_GraphBuilder.GetComponent<GraphBuilder>().ToggleEdgeVisibility(evt.newValue);
+        }
+        else
+        {
+            Debug.Log("Warning: Graph builder does not exist yet");
+        }
     }
 
     void InitScoringSelector()
@@ -158,8 +175,8 @@ public class ClamGraphBuildMenu
         Debug.LogWarning("finished setting up unity pgysics sim - passing to rust");
         //Clam.ClamFFI.LaunchPhysicsThread(nodes, m_EdgeScalar.value, 1000, EdgeDrawer, UpdatePhysicsSim);
         GameObject graphBuilderPrefab = Resources.Load("Graph") as GameObject;
-        var graphBuilder = MenuEventManager.Instantiate(graphBuilderPrefab);
-        graphBuilder.GetComponent<GraphBuilder>().Init(selectedClusters, m_EdgeScalar.value, 500);
+        m_GraphBuilder = MenuEventManager.Instantiate(graphBuilderPrefab);
+        m_GraphBuilder.GetComponent<GraphBuilder>().Init(selectedClusters, m_EdgeScalar.value, 500);
 
        
 

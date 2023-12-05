@@ -187,4 +187,10 @@ public class GraphBuilder : MonoBehaviour
         Debug.Log("graph builder edge drawer should never hit this");
 
     }
+
+    public void ToggleEdgeVisibility(bool value)
+    {
+        Debug.Log("toggling edge visinility");
+        GetComponent<Renderer>().enabled = value;
+    }
 }

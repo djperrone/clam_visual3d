@@ -7,9 +7,13 @@
         <ui:Button text="Select Clusters" display-tooltip-when-elided="true" name="SelectClamGraphClusters" focusable="false" />
         <ui:Button text="Create Graph" display-tooltip-when-elided="true" name="CreateClamGraphButton" focusable="false" />
         <ui:Button text="Destroy Graph" display-tooltip-when-elided="true" name="DestroyClamGraph" />
-        <ui:VisualElement style="flex-direction: row;">
+        <ui:VisualElement name="ScoringFunctions" style="flex-direction: row;">
             <ui:Label text="Scoring Function" display-tooltip-when-elided="true" name="ScoringFunctionLabel" />
             <ui:DropdownField index="0" name="ScoringFunctionSelector" style="flex-grow: 1;" />
+        </ui:VisualElement>
+        <ui:VisualElement name="ShowEdges" style="flex-direction: row;">
+            <ui:Label text="Show Edges" display-tooltip-when-elided="true" name="ShowEdgesLabel" style="margin-right: 0;" />
+            <ui:Toggle name="ShowEdgesToggle" value="true" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>
