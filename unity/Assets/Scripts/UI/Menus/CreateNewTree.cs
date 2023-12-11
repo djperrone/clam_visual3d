@@ -70,8 +70,6 @@ public class CreateNewTree : MonoBehaviour
     void CreateButtonCallback(ClickEvent evt)
     {
         var validNames = GetAnomalyFiles(m_DataDirectory);
-        validNames.Add("rand");
-        validNames.Add("test");
 
         string dataName = m_DatasetField.text;
 
@@ -89,12 +87,6 @@ public class CreateNewTree : MonoBehaviour
     {
         string loadDir = "../data/binaries";
         var validNames = Directory.GetFiles(loadDir);
-        Debug.Log("Load name options");
-        foreach(var validName in validNames)
-        {
-            Debug.Log(validName);
-        }
-
         string dataName = m_DatasetField.text;
 
         if (uint.TryParse(m_CardinalityField.text, out uint cardinality) && validNames.Contains(dataName))
@@ -114,13 +106,10 @@ public class CreateNewTree : MonoBehaviour
         {
             foreach (string f in Directory.GetFiles(dir))
             {
-                Debug.Log(Path.GetFileName(f));
                 var name = GetUntilOrEmpty(Path.GetFileName(f), "_");
-                Debug.Log(name);
 
                 fileNames.Add(name);
             }
-
 
             return fileNames;
         }
@@ -157,16 +146,9 @@ public class CreateNewTree : MonoBehaviour
         {
             foreach (string f in Directory.GetFiles(dir))
             {
-                Debug.Log(Path.GetFileName(f));
                 var name = GetUntilOrEmpty(Path.GetFileName(f), "_");
-                Debug.Log(name);
-
                 fileNames.Add(name);
             }
-            fileNames.Add("rand");
-            fileNames.Add("test");
-
-
             return fileNames;
         }
         catch (System.Exception ex)

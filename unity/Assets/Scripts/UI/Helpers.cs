@@ -29,22 +29,7 @@ public static class UIHelpers
         popupElement.style.height = new StyleLength(new Length(100, LengthUnit.Percent));
         popupElement.style.width = new StyleLength(new Length(100, LengthUnit.Percent));
 
-        //Popup background is button so that the popup is closed when the player
-        //clicks anywhere outside the popup.
-        //var backgroundButton = new Button();
-        //backgroundButton.style.position = new StyleEnum<Position>(Position.Absolute);
-        //backgroundButton.style.top = 0;
-        //backgroundButton.style.left = 0;
-        //backgroundButton.style.flexGrow = new StyleFloat(1);
-        //backgroundButton.style.height = new StyleLength(new Length(100, LengthUnit.Percent));
-        //backgroundButton.style.width = new StyleLength(new Length(100, LengthUnit.Percent));
-        //backgroundButton.style.opacity = new StyleFloat(0.4f);
-        //backgroundButton.style.backgroundColor = new StyleColor(Color.black);
-        //backgroundButton.text = string.Empty;
-
-
-        //popupElement.Add(backgroundButton);
-
+       
         //Set content size
         popupContent.style.width = new StyleLength(new Length(widthInPercents, LengthUnit.Percent));
         popupContent.style.height = new StyleLength(new Length(heightInPercents, LengthUnit.Percent));
@@ -66,11 +51,7 @@ public static class UIHelpers
     }
 
     public static void PopupClose(VisualElement popupRoot, VisualElement popup)//,
-                                                                                //Action callbackAfterPopupIsClosed)
     {
         popupRoot.Remove(popup);
-
-        //callbackAfterPopupIsClosed?.Invoke();
     }
-
 }

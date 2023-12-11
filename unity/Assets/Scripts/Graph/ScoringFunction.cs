@@ -26,5 +26,4 @@ public enum ScoringFunction
     DtEuclideanCr,
     DtEuclideanSp,
     DtEuclideanVd,
-
 }

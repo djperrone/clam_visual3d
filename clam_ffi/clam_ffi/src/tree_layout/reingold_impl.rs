@@ -2,11 +2,8 @@
 #![allow(unused_variables)]
 #![allow(unreachable_code)]
 
-use rand::{rngs::ThreadRng, Rng};
-use std::{cell::RefCell, collections::HashMap, rc::Rc};
-
-use crate::debug;
 use abd_clam::Cluster;
+use std::{cell::RefCell, rc::Rc};
 
 extern crate nalgebra as na;
 type Vec3 = na::Vector3<f32>;
@@ -31,7 +28,7 @@ impl Extreme {
     }
 
     pub fn default_link() -> ExtremeLink {
-        return Rc::new(RefCell::new(Extreme::default()));
+        Rc::new(RefCell::new(Extreme::default()))
     }
 
     pub fn copy(&mut self, other: ExtremeLink) {
@@ -48,7 +45,6 @@ pub struct Node {
     thread: bool,
     left_child: Link,
     right_child: Link,
-    // color: Vec3,
     name: String,
 }
 
@@ -61,28 +57,18 @@ impl Node {
             thread: false,
             left_child: None,
             right_child: None,
-            // color,
             name,
         }
     }
 
     pub fn new_link(depth: f32, name: String) -> Link {
-        return Some(Rc::new(RefCell::new(Node::new(depth, name))));
+        Some(Rc::new(RefCell::new(Node::new(depth, name))))
     }
 
     pub fn create_layout(abd_clam_root: &Cluster<f32>, max_depth: i32) -> Link {
-        // debug!("before 1st color filler");
-
         let draw_root = Node::new_link(0f32, abd_clam_root.name());
-        // debug!("after first color filler");
 
-        Self::init_helper(
-            draw_root.clone(),
-            abd_clam_root,
-            // data,
-            0f32,
-            max_depth,
-        );
+        Self::init_helper(draw_root.clone(), abd_clam_root, 0f32, max_depth);
 
         Self::setup(
             draw_root.clone(),
@@ -93,7 +79,7 @@ impl Node {
         );
         Self::petrify(draw_root.clone(), 0f32, max_depth);
 
-        return draw_root;
+        draw_root
     }
 
     fn init_helper(draw_root: Link, abd_clam_root: &Cluster<f32>, depth: f32, max_depth: i32) {
@@ -105,9 +91,6 @@ impl Node {
             if let Some(node) = draw_root.clone() {
                 node.borrow_mut().left_child = Node::new_link(depth, left.name());
                 node.borrow_mut().right_child = Node::new_link(depth, right.name());
-
-                // debug!("after a color filler");
-
                 Self::init_helper(
                     node.as_ref().borrow().get_left_child(),
                     left,
@@ -172,18 +155,18 @@ impl Node {
 
                 while left_child.is_some() && right_child.is_some() {
                     if current_sep < MIN_SEP {
-                        root_sep = root_sep + (MIN_SEP - current_sep);
+                        root_sep += MIN_SEP - current_sep;
                         current_sep = MIN_SEP;
                     }
 
                     if let Some(left) = left_child.clone() {
                         if let Some(inner_left) = left.as_ref().borrow().get_right_child() {
-                            loffsum = loffsum + left.as_ref().borrow().offset;
-                            current_sep = current_sep - left.as_ref().borrow().offset;
+                            loffsum += left.as_ref().borrow().offset;
+                            current_sep -= left.as_ref().borrow().offset;
                             left_child = Some(inner_left);
                         } else {
-                            loffsum = loffsum - left.as_ref().borrow().offset;
-                            current_sep = current_sep + left.as_ref().borrow().offset;
+                            loffsum -= left.as_ref().borrow().offset;
+                            current_sep += left.as_ref().borrow().offset;
                             let inner_left = left.as_ref().borrow().get_left_child();
                             left_child = inner_left.clone();
                         }
@@ -193,12 +176,12 @@ impl Node {
 
                     if let Some(right) = right_child.clone() {
                         if let Some(inner_right) = right.as_ref().borrow().get_left_child() {
-                            roffsum = roffsum - right.as_ref().borrow().offset;
-                            current_sep = current_sep - right.as_ref().borrow().offset;
+                            roffsum -= right.as_ref().borrow().offset;
+                            current_sep -= right.as_ref().borrow().offset;
                             right_child = Some(inner_right);
                         } else {
-                            roffsum = roffsum + right.as_ref().borrow().offset;
-                            current_sep = current_sep + right.as_ref().borrow().offset;
+                            roffsum += right.as_ref().borrow().offset;
+                            current_sep += right.as_ref().borrow().offset;
                             let inner_right = right.as_ref().borrow().get_right_child();
                             right_child = inner_right.clone();
                         }
@@ -208,8 +191,8 @@ impl Node {
                 } //end while
 
                 node.borrow_mut().offset = (root_sep + 1.) / 2.;
-                loffsum = loffsum - node.as_ref().borrow().offset;
-                roffsum = roffsum + node.as_ref().borrow().offset;
+                loffsum -= node.as_ref().borrow().offset;
+                roffsum += node.as_ref().borrow().offset;
 
                 if rl.as_ref().borrow().level > ll.as_ref().borrow().level
                     || node.as_ref().borrow().get_left_child().is_none()
@@ -256,11 +239,6 @@ impl Node {
                             } else {
                                 addr.right_child = left_child.clone();
                             }
-                        } else {
-                            println!(
-                                "node name rr addr not found {}",
-                                node.as_ref().borrow().name
-                            );
                         }
                     }
                 } else if let Some(right) = right_child.clone() {
@@ -287,11 +265,6 @@ impl Node {
                             } else {
                                 addr.left_child = right_child.clone();
                             }
-                        } else {
-                            println!(
-                                "node name ll addr not found {}",
-                                node.as_ref().borrow().name
-                            );
                         }
                     }
                 }
@@ -325,19 +298,19 @@ impl Node {
     }
 
     pub fn get_children(&self) -> (Link, Link) {
-        return (self.get_left_child(), self.get_right_child());
+        (self.get_left_child(), self.get_right_child())
     }
 
     pub fn get_left_child(&self) -> Link {
-        return self.left_child.clone();
+        self.left_child.clone()
     }
 
     pub fn get_right_child(&self) -> Link {
-        return self.right_child.clone();
+        self.right_child.clone()
     }
 
     pub fn is_leaf(&self) -> bool {
-        return self.left_child.is_none() && self.right_child.is_none();
+        self.left_child.is_none() && self.right_child.is_none()
     }
 
     pub fn height(root: &Link) -> i32 {
@@ -373,178 +346,21 @@ impl Node {
         );
     }
 
-    // pub fn get_color(&self) -> Vec3 {
-    //     return self.color.clone();
-    // }
-
     pub fn get_name(&self) -> String {
-        return self.name.clone();
+        self.name.clone()
     }
 
     pub fn get_id(&self) -> i32 {
-        return i32::from_str_radix(self.name.as_str(), 16).unwrap_or(-1);
-        // return self.name.parse::<i32>().unwrap_or(-1);
+        i32::from_str_radix(self.name.as_str(), 16).unwrap_or(-1)
     }
     pub fn get_x(&self) -> f32 {
-        return self.x;
+        self.x
     }
 
     pub fn get_y(&self) -> f32 {
-        return self.y;
+        self.y
     }
     pub fn depth(&self) -> i32 {
         self.y as i32
     }
-
-    // pub fn make_complete_tree(max_depth: i32) -> Link {
-    //     let root = Self::new_link(0f32, String::from(0.to_string()));
-    //     Self::complete_tree(root.clone(), 1, max_depth, 0);
-    //
-    //     // Self::setup(
-    //     //     root.clone(),
-    //     //     0f32,
-    //     //     Extreme::default_link(),
-    //     //     Extreme::default_link(),
-    //     //     depth -1,
-    //     // );
-    //     // Self::petrify(root.clone(), 0f32);
-    //
-    //     return root.clone();
-    // }
-
-    // pub fn complete_tree(root: Link, depth: i32, max_depth: i32, id: i32) {
-    //     if depth == max_depth {
-    //         return;
-    //     }
-    //
-    //     if let Some(node) = root.clone() {
-    //         node.borrow_mut().left_child =
-    //             Self::new_link(depth as f32, String::from(id.to_string()));
-    //         node.borrow_mut().right_child =
-    //             Self::new_link(depth as f32, String::from(id.to_string()));
-    //
-    //         Self::complete_tree(
-    //             node.as_ref().borrow().get_left_child(),
-    //             depth + 1,
-    //             max_depth,
-    //             id + 1,
-    //         );
-    //         Self::complete_tree(
-    //             node.as_ref().borrow().get_right_child(),
-    //             depth + 1,
-    //             max_depth,
-    //             id + 2,
-    //         );
-    //     }
-    // }
-
-    // pub fn make_random_tree(max_depth: i32) -> Link {
-    //     let mut rng = rand::thread_rng();
-    //
-    //     let root = Self::new_link(0f32, String::from("test"));
-    //     Self::random_tree(root.clone(), 1, max_depth, &mut rng);
-    //
-    //     Self::setup(
-    //         root.clone(),
-    //         0f32,
-    //         Extreme::default_link(),
-    //         Extreme::default_link(),
-    //         0
-    //     );
-    //     Self::petrify(root.clone(), 0f32, max_depth);
-    //
-    //     return root.clone();
-    // }
-    //
-    // pub fn random_tree(root: Link, depth: i32, max_depth: i32, rng: &mut ThreadRng) {
-    //     if depth == max_depth {
-    //         return;
-    //     }
-    //
-    //     let should_recur: bool = rng.gen_bool(2. / 3.);
-    //     let name1: u32 = rng.gen();
-    //     let name2: u32 = rng.gen();
-    //     if should_recur || depth < 3 {
-    //         if let Some(node) = root.clone() {
-    //             node.borrow_mut().left_child =
-    //                 Self::new_link(depth as f32, String::from(name1.to_string()));
-    //             node.borrow_mut().right_child =
-    //                 Self::new_link(depth as f32, String::from(name2.to_string()));
-    //
-    //             Self::random_tree(
-    //                 node.as_ref().borrow().get_left_child(),
-    //                 depth + 1,
-    //                 max_depth,
-    //                 rng,
-    //             );
-    //             Self::random_tree(
-    //                 node.as_ref().borrow().get_right_child(),
-    //                 depth + 1,
-    //                 max_depth,
-    //                 rng,
-    //             );
-    //         }
-    //     } else {
-    //         return;
-    //     }
-    // }
-    //
-    // pub fn example_tree2() -> Link {
-    //     let root = Node::new_link(0., "A".to_string());
-    //
-    //     let mut nodes = HashMap::new();
-    //     nodes.insert(String::from("A"), root.clone());
-    //
-    //     for i in 0..25 {
-    //         let label = (b'B' + i) as char;
-    //         let node = Node::new_link(0., format!("{}", label));
-    //         nodes.insert(format!("{}", label), node);
-    //     }
-    //
-    //     for i in 0..26 {
-    //         let label = (b'A' + i) as char;
-    //         let node = Node::new_link(0., format!("{}{}", label, label));
-    //         nodes.insert(format!("{}{}", label, label), node);
-    //     }
-    //     Self::add_children("A", "B", "C", &mut nodes);
-    //
-    //     Self::add_children("B", "D", "E", &mut nodes);
-    //     Self::add_children("C", "F", "G", &mut nodes);
-    //
-    //     Self::add_children("E", "H", "I", &mut nodes);
-    //     Self::add_children("F", "J", "K", &mut nodes);
-    //
-    //     Self::add_children("I", "N", "O", &mut nodes);
-    //     Self::add_children("J", "P", "Q", &mut nodes);
-    //
-    //     Self::add_children("O", "T", "U", &mut nodes);
-    //     Self::add_children("P", "V", "W", &mut nodes);
-    //
-    //     Self::add_children("K", "R", "S", &mut nodes);
-    //     Self::add_children("R", "X", "Y", &mut nodes);
-    //     Self::add_children("X", "Z", "AA", &mut nodes);
-    //     Self::add_children("Z", "BB", "CC", &mut nodes);
-    //     Self::add_children("BB", "DD", "EE", &mut nodes);
-    //
-    //     Self::add_children("U", "FF", "GG", &mut nodes);
-    //     Self::add_children("GG", "HH", "II", &mut nodes);
-    //     Self::add_children("II", "JJ", "KK", &mut nodes);
-    //
-    //     Self::setup(
-    //         root.clone(),
-    //         0.,
-    //         Extreme::default_link(),
-    //         Extreme::default_link(),
-    //         0
-    //     );
-    //     Self::petrify(root.clone(), 0.);
-    //
-    //     return root;
-    // }
-    //
-    // fn add_children(cur_node: &str, left: &str, right: &str, nodes: &mut HashMap<String, Link>) {
-    //     let a = nodes.get_mut(cur_node).unwrap().clone().unwrap().clone();
-    //     a.borrow_mut().left_child = nodes.get(left).unwrap().clone();
-    //     a.borrow_mut().right_child = nodes.get(right).unwrap().clone();
-    // }
 }

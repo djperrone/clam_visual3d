@@ -23,20 +23,15 @@ namespace Clam
         MinMaxSlider m_Slider;
         int m_MinValueThreshold;
         int m_MaxValueThreshold;
-
-        //Delegate m_Callback;
         Func<bool> m_Callback;
-
-        //VisualTreeAsset m_Template;
 
         public IntTextField(string name, UIDocument document, int minValue, int maxValue, Func<bool> callback)
         {
-            
+
             m_MinValueThreshold = minValue;
             m_MaxValueThreshold = maxValue;
 
             m_Callback = callback;
-
 
             m_Label = document.rootVisualElement.Q<Label>(name + "Label");
             m_MinField = document.rootVisualElement.Q<TextField>(name + "Min");
@@ -63,8 +58,6 @@ namespace Clam
             m_MaxField.doubleClickSelectsWord = true;
         }
 
-
-
         public IntTextField(string name, VisualElement parent, int minValue, int maxValue, Func<bool> callback)
         {
             var template = Resources.Load<VisualTreeAsset>("ui/SafeInputFieldTemplate");
@@ -75,12 +68,6 @@ namespace Clam
             m_MaxValueThreshold = maxValue;
 
             m_Callback = callback;
-
-
-            //m_Label = document.rootVisualElement.Q<Label>(name + "Label");
-            //m_MinField = document.rootVisualElement.Q<TextField>(name + "Min");
-            //m_MaxField = document.rootVisualElement.Q<TextField>(name + "Max");
-            //m_Slider = document.rootVisualElement.Q<MinMaxSlider>(name + "Slider");
 
             m_MinField.value = minValue.ToString();
             m_MaxField.value = maxValue.ToString();
@@ -105,22 +92,6 @@ namespace Clam
         void SliderCallback(ChangeEvent<Vector2> evt)
         {
             var slider = evt.target as MinMaxSlider;
-
-            //Vector2 newValue = evt.newValue; // The new value from the event
-            //Vector2 oldValue = evt.previousValue; // The previous value from the event
-
-            //// Round both components based on the sign of the difference
-            ////newValue.x = (newValue.x > oldValue.x) ? Mathf.Ceil(newValue.x) : Mathf.Floor(newValue.x);
-            ////newValue.y = (newValue.y > oldValue.y) ? Mathf.Ceil(newValue.y) : Mathf.Floor(newValue.y);
-
-            ////// Now you have the rounded newValue, you can use it as needed
-            ////newValue = Vector2.Lerp(newValue, newValue, Time.deltaTime * 5.0f);
-            ////slider.value = newValue;
-
-            //m_MinField.value = evt.newValue.x.ToString();
-            //m_MaxField.value = evt.newValue.y.ToString();
-            //slider.value = evt.newValue;
-
             m_Callback();
         }
 
@@ -128,51 +99,29 @@ namespace Clam
         {
             if (!ValidateCharacters(changeEvent.newValue, "0123456789."))
             {
-                //textField.value = changeEvent.previousValue;
                 return false;
 
             }
             else
             {
-                //if (m_MinValueThreshold.GetType() == typeof(double))
-                //{
-
-                //    double minValue = (double)(object)m_MinValueThreshold;
-                //    double maxValue = (double)(object)m_MaxValueThreshold;
-                //    double curMax = double.Parse(m_MaxField.value);
-                //    double value = double.Parse(changeEvent.newValue);
-
-                //    if (value < minValue || value > maxValue || value > curMax)
-                //    {
-                //        //textField.value = changeEvent.previousValue;
-                //        return false;
-                //    }
-                //}
-
+                if (changeEvent.newValue.Contains('.'))
                 {
-                    if (changeEvent.newValue.Contains('.'))
-                    {
-                        //textField.value = changeEvent.previousValue;
-                        return false;
-                    }
-                    int minValue = (int)(object)m_MinValueThreshold;
-                    int maxValue = (int)(object)m_MaxValueThreshold;
-                    int curMax = int.Parse(m_MaxField.value);
-                    int value = int.Parse(changeEvent.newValue);
+                    return false;
+                }
+                int minValue = (int)(object)m_MinValueThreshold;
+                int maxValue = (int)(object)m_MaxValueThreshold;
+                int curMax = int.Parse(m_MaxField.value);
+                int value = int.Parse(changeEvent.newValue);
 
-                    if (value < minValue || value > maxValue || value > curMax)
-                    {
-                        //textField.value = changeEvent.previousValue;
-                        return false;
-                    }
+                if (value < minValue || value > maxValue || value > curMax)
+                {
+                    return false;
                 }
 
                 return true;
 
             }
-
         }
-
 
         void MinFieldCallback(ChangeEvent<string> changeEvent)
         {
@@ -184,15 +133,9 @@ namespace Clam
             }
             else
             {
-                // do stuff
                 m_Slider.minValue = int.Parse(textField.value);
-
                 m_Callback();
-
-
             }
-
-
         }
 
         void MaxFieldCallback(ChangeEvent<string> changeEvent)
@@ -205,7 +148,6 @@ namespace Clam
             }
             else
             {
-                // do stuff
                 m_Slider.maxValue = int.Parse(textField.value);
                 m_Callback();
             }
@@ -213,37 +155,26 @@ namespace Clam
 
         bool MaxValueValidation(ChangeEvent<string> changeEvent)
         {
-
             if (!ValidateCharacters(changeEvent.newValue, "0123456789."))
             {
-                //textField.value = changeEvent.previousValue;
                 return false;
-
             }
             else
             {
-
+                if (changeEvent.newValue.Contains('.'))
                 {
-                    if (changeEvent.newValue.Contains('.'))
-                    {
-                        //textField.value = changeEvent.previousValue;
-                        return false;
-                    }
-                    int minValue = (int)(object)m_MinValueThreshold;
-                    int maxValue = (int)(object)m_MaxValueThreshold;
-                    int curMin = int.Parse(m_MinField.value);
-                    int value = int.Parse(changeEvent.newValue);
-
-                    if (value < minValue || value > maxValue || value < curMin)
-                    {
-                        //textField.value = changeEvent.previousValue;
-                        return false;
-                    }
+                    return false;
                 }
+                int minValue = (int)(object)m_MinValueThreshold;
+                int maxValue = (int)(object)m_MaxValueThreshold;
+                int curMin = int.Parse(m_MinField.value);
+                int value = int.Parse(changeEvent.newValue);
 
-
+                if (value < minValue || value > maxValue || value < curMin)
+                {
+                    return false;
+                }
                 return true;
-
             }
         }
         bool ValidateCharacters(string value, string validCharacters)
@@ -281,14 +212,13 @@ namespace Clam
             List<Tuple<string, int>> comparisons = new List<Tuple<string, int>>();
             comparisons.Add(new Tuple<string, int>("Depth", wrapper.GetData().depth));
             comparisons.Add(new Tuple<string, int>("Cardinality", wrapper.GetData().cardinality));
-            comparisons.Add(new Tuple<string, int>("ArgRadius", wrapper.GetData().argRadius));
+            comparisons.Add(new Tuple<string, int>("ArgRadius", wrapper.GetData().argRadial));
             comparisons.Add(new Tuple<string, int>("ArgCenter", wrapper.GetData().argCenter));
 
             foreach ((string name, int value) in comparisons)
             {
                 if (m_Label.text == name)
                 {
-                    Debug.Log("foudn comp for " + name);
                     (int min, int max) = MinMaxRange();
                     if (value < min || value > max)
                     {
@@ -298,33 +228,12 @@ namespace Clam
             }
 
             return true;
-
-            //if (m_Label.text == "Depth")
-            //{
-            //    var range = MinMaxRange();
-            //    if (wrapper.Data.depth < range.Item1 || wrapper.Data.depth > range.Item2)
-            //    {
-            //        return false;
-            //    }
-            //}
-            //else if(m_Label.text == "Cardinality")
         }
 
         public bool IsWithinRange(int value)
         {
-
             (int min, int max) = MinMaxRange();
-            //if (value < min || value > max)
-            //{
-            //    return false;
-            //}
-            //return true;
-
             return (value >= min && value <= max);
         }
-
-
     }
-
 }
-

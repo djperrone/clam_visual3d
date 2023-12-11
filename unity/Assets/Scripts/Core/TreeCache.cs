@@ -20,36 +20,22 @@ namespace Clam
 
         private Dictionary<string, GameObject> m_Tree;
         private Dictionary<string, GameObject> m_EdgeCache;
-
-        //private float m_EdgeScalar = 25.0f;
-        //private float m_SearchRadius = 0.05f;
         public bool m_IsPhysicsRunning = false;
 
-        //public void Init(GameObject nodePrefab, GameObject springPrefab, string dataName, uint cardinality)
         public FFIError Init(GameObject nodePrefab, GameObject springPrefab)
         {
             m_NodePrefab = nodePrefab;
             m_SpringPrefab = springPrefab;
-            //m_NodePrefab = nodePrefab;
-            //m_SpringPrefab = springPrefab;
-            //m_DataName = dataName;
-            //m_Cardinality = cardinality;
-            //m_TreeData = new TreeStartupData();
             m_TreeData = MenuEventManager.instance.m_TreeData;
-            //m_TreeData.dataName = "arrhythmia";
-            //m_TreeData.cardinality = 15;
             if (m_TreeData.dataName == null || m_TreeData.dataName.Length == 0)
             {
                 Debug.Log("error with tree data");
-                //Application.Quit();
                 return FFIError.StartupDataInvalid;
-
             }
 
             if (m_TreeData.shouldLoad)
             {
                 FFIError clam_result = Clam.FFI.NativeMethods.LoadCakes(m_TreeData);
-                //FFIError clam_result = Clam.FFI.NativeMethods.LoadCakes(m_TreeData.dataName);
                 if (clam_result != FFIError.Ok)
                 {
                     Debug.Log("error with tree data");
@@ -59,7 +45,6 @@ namespace Clam
             else
             {
                 FFIError clam_result = Clam.FFI.NativeMethods.InitClam(m_TreeData);
-                //FFIError clam_result = Clam.FFI.NativeMethods.InitClam(m_TreeData.dataName, m_TreeData.cardinality, m_TreeData.distanceMetric);
                 if (clam_result != FFIError.Ok)
                 {
                     Debug.Log("error with tree data");
@@ -96,7 +81,6 @@ namespace Clam
                 return FFIError.HandleInitFailed;
             }
 
-            //SetVisibleTreeDepth(7);
             return FFIError.Ok;
         }
 
@@ -134,8 +118,6 @@ namespace Clam
             }
             Clam.FFI.NativeMethods.DrawHierarchy(PositionUpdater);
             Clam.FFI.NativeMethods.ColorClustersByLabel(ColorFiller);
-
-            //Edge[] edges = GameObject.FindObjectsOfType<Edge>(true);
             var edges = GameObject.FindGameObjectsWithTag(m_SpringPrefab.tag);
 
             foreach (var obj in edges)
@@ -145,13 +127,11 @@ namespace Clam
                     GameObject gameObject = obj as GameObject;
                     Destroy(gameObject); // or use DestroyImmediate(gameObject) if you want to destroy it immediately
                 }
-                // Add additional checks or actions for other types if needed
             }
 
             Clam.FFI.NativeMethods.ForEachDFT(EdgeDrawer);
             PopulateEdgeDictionary();
         }
-
 
         public void EdgeDrawer(ref FFI.ClusterData nodeData)
         {
@@ -162,26 +142,13 @@ namespace Clam
                     if (m_Tree.TryGetValue(node.GetComponent<Node>().GetLeftChildID(), out var lc))
                     {
                         var spring = MenuEventManager.instance.MyInstantiate(m_SpringPrefab);
-                        //var sprint = SpringScript.CreateInstance(node, lc, SpringScript.SpringType.heirarchal);
-                        //var spring = MenuEventManager.instance.MyInstantiate(m_SpringPrefab);
-
                         spring.GetComponent<Edge>().InitLineRenderer(node, lc, Edge.SpringType.heirarchal);
-
-                        //spring.GetComponent<SpringScript>().SetNodes(node, lc);
-                        //spring.GetComponent<SpringScript>().SetColor(Color.white);
-
                     }
 
                     if (m_Tree.TryGetValue(node.GetComponent<Node>().GetRightChildID(), out var rc))
                     {
                         var spring = MenuEventManager.instance.MyInstantiate(m_SpringPrefab);
-
                         spring.GetComponent<Edge>().InitLineRenderer(node, rc, Edge.SpringType.heirarchal);
-
-                        //spring.GetComponent<SpringScript>().SetNodes(node, rc);
-                        //var sprint = SpringScript.CreateInstance(node, lc, SpringScript.SpringType.Similarity);
-
-                        //spring.GetComponent<SpringScript>().SetColor(Color.white);
                     }
                 }
             }
@@ -195,8 +162,6 @@ namespace Clam
         {
             return m_EdgeCache;
         }
-
-
 
         public void Set(Dictionary<string, GameObject> tree)
         {
@@ -212,22 +177,17 @@ namespace Clam
         {
             var wrapper = new RustResourceWrapper<ClusterIDs>(ClusterIDs.Alloc(id));
 
-            //var wrapper = NativeMethods.CreateClusterIDsWrapper(id);
             if (wrapper.result == FFIError.Ok)
             {
                 GameObject node = Instantiate(m_NodePrefab);
-                //nodeData.LogInfo();
                 node.GetComponent<Node>().SetID(wrapper.Data.id.AsString);
                 node.GetComponent<Node>().SetLeft(wrapper.Data.leftID.AsString);
                 node.GetComponent<Node>().SetRight(wrapper.Data.rightID.AsString);
-                print("setting name here add" + node.GetComponent<Node>().GetId());
                 m_Tree.Add(id, node);
                 return node;
             }
             return null;
-
         }
-
 
         public GameObject GetOrAdd(string id)
         {
@@ -236,14 +196,12 @@ namespace Clam
                 return m_Tree.GetValueOrDefault(id);
             }
             var wrapper = new RustResourceWrapper<ClusterIDs>(ClusterIDs.Alloc(id));
-            //var wrapper = NativeMethods.CreateClusterIDsWrapper(id);
             if (wrapper.result == FFIError.Ok)
             {
                 GameObject node = Instantiate(m_NodePrefab);
                 node.GetComponent<Node>().SetID(wrapper.Data.id.AsString);
                 node.GetComponent<Node>().SetLeft(wrapper.Data.leftID.AsString);
                 node.GetComponent<Node>().SetRight(wrapper.Data.rightID.AsString);
-                print("setting name here getoradd " + node.GetComponent<Node>().GetId());
                 m_Tree.Add(id, node);
                 return node;
             }
@@ -258,49 +216,30 @@ namespace Clam
             foreach (var kvp in m_Tree.ToList())
             {
                 var cluster = kvp.Value;
-                //if (!cluster.activeSelf)
-                //{
-                //    continue;
-                //}
-                //Clam.FFI.ClusterDataWrapper wrapper = Clam.FFI.NativeMethods.CreateClusterDataWrapper(kvp.Key);
                 var wrapper = new RustResourceWrapper<ClusterData>(ClusterData.Alloc(kvp.Key));
-                //Clam.FFI.ClusterDataWrapper wrapper = new Clam.FFI.ClusterDataWrapper(cluster.GetComponent<Node>().ToNodeData());
-                //Clam.FFI.NativeMethods.GetClusterData(wrapper);
                 if (wrapper.result == FFIError.Ok)
                 {
-                    //if (m_IntInputFields.TryGetValue("Depth", out var depthField))
+                    if (wrapper.Data.depth > maxDepth)
                     {
-                        //var range = textField.MinMaxRange();
-                        if (wrapper.Data.depth > maxDepth)
-                        {
-                            cluster.GetComponent<Node>().Deselect();
-                            cluster.SetActive(false);
-                            //continue;
-                        }
+                        cluster.GetComponent<Node>().Deselect();
+                        cluster.SetActive(false);
                     }
-
-
                 }
-                //cluster.GetComponent<Node>().Select();
             }
             return true;
         }
-
 
         public void Update()
         {
         }
         unsafe void SetNodeNames(ref Clam.FFI.ClusterIDs nodeData)
         {
-            
             if (!m_Tree.ContainsKey(nodeData.id.AsString))
             {
                 GameObject node = Instantiate(m_NodePrefab);
-                //nodeData.LogInfo();
                 node.GetComponent<Node>().SetID(nodeData.id.AsString);
                 node.GetComponent<Node>().SetLeft(nodeData.leftID.AsString);
                 node.GetComponent<Node>().SetRight(nodeData.rightID.AsString);
-                print("setting name here " + node.GetComponent<Node>().GetId());
                 m_Tree.Add(nodeData.id.AsString, node);
             }
         }
@@ -324,7 +263,6 @@ namespace Clam
             bool hasValue = m_Tree.TryGetValue(nodeData.id.AsString, out node);
             if (hasValue)
             {
-                Debug.Log("setting color to" + nodeData.color.AsVector3.ToString());
                 node.GetComponent<Node>().SetColor(nodeData.color.AsColor);
             }
             else
@@ -334,4 +272,3 @@ namespace Clam
         }
     }
 }
-

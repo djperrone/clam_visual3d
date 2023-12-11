@@ -11,25 +11,20 @@ use crate::ffi_impl::tree_startup_data_ffi::TreeStartupDataFFI;
 pub unsafe fn shutdown_clam_impl(context_ptr: OutHandlePtr) -> FFIError {
     if let Some(handle) = context_ptr {
         let _ = Box::from_raw(*handle);
-        return FFIError::Ok;
+        FFIError::Ok
     } else {
         debug!("shtudown clam handle not valid?");
-        return FFIError::NullPointerPassed;
+        FFIError::NullPointerPassed
     }
 }
 
 pub unsafe fn force_physics_shutdown(ptr: InHandlePtr) -> i32 {
-    // Handle::from_ptr(ptr).get_num_nodes() + 1
-
     if let Some(handle) = ptr {
-        // debug!("cardinality: {}", handle.tree_height() + 1);
         handle.force_physics_shutdown();
-
-        // return handle.tree_height() + 1;
     }
     debug!("handle not created");
 
-    return 0;
+    0
 }
 
 pub unsafe fn init_clam_struct_impl(
@@ -61,13 +56,12 @@ pub unsafe fn init_clam_struct_impl(
             if let Some(out_handle) = ptr {
                 *out_handle = Box::into_raw(Box::new(handle));
             }
-
             debug!("built clam tree for {}", data_name);
-            return FFIError::Ok;
+            FFIError::Ok
         }
         Err(e) => {
             debug!("{:?}", e);
-            return FFIError::HandleInitFailed;
+            FFIError::HandleInitFailed
         }
     }
 }
@@ -94,39 +88,14 @@ pub unsafe fn init_clam_impl(
             }
 
             debug!("built clam tree for {}", data_name);
-            return FFIError::Ok;
+            FFIError::Ok
         }
         Err(e) => {
             debug!("{:?}", e);
-            return FFIError::HandleInitFailed;
+            FFIError::HandleInitFailed
         }
     }
 }
-
-// pub unsafe fn load_cakes_impl(ptr: OutHandlePtr, data_name: *const u8, name_len: i32) -> FFIError {
-//     let data_name = match helpers::csharp_to_rust_utf8(data_name, name_len) {
-//         Ok(data_name) => data_name,
-//         Err(e) => {
-//             debug!("{:?}", e);
-//             return FFIError::InvalidStringPassed;
-//         }
-//     };
-//
-//     match Handle::load(&data_name) {
-//         Ok(handle) => {
-//             if let Some(out_handle) = ptr {
-//                 *out_handle = Box::into_raw(Box::new(handle));
-//             }
-//
-//             debug!("built clam tree for {}", data_name);
-//             return FFIError::Ok;
-//         }
-//         Err(e) => {
-//             debug!("{:?}", e);
-//             return FFIError::HandleInitFailed;
-//         }
-//     }
-// }
 
 pub unsafe fn load_cakes_struct_impl(
     ptr: OutHandlePtr,
@@ -150,11 +119,11 @@ pub unsafe fn load_cakes_struct_impl(
                 "built clam tree for {}",
                 data.data_name.as_string().unwrap()
             );
-            return FFIError::Ok;
+            FFIError::Ok
         }
         Err(e) => {
             debug!("{:?}", e);
-            return FFIError::HandleInitFailed;
+            FFIError::HandleInitFailed
         }
     }
 }

@@ -24,30 +24,8 @@ namespace StarterAssets
 		public bool cursorInputForLook = true;
 
 #if ENABLE_INPUT_SYSTEM
-
-        //public void OnChangeMap(InputValue value)
-        //{
-        //    Debug.Log("change map!");
-        //    bool uiActive = Cursor.visible;
-
-        //    if (uiActive)
-        //    {
-        //        //_playerInput.SwitchCurrentActionMap("Player");
-        //        Cursor.lockState = CursorLockMode.Locked;
-
-        //    }
-        //    else
-        //    {
-        //        //_playerInput.SwitchCurrentActionMap("WorldUI");
-        //        Cursor.lockState = CursorLockMode.None;
-
-        //    }
-        //    Cursor.visible = !Cursor.visible;
-
-        //}
         public void OnMove(InputValue value)
 		{
-			//Debug.Log("enable on move");
 			MoveInput(value.Get<Vector2>());
 		}
 
@@ -61,8 +39,6 @@ namespace StarterAssets
 
 		public void OnUpDown(InputValue value)
 		{
-			//Debug.Log("jump");
-
 			VerticalInput(value.Get<Vector2>());
 		}
 
@@ -70,20 +46,15 @@ namespace StarterAssets
 		{
 			SprintInput(value.isPressed);
 		}
-
-		
 #endif
-
 
 		public void MoveInput(Vector2 newMoveDirection)
 		{
-
             move = newMoveDirection;
 		}
 
         public void VerticalInput(Vector2 newMoveDirection)
         {
-
             verticalMove = newMoveDirection;
         }
 
@@ -105,8 +76,6 @@ namespace StarterAssets
 		private void OnApplicationFocus(bool hasFocus)
 		{
 			SetCursorState(cursorLocked);
-
-			Debug.Log("application focused");
 		}
 
 		private void SetCursorState(bool newState)
@@ -114,5 +83,4 @@ namespace StarterAssets
 			Cursor.lockState = newState ? CursorLockMode.Locked : CursorLockMode.None;
 		}
 	}
-	
 }

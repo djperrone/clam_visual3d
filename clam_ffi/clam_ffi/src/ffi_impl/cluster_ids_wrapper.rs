@@ -4,10 +4,8 @@ use crate::utils::types::Clusterf32;
 pub struct ClusterIDsWrapper {
     data: ClusterIDs,
 }
-
 impl Drop for ClusterIDsWrapper {
     fn drop(&mut self) {
-        // debug!("Freeing Cluster Data string with rust destructor");
         self.data.free_ids();
     }
 }

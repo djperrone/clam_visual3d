@@ -14,16 +14,11 @@ public class ClamGraphBuildMenu
     Toggle m_ShowEdges;
 
     GameObject m_GraphBuilder = null;
-    //Clam.FFI.ClusterData[] m_SelectedClusters;
-
     Dictionary<string, GameObject> m_Graph;
 
-    //public GameObject m_GraphBuilderPrefab;
 
     public ClamGraphBuildMenu(UIDocument document, string name)
     {
-        //m_GraphBuilderPrefab = graphBuilderPrefab;
-
         m_CreateGraph = document.rootVisualElement.Q<Button>("CreateClamGraphButton");
         m_DestroyGraph = document.rootVisualElement.Q<Button>("DestroyClamGraph");
         m_SelectClusters = document.rootVisualElement.Q<Button>("SelectClamGraphClusters");
@@ -67,13 +62,10 @@ public class ClamGraphBuildMenu
         m_ScoringSelector.choices = scoringFunctionStrings;
     }
 
-    
-
     void SelectClustersForGraphCallback(ClickEvent evt)
     {
         if (MenuEventManager.instance.m_IsPhysicsRunning)
         {
-            //Debug.Log("Error physics already running");
             return;
         }
         foreach ((var id, var node) in Cakes.Tree.GetTree())
@@ -97,12 +89,10 @@ public class ClamGraphBuildMenu
         }
     }
 
-
     void CreateGraphCallback(ClickEvent evt)
     {
         if (MenuEventManager.instance.m_IsPhysicsRunning)
         {
-            //Debug.Log("Error physics already running");
             return;
         }
 
@@ -116,27 +106,6 @@ public class ClamGraphBuildMenu
 
         Cakes.Tree.Set(m_Graph);
 
-        //Cakes.BuildGraphWithinParams();
-
-
-
-        //List<NodeDataUnity> nodes = new List<NodeDataUnity>();
-        //int numSelected = 0;
-        //foreach (var (name, node) in MenuEventManager.instance.GetTree())
-        //{
-        //    if (node.activeSelf && node.GetComponent<Node>().Selected)
-        //    {
-        //        numSelected++;
-        //        //var x = Random.Range(0, 100);
-        //        //var y = Random.Range(0, 100);
-        //        //var z = Random.Range(0, 100);
-
-        //        //node.GetComponent<Transform>().position = new Vector3(x, y, z);
-
-        //        //nodes.Add(node.GetComponent<NodeScript>().ToUnityData());
-        //    }
-        //}
-
         MenuEventManager.SwitchState(Menu.DestroyGraph);
         MenuEventManager.SwitchState(Menu.DestroyTree);
 
@@ -145,127 +114,50 @@ public class ClamGraphBuildMenu
 
         foreach (var (name, node) in m_Graph)
         {
-            //if (node.activeSelf && node.GetComponent<Node>().Selected)
+            var x = Random.Range(0, 100);
+            var y = Random.Range(0, 100);
+            var z = Random.Range(0, 100);
+
+            node.GetComponent<Transform>().position = new Vector3(x, y, z);
+
+            var result = Clam.FFI.NativeMethods.CreateClusterDataMustFree(node.GetComponent<Node>().GetId(), out var clusterData);
+            if (result == FFIError.Ok)
             {
-                //numSelected++;
-                var x = Random.Range(0, 100);
-                var y = Random.Range(0, 100);
-                var z = Random.Range(0, 100);
-
-                node.GetComponent<Transform>().position = new Vector3(x, y, z);
-
-                var result = Clam.FFI.NativeMethods.CreateClusterDataMustFree(node.GetComponent<Node>().GetId(), out var clusterData);
-                if (result == FFIError.Ok)
-                {
-                    selectedClusters[i++] = clusterData;
-                }
-                else
-                {
-                    Debug.LogError("Node could not be found");
-                    return;
-                }
-                //i++;
-
-                //if (i == numSelected)
-                //    break;
+                selectedClusters[i++] = clusterData;
+            }
+            else
+            {
+                Debug.LogError("Node could not be found");
+                return;
             }
         }
-        //Clam.ClamFFI.InitForceDirectedSim(nodes, EdgeDrawer);
         MenuEventManager.instance.m_IsPhysicsRunning = true;
-        Debug.LogWarning("finished setting up unity pgysics sim - passing to rust");
-        //Clam.ClamFFI.LaunchPhysicsThread(nodes, m_EdgeScalar.value, 1000, EdgeDrawer, UpdatePhysicsSim);
+        Debug.Log("finished setting up unity physics sim - passing to rust");
         GameObject graphBuilderPrefab = Resources.Load("Graph") as GameObject;
         m_GraphBuilder = MenuEventManager.Instantiate(graphBuilderPrefab);
         m_GraphBuilder.GetComponent<GraphBuilder>().Init(selectedClusters, m_EdgeScalar.value, 500);
-
-       
-
-        //Clam.FFI.NativeMethods.RunForceDirectedSim(nodes, m_EdgeScalar.value, 500, EdgeDrawer);
-
-
-        //for (int K = 0; K < selectedClusters.Length; K++)
-        //{
-        //    //ref var node = ref node1;
-        //    //Debug.Log("freeing all nodes from physics sim");
-        //    Clam.FFI.NativeMethods.DeleteClusterData(ref selectedClusters[K]);
-        //}
-
-
     }
-    //public void UpdatePhysicsSim(ref Clam.FFI.ClusterData nodeData)
-    //{
-    //    string id = nodeData.id.AsString;
-    //    //Debug.Log("id of updated node is " + id);
-    //    if (Cakes.Tree.GetTree().TryGetValue(id, out var node))
-    //    {
-    //        node.GetComponent<Node>().SetPosition(nodeData.pos.AsVector3);
-    //    }
-    //    else
-    //    {
-    //        Debug.Log("physics upodate key not found - " + id);
-    //    }
-    //}
-
-    //public void EdgeDrawer(ref Clam.FFI.ClusterData nodeData)
-    //{
-    //    if (Cakes.Tree.GetTree().TryGetValue(nodeData.id.AsString, out var node))
-    //    {
-    //        if (Cakes.Tree.GetTree().TryGetValue(nodeData.message.AsString, out var other))
-    //        {
-    //            //Debug.Log("message from rust " + nodeData.message.AsString);
-    //            //nodeData.SetMessage("hello world");
-    //            //Clam.FFI.NativeMethods.SetMessage("hello world", out nodeData);
-    //            //m_TempUI.AddEdge(node, other, 0);
-    //            //Object springPrefab = Resources.Load("Spring");
-    //            //var spring = SpringScript.CreateInstance(node, other, SpringScript.SpringType.Similarity);
-    //            var spring = MenuEventManager.instance.MyInstantiate(m_SpringPrefab);
-
-    //            spring.GetComponent<Edge>().InitLineRenderer(node, other, Edge.SpringType.Similarity);
-    //        }
-    //    }
-
-    //}
 
     public void DestroyGraphCallback(ClickEvent evt)
     {
-        //foreach(var (key, value) in MenuEventManager.instance.GetTree())
-        //{
-        //    value.SetActive(false);
-        //}
-        Debug.Log("is this running hello?00");
         MenuEventManager.SwitchState(Menu.DestroyTree);
         MenuEventManager.SwitchState(Menu.DestroyGraph);
     }
 
-
-
     void IncludeHiddenCallback(ClickEvent evt)
     {
-        //foreach (var (key, value) in MenuEventManager.instance.GetTree())
-        //{
-        //    if (value.GetComponent<NodeScript>().Selected)
-        //    {
-        //        value.SetActive(false);
-        //    }
-        //}
-        Debug.Log("toggled");
         MenuEventManager.SwitchState(Menu.IncludeHidden);
     }
 
     public void clusterSelector(ref Clam.FFI.ClusterData nodeData)
     {
-        Debug.Log("clusterselecor call");
         if (Cakes.Tree.GetTree().TryGetValue(nodeData.id.AsString, out var node))
         {
-            Debug.Log("seelcting for graph");
             node.GetComponent<Node>().Select();
         }
         else
         {
-            //var cluster = Cakes.Tree.GetOrAdd(nodeData.id.AsString);
             Debug.LogError("cluster not found");
         }
-
     }
-
 }

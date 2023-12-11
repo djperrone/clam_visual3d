@@ -38,31 +38,11 @@ namespace Clam
             set { m_IndexBufferID = value; }
         }
 
-
-        //void Awake()
-        //{
-        //    click = new InputAction(binding: "<Mouse>/leftButton");
-        //    click.performed += ctx => {
-        //        RaycastHit hit;
-        //        Vector3 coor = Mouse.current.position.ReadValue();
-        //        if (Physics.Raycast(Camera.main.ScreenPointToRay(coor), out hit))
-        //        {
-        //            hit.collider.GetComponent<IClickable>()?.OnClick();
-        //        }
-        //    };
-        //    click.Enable();
-        //}
         // Start is called before the first frame update
         void Start()
         {
-            //m_ActualColor = new Color(255.0f,255.0f,255.0f);
             m_IndexBufferID = -1;
         }
-        //public void OnClick()
-        //{
-        //    Debug.Log("somebody clicked me" + " " + _id);
-        //}
-        // Update is called once per frame
         void Update()
         {
         }
@@ -83,16 +63,8 @@ namespace Clam
 
         public void Select()
         {
-            //if (m_IsSelected)
-            //{
-            //    SetColor(m_ActualColor);
-            //    m_IsSelected = false;
-            //}
-            //else
-            {
-                SetColor(new Color(0.0f, 0.0f, 1.0f));
-                m_IsSelected = true;
-            }
+            SetColor(new Color(0.0f, 0.0f, 1.0f));
+            m_IsSelected = true;
         }
 
         public void Deselect()
@@ -110,12 +82,10 @@ namespace Clam
         public void SetPosition(Vector3 pos)
         {
             GetComponent<Transform>().position = new Vector3(pos.x, -pos.y, pos.z);
-            //GetComponent<Transform>().position = pos;
         }
 
         public void SetColor(Color color)
         {
-            //Debug.Log("setting node " + _id + " color to " + color);
             GetComponent<Renderer>().material.color = color;
         }
 
@@ -177,21 +147,6 @@ namespace Clam
             print("-------------------------------------------------lid " + m_LeftChildID + ", rid " + m_RightChildID);
             return m_LeftChildID == "None" && m_RightChildID == "None";
         }
-
-
-        //public FFI.ClusterData ToNodeData()
-        //{
-        //    FFI.ClusterData node = new Clam.FFI.ClusterData(m_ID, m_LeftChildID, m_RightChildID, GetPosition(), GetColor());
-
-        //    return node;
-        //}
-
-        //public NodeDataUnity ToUnityData()
-        //{
-        //    NodeDataUnity node = new NodeDataUnity(_id, _leftChildID, _rightChildID, GetPosition(), GetColor());
-
-        //    return node;
-        //}
     }
 }
 

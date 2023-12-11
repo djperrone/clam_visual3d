@@ -87,14 +87,6 @@ public class TreeMenu
         {
             ColorByLabel, ColorByCardinality, ColorByRadius,ColorByLFD, ColorByDepth, ColorByVertexDegree
         };
-        //if (changeEvent != null && changeEvent.newValue >=0 && changeEvent.newValue < choices.Count)
-        //{
-        //    NativeMethods.ForEachDFT(choices[changeEvent.newValue]);
-        //}
-        //else
-        //{
-        //    Debug.LogError("invalid color choice");
-        //}
 
         Debug.Log("color by " + m_ColorOptions.choices.ToList()[changeEvent.newValue]);
         if (changeEvent.newValue == 0)
@@ -106,25 +98,7 @@ public class TreeMenu
         {
             NativeMethods.ForEachDFT(choices[changeEvent.newValue]);
         }
-        //else if (changeEvent.newValue == 1)
-        //{
-        //    NativeMethods.ForEachDFT(ColorByCardinality);
-        //    Debug.Log("cardinality");
-
-        //}
-        //else if (changeEvent.newValue == 2)
-        //{
-        //    Debug.Log("radius");
-
-        //    NativeMethods.ForEachDFT(ColorByRadius);
-        //}
-        //else if (changeEvent.newValue == 3)
-        //{
-        //    Debug.Log("lfd");
-        //    NativeMethods.ForEachDFT(ColorByLFD);
-        //}
     }
-
 
     void ColorByRadius(ref Clam.FFI.ClusterData nodeData)
     {

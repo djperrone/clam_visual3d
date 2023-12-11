@@ -3,9 +3,6 @@
 
 use crate::utils::error::FFIError;
 use ndarray::prelude::*;
-// #[macro_use]
-// mod core::debug;
-// use crate::debug;
 
 pub static ANOMALY_DATASETS: &[&str] = &[
     "annthyroid",  // 0

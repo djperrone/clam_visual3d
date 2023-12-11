@@ -19,7 +19,6 @@ public class LoadTree : MonoBehaviour
 
     string m_DataDirectory = "../data/binaries/";
 
-
     // Start is called before the first frame update
     void Start()
     {
@@ -49,18 +48,12 @@ public class LoadTree : MonoBehaviour
         MenuEventManager.SwitchState(Menu.Main);
     }
 
-
     void LoadButtonCallback(ClickEvent evt)
     {
         var validNames = Directory.GetDirectories(m_DataDirectory);
-        Debug.Log("Load name options");
-        foreach(var validName in validNames)
-        {
-            Debug.Log(validName);
-        }
-
         string dataName = m_LoadTreeField.text;
         dataName = "../data/binaries/" + dataName;
+
         if (validNames.Contains(dataName))
         {
             Clam.MenuEventManager.SwitchState(Menu.LoadClam);
@@ -71,8 +64,6 @@ public class LoadTree : MonoBehaviour
             ErrorDialoguePopup();
         }
     }
-
-    
 
     void ErrorDialoguePopup()
     {
@@ -91,49 +82,6 @@ public class LoadTree : MonoBehaviour
             UIHelpers.PopupClose(m_UIDocument.rootVisualElement, m_UIDocument.rootVisualElement.Q<VisualElement>("PopUpElement"));
         };
     }
-
-    private HashSet<string> GetAnomalyFiles(string dir)
-    {
-        HashSet<string> fileNames = new HashSet<string>();
-        try
-        {
-            foreach (string f in Directory.GetFiles(dir))
-            {
-                Debug.Log(Path.GetFileName(f));
-                var name = GetUntilOrEmpty(Path.GetFileName(f), "_");
-                Debug.Log(name);
-
-                fileNames.Add(name);
-            }
-            fileNames.Add("rand");
-            fileNames.Add("test");
-
-
-            return fileNames;
-        }
-        catch (System.Exception ex)
-        {
-            Debug.Log(ex.Message);
-        }
-        return new HashSet<string>();
-
-    }
-
-    private string GetUntilOrEmpty(string text, string stopAt = "-")
-    {
-        if (!String.IsNullOrWhiteSpace(text))
-        {
-            int charLocation = text.IndexOf(stopAt, StringComparison.Ordinal);
-
-            if (charLocation > 0)
-            {
-                return text.Substring(0, charLocation);
-            }
-        }
-
-        return String.Empty;
-    }
-
 
     // Update is called once per frame
     void Update()

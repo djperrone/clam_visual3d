@@ -61,16 +61,80 @@
       <change beforePath="$PROJECT_DIR$/clam_ffi/clam/py-clam/python/tests/test_search.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/clam_ffi/clam/py-clam/ruff.toml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/clam_ffi/clam/py-clam/src/lib.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/ffi_impl/cleanup.rs" beforeDir="false" afterPath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/ffi_impl/cleanup.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/ffi_impl/cluster_data.rs" beforeDir="false" afterPath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/ffi_impl/cluster_data.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/ffi_impl/cluster_data_wrapper.rs" beforeDir="false" afterPath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/ffi_impl/cluster_data_wrapper.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/ffi_impl/cluster_ids.rs" beforeDir="false" afterPath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/ffi_impl/cluster_ids.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/ffi_impl/cluster_ids_wrapper.rs" beforeDir="false" afterPath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/ffi_impl/cluster_ids_wrapper.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/ffi_impl/lib_impl.rs" beforeDir="false" afterPath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/ffi_impl/lib_impl.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/ffi_impl/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/ffi_impl/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/ffi_impl/string_ffi.rs" beforeDir="false" afterPath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/ffi_impl/string_ffi.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/file_io/load_save.rs" beforeDir="false" afterPath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/file_io/load_save.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/graph/entry.rs" beforeDir="false" afterPath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/graph/entry.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/graph/force_directed_graph.rs" beforeDir="false" afterPath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/graph/force_directed_graph.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/graph/graph_builder.rs" beforeDir="false" afterPath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/graph/graph_builder.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/graph/helpers.rs" beforeDir="false" afterPath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/graph/helpers.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/graph/physics_node.rs" beforeDir="false" afterPath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/graph/physics_node.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/graph/spring.rs" beforeDir="false" afterPath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/graph/spring.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/handle/entry_point.rs" beforeDir="false" afterPath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/handle/entry_point.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/handle/handle.rs" beforeDir="false" afterPath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/handle/handle.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/utils/error.rs" beforeDir="false" afterPath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/utils/error.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/FFI/Error.cs" beforeDir="false" afterPath="$PROJECT_DIR$/unity/Assets/Scripts/FFI/Error.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/lib.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/tree_layout/entry_point.rs" beforeDir="false" afterPath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/tree_layout/entry_point.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/tree_layout/reingold_impl.rs" beforeDir="false" afterPath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/tree_layout/reingold_impl.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/tree_layout/reingold_tilford.rs" beforeDir="false" afterPath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/tree_layout/reingold_tilford.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/utils/anomaly_readers.rs" beforeDir="false" afterPath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/utils/anomaly_readers.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/utils/distances.rs" beforeDir="false" afterPath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/utils/distances.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/utils/helpers.rs" beforeDir="false" afterPath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/utils/helpers.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/utils/types.rs" beforeDir="false" afterPath="$PROJECT_DIR$/clam_ffi/clam_ffi/src/utils/types.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/CameraController/FirstPersonController/Scripts/FirstPersonController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/unity/Assets/CameraController/FirstPersonController/Scripts/FirstPersonController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/CameraController/InputSystem/StarterAssetsInputs.cs" beforeDir="false" afterPath="$PROJECT_DIR$/unity/Assets/CameraController/InputSystem/StarterAssetsInputs.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/Core/Cakes.cs" beforeDir="false" afterPath="$PROJECT_DIR$/unity/Assets/Scripts/Core/Cakes.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/Core/MainApp.cs" beforeDir="false" afterPath="$PROJECT_DIR$/unity/Assets/Scripts/Core/MainApp.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/Core/Node.cs" beforeDir="false" afterPath="$PROJECT_DIR$/unity/Assets/Scripts/Core/Node.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/Core/Old.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/Core/Old/TreeScript.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/Core/Old/TreeScript.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/Core/TreeCache.cs" beforeDir="false" afterPath="$PROJECT_DIR$/unity/Assets/Scripts/Core/TreeCache.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/FFI/ClusterData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/unity/Assets/Scripts/FFI/ClusterData.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/FFI/Graph.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/FFI/Graph.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/FFI/Handle.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/FFI/Handle.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/FFI/NativeHeader.cs" beforeDir="false" afterPath="$PROJECT_DIR$/unity/Assets/Scripts/FFI/NativeHeader.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/FFI/NativeMethods.cs" beforeDir="false" afterPath="$PROJECT_DIR$/unity/Assets/Scripts/FFI/NativeMethods.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/FFI/Old.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/FFI/Old/ClamHelpers.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/FFI/Old/ClamHelpers.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/FFI/Old/NodeDataUnity.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/FFI/Old/NodeDataUnity.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/FFI/RustResource.cs" beforeDir="false" afterPath="$PROJECT_DIR$/unity/Assets/Scripts/FFI/RustResource.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/FFI/TreeStartupDataFFI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/unity/Assets/Scripts/FFI/TreeStartupDataFFI.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/Graph/Graph.cs" beforeDir="false" afterPath="$PROJECT_DIR$/unity/Assets/Scripts/Graph/Graph.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/Graph/GraphBuilder.cs" beforeDir="false" afterPath="$PROJECT_DIR$/unity/Assets/Scripts/Graph/GraphBuilder.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/Graph/ScoringFunction.cs" beforeDir="false" afterPath="$PROJECT_DIR$/unity/Assets/Scripts/Graph/ScoringFunction.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/TreeLayout/ReingoldTilFord.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/TreeLayout/ReingoldTilFord.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/TreeLayout/TreeLayout.cs" beforeDir="false" afterPath="$PROJECT_DIR$/unity/Assets/Scripts/TreeLayout/TreeLayout.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/UI/ClamUserInput.cs" beforeDir="false" afterPath="$PROJECT_DIR$/unity/Assets/Scripts/UI/ClamUserInput.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/UI/ClusterUI_View.cs" beforeDir="false" afterPath="$PROJECT_DIR$/unity/Assets/Scripts/UI/ClusterUI_View.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/UI/DoubleTextField.cs" beforeDir="false" afterPath="$PROJECT_DIR$/unity/Assets/Scripts/UI/DoubleTextField.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/UI/Helpers.cs" beforeDir="false" afterPath="$PROJECT_DIR$/unity/Assets/Scripts/UI/Helpers.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/UI/IntTextField.cs" beforeDir="false" afterPath="$PROJECT_DIR$/unity/Assets/Scripts/UI/IntTextField.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/UI/MenuEventManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/unity/Assets/Scripts/UI/MenuEventManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/UI/Menus/ClamGraphBuilder.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/UI/Menus/ClamGraphBuilder.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/UI/Menus/ClamGraphBuildMenu.cs" beforeDir="false" afterPath="$PROJECT_DIR$/unity/Assets/Scripts/UI/Menus/ClamGraphBuildMenu.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/UI/Menus/ClusterMenu.cs" beforeDir="false" afterPath="$PROJECT_DIR$/unity/Assets/Scripts/UI/Menus/ClusterMenu.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/UI/Menus/CreateNewTree.cs" beforeDir="false" afterPath="$PROJECT_DIR$/unity/Assets/Scripts/UI/Menus/CreateNewTree.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/unity/Assets/UI/ClamGraphMenu.uxml" beforeDir="false" afterPath="$PROJECT_DIR$/unity/Assets/UI/ClamGraphMenu.uxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/UI/Menus/GraphBuildMenu.cs" beforeDir="false" afterPath="$PROJECT_DIR$/unity/Assets/Scripts/UI/Menus/GraphBuildMenu.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/UI/Menus/LoadTree.cs" beforeDir="false" afterPath="$PROJECT_DIR$/unity/Assets/Scripts/UI/Menus/LoadTree.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/UI/Menus/MainMenu.cs" beforeDir="false" afterPath="$PROJECT_DIR$/unity/Assets/Scripts/UI/Menus/MainMenu.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/UI/Menus/MenuSelector.cs" beforeDir="false" afterPath="$PROJECT_DIR$/unity/Assets/Scripts/UI/Menus/MenuSelector.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/UI/Menus/PauseMenu.cs" beforeDir="false" afterPath="$PROJECT_DIR$/unity/Assets/Scripts/UI/Menus/PauseMenu.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/UI/Menus/TreeMenu.cs" beforeDir="false" afterPath="$PROJECT_DIR$/unity/Assets/Scripts/UI/Menus/TreeMenu.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/UI/Old.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/UI/Old/SafeTextField.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/UI/Old/SafeTextField.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/UI/Old/TempUI.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/unity/Assets/Scripts/UI/Old/TempUI.cs.meta" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -103,23 +167,23 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_MARK_IGNORED_FILES_AS_EXCLUDED&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;visualization-demo&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/uri/clam_visual3d&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;org.rust.cargo.project.model.PROJECT_DISCOVERY&quot;: &quot;true&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;language.rust.rustfmt&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "visualization-demo",
+    "last_opened_file_path": "C:/uri/clam_visual3d",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "org.rust.cargo.project.model.PROJECT_DISCOVERY": "true",
+    "settings.editor.selected.configurable": "language.rust.rustfmt",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RustProjectSettings">
     <option name="toolchainHomeDirectory" value="$USER_HOME$/.cargo/bin" />
   </component>
@@ -142,7 +206,9 @@
       <workItem from="1701264799674" duration="1227000" />
       <workItem from="1701617240559" duration="15000" />
       <workItem from="1701715547713" duration="5785000" />
-      <workItem from="1701814091077" duration="1032000" />
+      <workItem from="1701814091077" duration="1740000" />
+      <workItem from="1701885117377" duration="101000" />
+      <workItem from="1702062832281" duration="4177000" />
     </task>
     <servers />
   </component>

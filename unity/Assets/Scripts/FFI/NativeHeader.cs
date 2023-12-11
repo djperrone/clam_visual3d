@@ -22,9 +22,6 @@ namespace Clam
             [DllImport(__DllName, EntryPoint = "init_clam_struct", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
             private static extern FFIError init_clam(out IntPtr ptr, ref TreeStartupDataFFI data);
 
-            // [DllImport(__DllName, EntryPoint = "load_cakes", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-            // private static extern FFIError load_cakes(out IntPtr ptr, byte[] data_name, int name_len);
-
             [DllImport(__DllName, EntryPoint = "load_cakes_struct", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
             private static extern FFIError load_cakes(out IntPtr ptr, ref TreeStartupDataFFI data);
 
@@ -63,9 +60,6 @@ namespace Clam
 
             // ------------------------------------- Cluster Helpers ------------------------------------- 
 
-            //[DllImport(__DllName, EntryPoint = "get_cluster_data", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-            //private static unsafe extern FFIError get_cluster_data(IntPtr handle, ref global::Clam.FFI.ClusterData inNode, out global::Clam.FFI.ClusterData outNode);
-
             [DllImport(__DllName, EntryPoint = "get_root_data", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
             private static extern int get_root_data(IntPtr handle);
             [DllImport(__DllName, EntryPoint = "create_cluster_data", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -82,7 +76,6 @@ namespace Clam
 
             [DllImport(__DllName, EntryPoint = "free_string", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
             private static extern FFIError free_string(ref StringFFI inData, out ClusterData outData);
-
 
             [DllImport(__DllName, EntryPoint = "delete_cluster_ids", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
             private static extern FFIError delete_cluster_ids(ref ClusterIDs inData, out ClusterIDs outData);

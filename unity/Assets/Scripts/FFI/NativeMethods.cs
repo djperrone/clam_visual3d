@@ -18,7 +18,7 @@ namespace Clam
 
         public static partial class NativeMethods
         {
-	public const string __DllName = "clam_ffi_2023-12-0517-36-32";
+	public const string __DllName = "clam_ffi_2023-12-1111-02-07";
             private static IntPtr m_Handle;
 
             private static bool m_Initialized = false;
@@ -85,22 +85,9 @@ namespace Clam
                 }
                 return e;
             }
-            //public static FFIError LoadCakes(string dataName)
-            //{
-            //    byte[] byteName = Encoding.UTF8.GetBytes(dataName);
-            //    int len = byteName.Length;
-            //    var e = load_cakes(out m_Handle, byteName, len);
-            //    if (e == FFIError.Ok)
-            //    {
-            //        m_Initialized = true;
-            //    }
-            //    return e;
-            //}
 
             public static FFIError LoadCakes(TreeStartupData data)
             {
-                //byte[] byteName = Encoding.UTF8.GetBytes(dataName);
-                //int len = byteName.Length;
                 var wrapper = new RustResourceWrapper<TreeStartupDataFFI>(TreeStartupDataFFI.Alloc(data));
                 if (wrapper.result == FFIError.Ok)
                 {
@@ -116,7 +103,6 @@ namespace Clam
                 {
                     return wrapper.result;
                 }
-
             }
 
             // -------------------------------------  Tree helpers ------------------------------------- 
@@ -130,7 +116,6 @@ namespace Clam
                 else
                 {
                     return for_each_dft(m_Handle, callback, startNode, maxDepth);
-
                 }
             }
 
@@ -138,11 +123,6 @@ namespace Clam
             {
                 return set_names(m_Handle, callback, startNode);
             }
-
-            //public static int GetNumNodes()
-            //{
-            //    return get_num_nodes(m_Handle);
-            //}
 
             public static int TreeHeight()
             {
@@ -186,7 +166,6 @@ namespace Clam
                 var result = create_cluster_ids(m_Handle, id, out var data);
                 if (result != FFIError.Ok)
                 {
-                    Debug.Log(result);
                     clusterData = new ClusterIDs();
                 }
                 clusterData = data;
@@ -198,7 +177,6 @@ namespace Clam
                 var result = create_cluster_data(m_Handle, id, out var data);
                 if (result != FFIError.Ok)
                 {
-                    Debug.LogError(result);
                     clusterData = new ClusterData();
                     return result;
                 }
@@ -209,67 +187,43 @@ namespace Clam
                     clusterData = data;
                     return FFIError.Ok;
                 }
-                //else if (addIfNotExists) 
-                //{
-
-                //}
                 else
                 {
                     clusterData = data;
                     return FFIError.NotInCache;
                 }
-
-
-
-
             }
 
             public static FFIError DeleteClusterData(ref ClusterData data)
             {
-                //Debug.Log("freeing with delete cluster data");
                 return delete_cluster_data(ref data, out var outData);
-                //return data;
-                //ClusterData* data = create_cluster_data("1");
             }
 
             public static FFIError FreeString(ref StringFFI data)
             {
-                //Debug.Log("freeing with delete cluster data");
                 return free_string(ref data, out var outData);
-                //return data;
-                //ClusterData* data = create_cluster_data("1");
             }
 
             public static FFIError DeleteClusterIDs(ref ClusterIDs data)
             {
-                //Debug.Log("freeing with delete cluster data");
                 return delete_cluster_ids(ref data, out var outData);
-                //return data;
-                //ClusterData* data = create_cluster_data("1");
             }
 
             public static FFIError SetMessage(string msg, out ClusterData data)
             {
-                //Debug.Log("freeing with delete cluster data");
                 set_message(msg, out data);
-                //data = outData;
                 return FFIError.Ok;
-                //return data;
-                //ClusterData* data = create_cluster_data("1");
             }
 
             public static FFIError GetRootData(out RustResourceWrapper<ClusterData> clusterDataWrapper)
             {
                 string rootID = "0-" + NativeMethods.TreeCardinality().ToString();
 
-                //if (Cakes.Tree.GetTree().TryGetValue(rootID, out var root))
-                {
-                    clusterDataWrapper = new RustResourceWrapper<ClusterData>(ClusterData.Alloc(rootID));
+                clusterDataWrapper = new RustResourceWrapper<ClusterData>(ClusterData.Alloc(rootID));
 
-                    if (clusterDataWrapper.result == FFIError.Ok || clusterDataWrapper.result == FFIError.NotInCache)
-                    {
-                        return clusterDataWrapper.result;
-                    }
+                if (clusterDataWrapper.result == FFIError.Ok || clusterDataWrapper.result == FFIError.NotInCache)
+                {
+                    return clusterDataWrapper.result;
                 }
 
                 clusterDataWrapper = null;
@@ -294,7 +248,6 @@ namespace Clam
             }
 
             // Graph Physics
-
             public static void InitForceDirectedGraph(ClusterData[] nodes, float scalar, int maxIters)
             {
                 init_force_directed_graph(m_Handle, nodes, nodes.Length, scalar, maxIters);
