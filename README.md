@@ -6,7 +6,8 @@ This is my master's thesis I'm working on at the University of Rhode Island. The
 - When in the visualization, use wasd to move the camera forward, backwards, left, and right
 - To move the camera up and down use shift and the space bar, respectively
 - Use the mouse to rotate the camera
-- The left ctrl key is used to switch between interface modes. One mode allows the camera to move around, the other mode locks the camera and allows the user to interact with the ui
+- The left ctrl key is used to switch between interface modes. One mode allows the camera to move around, the other mode locks the camera and allows the user to interact with the sidebar ui
+- `~` opens in-game menu
 
 ## Features
 - Allows the user to walk through the tree built by clam.
