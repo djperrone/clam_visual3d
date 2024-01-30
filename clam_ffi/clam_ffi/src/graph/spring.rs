@@ -15,7 +15,7 @@ pub struct Spring {
 impl Spring {
     pub fn new(nat_len: f32, hash_code1: String, hash_code2: String, real: bool) -> Self {
         Spring {
-            nat_len,
+            nat_len, //: nat_len.min(1.0),
             k: 0.005,
             node1: hash_code1,
             node2: hash_code2,

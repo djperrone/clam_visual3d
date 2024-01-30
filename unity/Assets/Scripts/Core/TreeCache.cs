@@ -128,7 +128,7 @@ namespace Clam
                     Destroy(gameObject); // or use DestroyImmediate(gameObject) if you want to destroy it immediately
                 }
             }
-
+            m_EdgeCache.Clear();
             Clam.FFI.NativeMethods.ForEachDFT(EdgeDrawer);
             PopulateEdgeDictionary();
         }

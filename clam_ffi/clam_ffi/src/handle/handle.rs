@@ -191,6 +191,15 @@ impl<'a> Handle<'a> {
 
             if let Ok(graph) = Graph::new(clusters, edges) {
                 self.clam_graph = Some(graph);
+                debug!(
+                    "{}",
+                    self.clam_graph
+                        .as_ref()
+                        .unwrap()
+                        .find_component_clusters()
+                        .len()
+                );
+
                 return FFIError::Ok;
             }
         }
