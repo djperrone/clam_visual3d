@@ -5,8 +5,7 @@ use std::path::Path;
 use std::sync::Arc;
 use std::thread::JoinHandle;
 
-use abd_clam::builder::detect_edges;
-use abd_clam::cluster_selection::select_clusters_for_visualization;
+// use abd_clam::criteria::detect_edges;
 use abd_clam::Tree;
 use abd_clam::VecDataset;
 use abd_clam::{Graph, PartitionCriteria};
@@ -17,6 +16,8 @@ use crate::graph::spring;
 use crate::tree_layout::reingold_tilford;
 use crate::utils::distances::DistanceMetric;
 use crate::utils::error::FFIError;
+use crate::utils::scoring_functions;
+use crate::utils::scoring_functions::enum_to_function;
 use crate::utils::types::{Clusterf32, DataSet};
 use crate::utils::{self, anomaly_readers};
 
@@ -26,12 +27,12 @@ use crate::ffi_impl::cluster_data::ClusterData;
 use crate::ffi_impl::cluster_data_wrapper::ClusterDataWrapper;
 use crate::ffi_impl::tree_startup_data_ffi::TreeStartupDataFFI;
 use crate::graph::physics_node::PhysicsNode;
-use crate::utils::scoring_functions::{scoring_function_to_string, ScoringFunction};
+use crate::utils::scoring_functions::{enum_to_string, ScoringFunction};
 use spring::Spring;
 
 pub struct Handle<'a> {
     tree: Option<Tree<Vec<f32>, f32, DataSet>>,
-    labels: Option<Vec<bool>>,
+    // labels: Option<Vec<usize>>,
     graph: Option<HashMap<String, PhysicsNode>>,
     clam_graph: Option<Graph<'a, f32>>,
     edges: Option<Vec<Spring>>,
@@ -42,14 +43,14 @@ pub struct Handle<'a> {
 impl<'a> Handle<'a> {
     pub fn shutdown(&mut self) {
         self.tree = None;
-        self.labels = None;
+        // self.labels = None;
     }
 
-    pub fn get_tree(&self) -> Option<&Tree<Vec<f32>, f32, VecDataset<Vec<f32>, f32, bool>>> {
+    pub fn get_tree(&self) -> Option<&Tree<Vec<f32>, f32, VecDataset<Vec<f32>, f32, u8>>> {
         self.tree.as_ref()
     }
 
-    pub fn tree(&self) -> Option<&Tree<Vec<f32>, f32, VecDataset<Vec<f32>, f32, bool>>> {
+    pub fn tree(&self) -> Option<&Tree<Vec<f32>, f32, VecDataset<Vec<f32>, f32, u8>>> {
         self.tree.as_ref()
     }
 
@@ -68,11 +69,10 @@ impl<'a> Handle<'a> {
         };
     }
 
-    pub fn labels(&self) -> Option<&Vec<bool>> {
-        if let Some(labels) = &self.labels {
-            Some(labels)
-        } else {
-            None
+    pub fn labels(&self) -> Option<&[u8]> {
+        match self.tree() {
+            Some(tree) => Some(tree.data().metadata()),
+            None => None,
         }
     }
 
@@ -88,10 +88,9 @@ impl<'a> Handle<'a> {
                 let tree = Tree::new(dataset, Some(1))
                     .partition(&criteria)
                     .with_ratios(false);
-                let labels = tree.data().metadata().unwrap().to_vec();
                 Ok(Handle {
                     tree: Some(tree),
-                    labels: Some(labels),
+                    // labels: Some(labels.to_vec()),
                     graph: None,
                     clam_graph: None,
                     edges: None,
@@ -124,10 +123,10 @@ impl<'a> Handle<'a> {
             Tree::<Vec<f32>, f32, DataSet>::load(Path::new(&data_name), metric, data.is_expensive)
         {
             let tree = tree.with_ratios(false);
-            let labels = tree.data().metadata().unwrap().to_vec();
+            // let labels = tree.data().metadata().to_vec();
             Ok(Handle {
                 tree: Some(tree),
-                labels: Some(labels),
+                // labels: Some(labels),
                 graph: None,
                 clam_graph: None,
                 edges: None,
@@ -154,16 +153,15 @@ impl<'a> Handle<'a> {
         };
         match anomaly_readers::read_anomaly_data(data_name, false) {
             Ok((first_data, labels)) => {
-                let labels = labels.iter().map(|x| *x == 1).collect::<Vec<bool>>();
-                let dataset = VecDataset::new(
-                    data_name.to_string(),
-                    first_data,
-                    metric,
-                    is_expensive,
-                    Some(labels),
-                );
-
-                Ok(dataset)
+                // let labels = labels.iter().map(|x| *x == 1).collect::<Vec<bool>>();
+                let dataset =
+                    VecDataset::new(data_name.to_string(), first_data, metric, is_expensive)
+                        .assign_metadata(labels);
+                if dataset.is_ok() {
+                    Ok(dataset.unwrap())
+                } else {
+                    return Err(FFIError::HandleInitFailed);
+                }
             }
             Err(e) => {
                 debug!("{:?}", e);
@@ -178,18 +176,12 @@ impl<'a> Handle<'a> {
         cluster_selector: CBFnNodeVisitor,
     ) -> FFIError {
         if let Some(tree) = &self.tree {
-            let clusters = select_clusters_for_visualization(
-                tree.root(),
-                Some(scoring_function_to_string(&scoring_function)),
-            );
-            debug!("num clusters: {}", clusters.len());
-            let edges = detect_edges(&clusters, tree.data());
-            for cluster in &clusters {
-                let baton = ClusterDataWrapper::from_cluster(cluster);
-                cluster_selector(Some(baton.data()));
+            let scorer = enum_to_function(&scoring_function);
+            if scorer.is_none() {
+                return FFIError::GraphBuildFailed;
             }
-
-            if let Ok(graph) = Graph::new(clusters, edges) {
+            let scorer = scorer.unwrap();
+            if let Ok(graph) = Graph::from_tree(tree, &scorer) {
                 self.clam_graph = Some(graph);
                 debug!(
                     "{}",
@@ -199,6 +191,11 @@ impl<'a> Handle<'a> {
                         .find_component_clusters()
                         .len()
                 );
+
+                for cluster in self.clam_graph().unwrap().clusters() {
+                    let baton = ClusterDataWrapper::from_cluster(cluster);
+                    cluster_selector(Some(baton.data()));
+                }
 
                 return FFIError::Ok;
             }

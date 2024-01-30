@@ -150,7 +150,7 @@ pub fn color_clusters_by_label_impl(ptr: InHandlePtr, node_visitor: CBFnNodeVisi
     FFIError::HandleInitFailed
 }
 
-fn calc_cluster_entropy_color(cluster: &Clusterf32, labels: &[bool]) -> glam::Vec3 {
+fn calc_cluster_entropy_color(cluster: &Clusterf32, labels: &[u8]) -> glam::Vec3 {
     let indices = cluster.indices();
     let mut entropy = [0; 2];
     indices.for_each(|i| entropy[labels[i] as usize] += 1);
@@ -162,7 +162,7 @@ fn calc_cluster_entropy_color(cluster: &Clusterf32, labels: &[bool]) -> glam::Ve
 
     glam::Vec3::new(perc_outliers, perc_inliers, 0.)
 }
-fn color_helper(root: Option<&Clusterf32>, labels: &Vec<bool>, node_visitor: CBFnNodeVisitor) {
+fn color_helper(root: Option<&Clusterf32>, labels: &[u8], node_visitor: CBFnNodeVisitor) {
     if let Some(cluster) = root {
         let mut cluster_data = ClusterDataWrapper::from_cluster(cluster);
         cluster_data.data_mut().color = calc_cluster_entropy_color(cluster, labels);

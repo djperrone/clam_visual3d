@@ -7,5 +7,5 @@ pub type OutHandlePtr<'a> = Option<&'a mut *mut Handle<'a>>;
 pub type InHandlePtr<'a> = Option<&'a mut Handle<'a>>;
 
 pub type Clusterf32 = Cluster<f32>;
-pub type DataSet = VecDataset<Vec<f32>, f32, bool>;
+pub type DataSet = VecDataset<Vec<f32>, f32, u8>;
 // pub type Cakesf32 = Cakes<f32, f32, DataSet>;

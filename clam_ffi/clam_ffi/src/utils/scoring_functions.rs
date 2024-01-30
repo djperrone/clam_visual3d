@@ -1,3 +1,7 @@
+use abd_clam::MetaMLScorer;
+
+// pub type MetaMLScorer = Box<fn(abd_clam::::Ratios) -> f64>;
+
 #[repr(C)]
 #[derive(Debug, PartialEq, Eq)]
 pub enum ScoringFunction {
@@ -27,7 +31,7 @@ pub enum ScoringFunction {
     DtEuclideanVd,
 }
 
-pub fn scoring_function_to_string(scoring_function: &ScoringFunction) -> String {
+pub fn enum_to_string(scoring_function: &ScoringFunction) -> String {
     match scoring_function {
         ScoringFunction::LrManhattanSc => "lr_manhattan_sc".to_string(),
         ScoringFunction::LrManhattanCc => "lr_manhattan_cc".to_string(),
@@ -53,5 +57,18 @@ pub fn scoring_function_to_string(scoring_function: &ScoringFunction) -> String 
         ScoringFunction::DtEuclideanCr => "dt_euclidean_cr".to_string(),
         ScoringFunction::DtEuclideanSp => "dt_euclidean_sp".to_string(),
         ScoringFunction::DtEuclideanVd => "dt_euclidean_vd".to_string(),
+    }
+}
+
+pub fn enum_to_function(scoring_function: &ScoringFunction) -> Option<MetaMLScorer> {
+    let pretrained_models = abd_clam::chaoda::pretrained_models::get_meta_ml_scorers();
+    let function_name = enum_to_string(scoring_function);
+
+    match pretrained_models
+        .into_iter()
+        .find(|item| item.0 == function_name)
+    {
+        Some(result) => Some(result.1),
+        None => None,
     }
 }
