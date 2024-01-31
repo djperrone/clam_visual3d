@@ -16,7 +16,6 @@ use crate::graph::spring;
 use crate::tree_layout::reingold_tilford;
 use crate::utils::distances::DistanceMetric;
 use crate::utils::error::FFIError;
-use crate::utils::scoring_functions;
 use crate::utils::scoring_functions::enum_to_function;
 use crate::utils::types::{Clusterf32, DataSet};
 use crate::utils::{self, anomaly_readers};
@@ -27,7 +26,7 @@ use crate::ffi_impl::cluster_data::ClusterData;
 use crate::ffi_impl::cluster_data_wrapper::ClusterDataWrapper;
 use crate::ffi_impl::tree_startup_data_ffi::TreeStartupDataFFI;
 use crate::graph::physics_node::PhysicsNode;
-use crate::utils::scoring_functions::{enum_to_string, ScoringFunction};
+use crate::utils::scoring_functions::ScoringFunction;
 use spring::Spring;
 
 pub struct Handle<'a> {
@@ -176,28 +175,22 @@ impl<'a> Handle<'a> {
         cluster_selector: CBFnNodeVisitor,
     ) -> FFIError {
         if let Some(tree) = &self.tree {
-            let scorer = enum_to_function(&scoring_function);
-            if scorer.is_none() {
-                return FFIError::GraphBuildFailed;
-            }
-            let scorer = scorer.unwrap();
-            if let Ok(graph) = Graph::from_tree(tree, &scorer) {
-                self.clam_graph = Some(graph);
-                debug!(
-                    "{}",
-                    self.clam_graph
-                        .as_ref()
-                        .unwrap()
-                        .find_component_clusters()
-                        .len()
-                );
+            match enum_to_function(&scoring_function) {
+                Ok(scorer) => {
+                    if let Ok(graph) = Graph::from_tree(tree, &scorer) {
+                        self.clam_graph = Some(graph);
 
-                for cluster in self.clam_graph().unwrap().clusters() {
-                    let baton = ClusterDataWrapper::from_cluster(cluster);
-                    cluster_selector(Some(baton.data()));
+                        for cluster in self.clam_graph().unwrap().clusters() {
+                            let baton = ClusterDataWrapper::from_cluster(cluster);
+                            cluster_selector(Some(baton.data()));
+                        }
+
+                        return FFIError::Ok;
+                    }
                 }
-
-                return FFIError::Ok;
+                Err(e) => {
+                    return e;
+                }
             }
         }
         FFIError::GraphBuildFailed
@@ -209,7 +202,7 @@ impl<'a> Handle<'a> {
             let _ = self.force_directed_graph.take().unwrap().0.join();
 
             self.force_directed_graph = None;
-            debug!("shutting down physics");
+            debug!("force shutting down physics");
             return FFIError::PhysicsFinished;
         }
         FFIError::PhysicsAlreadyShutdown

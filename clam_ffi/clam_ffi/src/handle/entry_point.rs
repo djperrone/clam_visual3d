@@ -18,15 +18,6 @@ pub unsafe fn shutdown_clam_impl(context_ptr: OutHandlePtr) -> FFIError {
     }
 }
 
-pub unsafe fn force_physics_shutdown(ptr: InHandlePtr) -> i32 {
-    if let Some(handle) = ptr {
-        handle.force_physics_shutdown();
-    }
-    debug!("handle not created");
-
-    0
-}
-
 pub unsafe fn init_clam_struct_impl(
     ptr: OutHandlePtr,
     data: Option<&TreeStartupDataFFI>,

@@ -19,6 +19,7 @@ pub enum FFIError {
     StartupDataInvalid,
     SaveFailed,
     UnsupportedMetric,
+    ScoringFunctionNotFound,
     PathNotFound,
     NotInCache,
 }

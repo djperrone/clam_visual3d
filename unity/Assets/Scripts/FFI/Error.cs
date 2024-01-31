@@ -24,6 +24,7 @@ namespace Clam
         StartupDataInvalid,
         SaveFailed,
         UnsupportedMetric,
+        ScoringFunctionNotFound,
         PathNotFound,
         NotInCache,
     }

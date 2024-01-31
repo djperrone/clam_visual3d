@@ -1,6 +1,4 @@
-use abd_clam::MetaMLScorer;
-
-// pub type MetaMLScorer = Box<fn(abd_clam::::Ratios) -> f64>;
+use super::error::FFIError;
 
 #[repr(C)]
 #[derive(Debug, PartialEq, Eq)]
@@ -60,7 +58,9 @@ pub fn enum_to_string(scoring_function: &ScoringFunction) -> String {
     }
 }
 
-pub fn enum_to_function(scoring_function: &ScoringFunction) -> Option<MetaMLScorer> {
+pub fn enum_to_function(
+    scoring_function: &ScoringFunction,
+) -> Result<abd_clam::MetaMLScorer, FFIError> {
     let pretrained_models = abd_clam::chaoda::pretrained_models::get_meta_ml_scorers();
     let function_name = enum_to_string(scoring_function);
 
@@ -68,7 +68,7 @@ pub fn enum_to_function(scoring_function: &ScoringFunction) -> Option<MetaMLScor
         .into_iter()
         .find(|item| item.0 == function_name)
     {
-        Some(result) => Some(result.1),
-        None => None,
+        Some(result) => Ok(result.1),
+        None => Err(FFIError::ScoringFunctionNotFound),
     }
 }
