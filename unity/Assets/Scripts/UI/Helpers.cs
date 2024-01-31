@@ -1,9 +1,34 @@
 
+using Clam;
 using System;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 public static class UIHelpers
 {
+    public static void ShowErrorPopUP(string errorMessage)
+    {
+        var template = Resources.Load<VisualTreeAsset>("ui/InvalidInputPopup");
+        var instance = template.Instantiate();
+        var uiDoc = MenuEventManager.instance.GetCurrentMenu().GetComponent<UIDocument>();
+        
+        uiDoc.rootVisualElement.Add(instance);
+        var label = uiDoc.rootVisualElement.Q<Label>("InvalidInputLabel");
+        label.text = errorMessage;
+
+
+        UIHelpers.ShowPopup(uiDoc.rootVisualElement, instance);
+
+        var overlay = uiDoc.rootVisualElement.Q<VisualElement>("Overlay");
+        overlay.style.backgroundColor = new StyleColor(new Color(0, 0, 0, 0.71f));
+        var okButton = uiDoc.rootVisualElement.Q<Button>("PopUpOkButton");
+
+        okButton.clickable.clicked += () =>
+        {
+            UIHelpers.PopupClose(uiDoc.rootVisualElement, uiDoc.rootVisualElement.Q<VisualElement>("PopUpElement"));
+        };
+    }
+
     public static void ShowPopup(VisualElement rootElementForPopup,
         VisualElement popupContent,
         float widthInPercents = 100.0f,
