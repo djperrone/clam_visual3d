@@ -13,62 +13,18 @@ namespace Clam
 
         public PlayerInput m_PlayerInput;
 
-        //temporary
-        //private GameObject m_NodeForHeirarchyOffset;
-        //public GameObject clusterUI_Prefab;
-
-        //private GameObject m_ClusterUI;
-
         public void Start()
         {
-            //m_ClusterUI = Instantiate(clusterUI_Prefab);
-
-            //m_ClusterUI = GameObject.Find("MenuManager").GetComponent<MenuEventManager>().GetCurrentMenu();
             UnityEngine.Cursor.lockState = CursorLockMode.Locked;
             UnityEngine.Cursor.visible = false;
         }
 
         public void OnChangeMapToPlayer(InputValue value)
         {
-            //Debug.Log("cuserinput changemap to player");
             BlurFocus();
 
             m_PlayerInput.SwitchCurrentActionMap("Player");
             MenuEventManager.SwitchState(Menu.Lock);
-
-            //MenuEventManager.SwitchInputActionMap("Player", playerInput);
-
-            //Debug.Log("change map!");
-            //bool uiActive = UnityEngine.Cursor.visible;
-
-            //if (uiActive)
-            //{
-            //    //Debug.Log("locking567");
-            //    //Debug.Log("cursor is visible");
-
-
-            //    //UnityEngine.Cursor.lockState = CursorLockMode.Locked;
-            //    //m_ClusterUI.GetComponent<ClusterUI_View>().Lock();
-
-
-            //}
-            //else
-            //{
-            //    //Debug.Log("unlocking567");
-            //    //playerInput.SwitchCurrentActionMap("WorldUI");
-            //    ////UnityEngine.Cursor.lockState = CursorLockMode.None;
-            //    ////m_ClusterUI.GetComponent<ClusterUI_View>().UnLock();
-            //    //MenuEventManager.SwitchState(Menu.Unlock);
-
-            //    //var focusedElement = GetFocusedElement();
-            //    //if (focusedElement != null)
-            //    //{
-
-            //    //    //focusedElement.focusable = false;
-            //    //    focusedElement.Blur();
-            //    //}
-            //}
-            //UnityEngine.Cursor.visible = !UnityEngine.Cursor.visible;
         }
 
         public void BlurFocus()
@@ -76,15 +32,12 @@ namespace Clam
             var focusedElement = GetFocusedElement();
             if (focusedElement != null)
             {
-
-                //focusedElement.focusable = false;
                 focusedElement.Blur();
             }
         }
 
         public void OnLMC()
         {
-            //Debug.Log("selecting onlmc");
             Camera.main.ScreenToViewportPoint(Mouse.current.position.ReadValue());
             Vector3 mousePosition = Mouse.current.position.ReadValue();
             Ray ray = Camera.main.ScreenPointToRay(mousePosition);
@@ -99,43 +52,28 @@ namespace Clam
             {
                 var selectedNode = hitInfo.collider.gameObject;
 
-                //Debug.Log("selexting");
-
-                //if (!selectedNode.GetComponent<NodeScript>().Selected)
+                var wrapper = new RustResourceWrapper<ClusterData>(ClusterData.Alloc(selectedNode.GetComponent<Node>().GetId()));
+                if (wrapper != null)
                 {
-                    //Clam.FFI.ClusterDataWrapper wrapper = new Clam.FFI.ClusterDataWrapper(selectedNode.GetComponent<Node>().ToNodeData());
-                    //FFIError found = Clam.FFI.NativeMethods.GetClusterData(wrapper);
-                                var wrapper = new RustResourceWrapper<ClusterData>(ClusterData.Alloc(selectedNode.GetComponent<Node>().GetId()));
-                    if (wrapper != null)
+                    if (!selectedNode.GetComponent<Node>().Selected)
                     {
-                        if (!selectedNode.GetComponent<Node>().Selected)
-                        {
-                            //m_ClusterUI.GetComponent<ClusterUI_View>().DisplayClusterInfo(wrapper.Data);
-                            MenuEventManager.instance.GetCurrentMenu().GetComponent<SideMenu>().DisplayClusterInfo(wrapper.Data);
-                            //Debug.Log(wrapper.Data.id.AsString);
-                        }
-                        else
-                        {
-                            //m_ClusterUI.GetComponent<ClusterUI_View>().ClearClusterInfo();
-                            MenuEventManager.instance.GetCurrentMenu().GetComponent<SideMenu>().ClearClusterInfo();
-
-                        }
-                        selectedNode.GetComponent<Node>().ToggleSelect();
-                        
-
+                        MenuEventManager.instance.GetCurrentMenu().GetComponent<SideMenu>().DisplayClusterInfo(wrapper.Data);
                     }
                     else
                     {
-                        Debug.LogError("wrapper was null in Create ClusterData");
+                        MenuEventManager.instance.GetCurrentMenu().GetComponent<SideMenu>().ClearClusterInfo();
                     }
-                    
+                    selectedNode.GetComponent<Node>().ToggleSelect();
+                }
+                else
+                {
+                    Debug.LogError("wrapper was null in Create ClusterData");
                 }
             }
         }
 
         public void OnRMC()
         {
-            //Debug.Log("selecting onlmc");
             Camera.main.ScreenToViewportPoint(Mouse.current.position.ReadValue());
             Vector3 mousePosition = Mouse.current.position.ReadValue();
             Ray ray = Camera.main.ScreenPointToRay(mousePosition);
@@ -170,64 +108,32 @@ namespace Clam
                         rightChild.SetActive(false);
                     }
 
-                    //var leftChild = Cakes.Tree.GetOrAdd(selectedNode.GetComponent<Node>().GetLeftChildID());
-                    //var rightChild = Cakes.Tree.GetOrAdd(selectedNode.GetComponent<Node>().GetRightChildID());
-
                     bool hasLeft = Cakes.Tree.GetTree().TryGetValue(lid, out leftChild);
 
                     bool hasRight = Cakes.Tree.GetTree().TryGetValue(rid, out rightChild);
-                    //if (hasLeft && hasRight)
+                    // should i handle case of only one being active?
+                    if (leftChild.activeSelf && rightChild.activeSelf)
                     {
-                        // should i handle case of only one being active?
-                        if (leftChild.activeSelf && rightChild.activeSelf)
-                        {
-                            //leftChild.SetActive(!leftChild.activeSelf);
-                            //rightChild.SetActive(!rightChild.activeSelf);
-                            Clam.FFI.NativeMethods.ForEachDFT(SetInactiveCallBack, leftChild.GetComponent<Node>().GetId());
-                            Clam.FFI.NativeMethods.ForEachDFT(SetInactiveCallBack, rightChild.GetComponent<Node>().GetId());
-
-                            // if active that means setting inactive - set all subsequent children inactive as well
-
-                        }
-                        else
-                        {
-                            Debug.Log("else make children visible");
-                            //if inactive - only set immediate two children as active
-                            //if (Cakes.Tree.Contains)
-                            leftChild.SetActive(true);
-                            rightChild.SetActive(true);
-
-                            // need to redraw parent child lines
-                            //string rootName = "1";
-                            var wrapper = new RustResourceWrapper<ClusterData>(ClusterData.Alloc(selectedNode.GetComponent<Node>().GetId()));
-                            //var wrapper = Clam.FFI.NativeMethods.CreateClusterDataWrapper(selectedNode.GetComponent<Node>().GetId());
-                            //Clam.FFI.ClusterDataWrapper wrapper = new Clam.FFI.ClusterDataWrapper();
-                            //if (MenuEventManager.instance.GetTree().TryGetValue(rootName, out var root))
-                            {
-                                // tempoarary fix to prevent moving nodes around when already in reingold format
-                                //if (!root.activeSelf)
-                                {
-                                    Clam.FFI.NativeMethods.DrawHierarchyOffsetFrom(wrapper, PositionUpdater);
-
-                                }
-                            }
-
-                            //redrawing lines here after reingold call potentially
-                            var springPrefab = Resources.Load("Spring") as GameObject;
-                            var leftSpring = MenuEventManager.instance.MyInstantiate(springPrefab);
-                            var rightSpring = MenuEventManager.instance.MyInstantiate(springPrefab);
-
-                            leftSpring.GetComponent<Edge>().SetNodes(selectedNode, leftChild);
-                            rightSpring.GetComponent<Edge>().SetNodes(selectedNode, rightChild);
-
-                            //leftSpring.GetComponent<SpringScript>().SetColor(Color.white);
-                            //rightSpring.GetComponent<SpringScript>().SetColor(Color.white);
-
-                        }
-
+                        Clam.FFI.NativeMethods.ForEachDFT(SetInactiveCallBack, leftChild.GetComponent<Node>().GetId());
+                        Clam.FFI.NativeMethods.ForEachDFT(SetInactiveCallBack, rightChild.GetComponent<Node>().GetId());
                     }
+                    else
+                    {
+                        leftChild.SetActive(true);
+                        rightChild.SetActive(true);
 
+                        // need to redraw parent child lines
+                        var wrapper = new RustResourceWrapper<ClusterData>(ClusterData.Alloc(selectedNode.GetComponent<Node>().GetId()));
+                        Clam.FFI.NativeMethods.DrawHierarchyOffsetFrom(wrapper, PositionUpdater);
 
+                        //redrawing lines here after reingold call potentially
+                        var springPrefab = Resources.Load("Spring") as GameObject;
+                        var leftSpring = MenuEventManager.instance.MyInstantiate(springPrefab);
+                        var rightSpring = MenuEventManager.instance.MyInstantiate(springPrefab);
+
+                        leftSpring.GetComponent<Edge>().SetNodes(selectedNode, leftChild);
+                        rightSpring.GetComponent<Edge>().SetNodes(selectedNode, rightChild);
+                    }
                 }
             }
         }
@@ -237,7 +143,6 @@ namespace Clam
             bool hasValue = Cakes.Tree.GetTree().TryGetValue(nodeData.id.AsString, out GameObject node);
             if (hasValue)
             {
-                //node.GetComponent<NodeScript>().SetColor(nodeData.color.AsColor);
                 node.SetActive(false);
             }
             else
@@ -251,7 +156,6 @@ namespace Clam
             bool hasValue = Cakes.Tree.GetTree().TryGetValue(nodeData.id.AsString, out GameObject node);
             if (hasValue)
             {
-                //node.GetComponent<NodeScript>().SetColor(nodeData.color.AsColor);
                 node.GetComponent<Node>().SetPosition(nodeData.pos.AsVector3);
             }
             else
@@ -261,7 +165,6 @@ namespace Clam
         }
         void OnExit()
         {
-            //Application.Quit();
             m_PlayerInput.SwitchCurrentActionMap("WorldUI");
 
             MenuEventManager.SwitchState(Menu.Pause);
@@ -296,7 +199,6 @@ namespace Clam
             pointer.position = position;
             List<RaycastResult> raycastResults = new List<RaycastResult>();
 
-            // UI Elements must have `picking mode` set to `position` to be hit
             EventSystem.current.RaycastAll(pointer, raycastResults);
 
             if (raycastResults.Count > 0)

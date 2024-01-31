@@ -15,13 +15,10 @@ class DoubleTextField
     double m_MinValueThreshold;
     double m_MaxValueThreshold;
 
-    //VisualTreeAsset m_Template;
-
     public DoubleTextField(string name, UIDocument document, double minValue, double maxValue)
     {
         m_MinValueThreshold = minValue;
         m_MaxValueThreshold = maxValue;
-
 
         m_Label = document.rootVisualElement.Q<Label>(name + "Label");
         m_MinField = document.rootVisualElement.Q<TextField>(name + "Min");
@@ -33,7 +30,6 @@ class DoubleTextField
         m_MinField.focusable = false;
         m_MaxField.focusable = false;
 
-
         m_MaxField.RegisterValueChangedCallback(MaxFieldCallback);
         m_MinField.RegisterValueChangedCallback(MaxFieldCallback);
 
@@ -42,8 +38,6 @@ class DoubleTextField
         m_MaxField.tripleClickSelectsLine = true;
         m_MaxField.doubleClickSelectsWord = true;
     }
-
-
 
     public DoubleTextField(string name, VisualElement parent, double minValue, double maxValue)
     {
@@ -66,7 +60,6 @@ class DoubleTextField
         m_MinField.focusable = false;
         m_MaxField.focusable = false;
 
-
         m_MaxField.RegisterValueChangedCallback(MaxFieldCallback);
         m_MinField.RegisterValueChangedCallback(MinFieldCallback);
 
@@ -80,31 +73,20 @@ class DoubleTextField
     {
         if (!ValidateCharacters(changeEvent.newValue, "0123456789."))
         {
-            //textField.value = changeEvent.previousValue;
             return false;
-
         }
         else
         {
-            //if (m_MinValueThreshold.GetType() == typeof(double))
+            double minValue = (double)(object)m_MinValueThreshold;
+            double maxValue = (double)(object)m_MaxValueThreshold;
+            double curMax = double.Parse(m_MaxField.value);
+            double value = double.Parse(changeEvent.newValue);
+
+            if (value < minValue || value > maxValue || value > curMax)
             {
-
-                double minValue = (double)(object)m_MinValueThreshold;
-                double maxValue = (double)(object)m_MaxValueThreshold;
-                double curMax = double.Parse(m_MaxField.value);
-                double value = double.Parse(changeEvent.newValue);
-
-                if (value < minValue || value > maxValue || value > curMax)
-                {
-                    //textField.value = changeEvent.previousValue;
-                    return false;
-                }
+                return false;
             }
-
-           
-
             return true;
-
         }
 
     }
@@ -116,12 +98,6 @@ class DoubleTextField
         {
             textField.value = changeEvent.previousValue;
         }
-        else
-        {
-            // do stuff
-        }
-
-
     }
 
     void MaxFieldCallback(ChangeEvent<string> changeEvent)
@@ -132,42 +108,26 @@ class DoubleTextField
         {
             textField.value = changeEvent.previousValue;
         }
-        else
-        {
-            // do stuff
-        }
     }
 
     bool MaxValueValidation(ChangeEvent<string> changeEvent)
     {
-
         if (!ValidateCharacters(changeEvent.newValue, "0123456789."))
         {
-            //textField.value = changeEvent.previousValue;
             return false;
-
         }
         else
         {
-            //if (m_MinValueThreshold.GetType() == typeof(double))
+            double minValue = (double)(object)m_MinValueThreshold;
+            double maxValue = (double)(object)m_MaxValueThreshold;
+            double curMin = double.Parse(m_MinField.value);
+            double value = double.Parse(changeEvent.newValue);
+
+            if (value < minValue || value > maxValue || value < curMin)
             {
-
-                double minValue = (double)(object)m_MinValueThreshold;
-                double maxValue = (double)(object)m_MaxValueThreshold;
-                double curMin = double.Parse(m_MinField.value);
-                double value = double.Parse(changeEvent.newValue);
-
-                if (value < minValue || value > maxValue || value < curMin)
-                {
-                    //textField.value = changeEvent.previousValue;
-                    return false;
-                }
+                return false;
             }
-            
-
-
             return true;
-
         }
     }
     bool ValidateCharacters(string value, string validCharacters)
@@ -204,15 +164,4 @@ class DoubleTextField
     {
         return new Tuple<double, double>(double.Parse(m_MinField.value), double.Parse(m_MaxField.value));
     }
-
-    //public Vector2 MinMaxFloat()
-    //{
-    //    return new Vector2(float.Parse(m_MinField.value), float.Parse(m_MaxField.value));
-    //}
-
-    //public bool IsValid(NodeWrapper wrapper)
-    //{
-
-    //}
 }
-

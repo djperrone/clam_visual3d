@@ -6,15 +6,7 @@ using UnityEngine;
 
 public class Graph : MonoBehaviour
 {
-
-    //private Dictionary<string, GameObject> m_Graph;
-    //private List<GameObject> m_Components;
-    //private List<(string, string)> m_ComponentEdges;
-
-    //private List<string> m_Clusters;
     private List<GraphComponent> m_Components;
-
-
 
     // Start is called before the first frame update
     void Start()
@@ -24,7 +16,6 @@ public class Graph : MonoBehaviour
         //m_Components[i].Init(i, ids));
 
         ComponentLoop();
-
     }
 
     // Update is called once per frame

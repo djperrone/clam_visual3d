@@ -28,14 +28,6 @@ namespace Clam
                 return (outData, result);
             }
 
-            //public TreeStartupDataFFI(TreeStartupData data)
-            //{
-            //    dataName = StringFFI.Alloc(data.dataName).Item1;
-            //    distanceMetric = data.distanceMetric;
-            //    cardinality = data.cardinality;
-            //    isExpensive = data.isExpensive;
-            //}
-
             public void Free()
             {
                 NativeMethods.FreeString(ref dataName);

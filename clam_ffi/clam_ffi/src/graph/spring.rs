@@ -15,7 +15,7 @@ pub struct Spring {
 impl Spring {
     pub fn new(nat_len: f32, hash_code1: String, hash_code2: String, real: bool) -> Self {
         Spring {
-            nat_len: nat_len,
+            nat_len, //: nat_len.min(1.0),
             k: 0.005,
             node1: hash_code1,
             node2: hash_code2,
@@ -23,8 +23,8 @@ impl Spring {
         }
     }
 
-    pub fn get_node_ids(&self) -> (String, String) {
-        return (self.node1.clone(), self.node2.clone());
+    pub fn get_node_ids(&self) -> (&String, &String) {
+        (&self.node1, &self.node2)
     }
 
     //apply acceleration to both nodes at each end of spring
@@ -45,20 +45,13 @@ impl Spring {
 
         let mut new_force = graph::helpers::set_magnitude(force, new_magnitude);
 
-        //drop ownership to get_mut from hashmap
-        // std::mem::drop(node1);
-        // std::mem::drop(node2);
-
         let node1 = nodes.get_mut(&self.node1).unwrap();
         node1.accelerate(new_force);
-        // std::mem::drop(node1);
-
         //reverse direction of force for node on opposite side
         new_force *= -1.;
 
         let node2 = nodes.get_mut(&self.node2).unwrap();
         node2.accelerate(new_force);
-        // std::mem::drop(node2);
     }
 
     pub fn nat_len(&self) -> f32 {

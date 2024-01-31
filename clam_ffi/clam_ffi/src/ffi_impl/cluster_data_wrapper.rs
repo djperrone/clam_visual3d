@@ -1,13 +1,11 @@
-use crate::{tree_layout::reingold_impl, utils::types::Clusterf32};
-
 use super::cluster_data::ClusterData;
+use crate::{tree_layout::reingold_impl, utils::types::Clusterf32};
 pub struct ClusterDataWrapper {
     data: ClusterData,
 }
 
 impl Drop for ClusterDataWrapper {
     fn drop(&mut self) {
-        // debug!("Freeing Cluster Data string with rust destructor");
         self.data.free_ids();
     }
 }

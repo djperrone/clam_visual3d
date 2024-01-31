@@ -16,11 +16,11 @@ namespace Clam
             [DllImport(__DllName, EntryPoint = "init_clam", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
             private static extern FFIError init_clam(out IntPtr ptr, byte[] data_name, int name_len, uint cardinality, DistanceMetric distanceMetric);
 
+            [DllImport(__DllName, EntryPoint = "init_clam_graph", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+            private static extern FFIError init_clam_graph(IntPtr ptr,ScoringFunction scoringFunction,  NodeVisitor cluster_selector);
+
             [DllImport(__DllName, EntryPoint = "init_clam_struct", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
             private static extern FFIError init_clam(out IntPtr ptr, ref TreeStartupDataFFI data);
-
-            [DllImport(__DllName, EntryPoint = "load_cakes", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-            private static extern FFIError load_cakes(out IntPtr ptr, byte[] data_name, int name_len);
 
             [DllImport(__DllName, EntryPoint = "load_cakes_struct", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
             private static extern FFIError load_cakes(out IntPtr ptr, ref TreeStartupDataFFI data);
@@ -49,13 +49,16 @@ namespace Clam
             [DllImport(__DllName, EntryPoint = "max_lfd", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
             private static extern float max_lfd(IntPtr handle);
 
+            [DllImport(__DllName, EntryPoint = "max_vertex_degree", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+            private static extern int max_vertex_degree(IntPtr handle);
+
+            [DllImport(__DllName, EntryPoint = "vertex_degree", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+            private static extern int vertex_degree(IntPtr handle, string cluster_id);
+
             [DllImport(__DllName, EntryPoint = "color_clusters_by_label", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
             private static extern FFIError color_clusters_by_label(IntPtr ptr, NodeVisitor callback);
 
             // ------------------------------------- Cluster Helpers ------------------------------------- 
-
-            //[DllImport(__DllName, EntryPoint = "get_cluster_data", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-            //private static unsafe extern FFIError get_cluster_data(IntPtr handle, ref global::Clam.FFI.ClusterData inNode, out global::Clam.FFI.ClusterData outNode);
 
             [DllImport(__DllName, EntryPoint = "get_root_data", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
             private static extern int get_root_data(IntPtr handle);
@@ -74,7 +77,6 @@ namespace Clam
             [DllImport(__DllName, EntryPoint = "free_string", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
             private static extern FFIError free_string(ref StringFFI inData, out ClusterData outData);
 
-
             [DllImport(__DllName, EntryPoint = "delete_cluster_ids", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
             private static extern FFIError delete_cluster_ids(ref ClusterIDs inData, out ClusterIDs outData);
 
@@ -90,7 +92,7 @@ namespace Clam
             private static extern FFIError draw_hierarchy(IntPtr ptr, NodeVisitor callback);
 
             [DllImport(__DllName, EntryPoint = "draw_hierarchy_offset_from", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-            private static extern FFIError draw_hierarchy_offset_from(IntPtr ptr, ref ClusterData offsetPos,int currentDepth, int maxDepth, NodeVisitor callback);
+            private static extern FFIError draw_hierarchy_offset_from(IntPtr ptr, ref ClusterData offsetPos, int currentDepth, int maxDepth, NodeVisitor callback);
 
             // ------------------------------------- Graph Physics -------------------------------------
             [System.Security.SecurityCritical]

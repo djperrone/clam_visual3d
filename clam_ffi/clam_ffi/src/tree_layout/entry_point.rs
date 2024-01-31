@@ -6,11 +6,10 @@ use crate::{
 
 pub fn draw_hierarchy_impl(ptr: InHandlePtr, node_visitor: CBFnNodeVisitor) -> FFIError {
     if let Some(handle) = ptr {
-        // return Handle::from_ptr(ptr).create_reingold_layout(node_visitor);
         return handle.create_reingold_layout(node_visitor);
     }
 
-    return FFIError::NullPointerPassed;
+    FFIError::NullPointerPassed
 }
 
 pub unsafe fn draw_hierarchy_offset_from_impl(
@@ -29,8 +28,7 @@ pub unsafe fn draw_hierarchy_offset_from_impl(
                 node_visitor,
             );
         }
-        // return Handle::from_ptr(ptr).create_reingold_layout(node_visitor);
     }
 
-    return FFIError::NullPointerPassed;
+    FFIError::NullPointerPassed
 }

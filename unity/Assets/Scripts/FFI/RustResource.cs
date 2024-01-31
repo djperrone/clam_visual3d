@@ -9,7 +9,6 @@ namespace Clam
     {
         public interface IRustResource
         {
-            //T GetData();
             void Free();
             // must also implement but its impossible to enforce...
             //public static (T, FFIError) Alloc(Args&&... data)
@@ -35,11 +34,6 @@ namespace Clam
             {
                 m_Data = tuple.data;
                 this.result = tuple.result;
-
-                //if(this.result != FFIError.Ok)
-                //{
-                //    Debug.LogError("Resource Allocation failed");
-                //}
             }
 
             public T GetData()

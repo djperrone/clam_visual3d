@@ -14,11 +14,7 @@ namespace Clam
         private static GameObject m_SpringPrefab;
 
         private static Cakes instance;
-        //private static Tree m_Tree;
-        //public static TreeStartupData m_StartupData;
-        //FFIError m_InitResult;
         private static bool m_Initialized = false;
-        //private static IntPtr m_Handle;
 
         static public void BuildGraphWithSelected()
         {
@@ -33,15 +29,10 @@ namespace Clam
                 else
                 {
                     Destroy(node);
-                    //node.SetActive(false);
                 }
             }
 
             Debug.Log("building graph with size" + graph.Count);
-            //var graph = Tree.GetTree().Where(
-            //    kvp => kvp.Value.activeSelf && kvp.Value.GetComponent<Node>().IsSelected())
-            //    .ToDictionary(kvp => kvp.Key, kvp => kvp.Value); 
-
             Tree.Set(graph);
         }
 
@@ -62,18 +53,12 @@ namespace Clam
                 else
                 {
                     Destroy(node);
-                    //node.SetActive(false);
                 }
             }
 
             Debug.Log("building graph with size" + graph.Count);
-            //var graph = Tree.GetTree().Where(
-            //    kvp => kvp.Value.activeSelf && kvp.Value.GetComponent<Node>().IsSelected())
-            //    .ToDictionary(kvp => kvp.Key, kvp => kvp.Value); 
-
             Tree.Set(graph);
         }
-
 
         private static Cakes Instance
         {
@@ -87,17 +72,12 @@ namespace Clam
                         GameObject obj = new GameObject();
                         obj.name = typeof(Cakes).Name;
                         instance = obj.AddComponent<Cakes>();
-                        //m_Handle = FFI.NativeMethods.GetHandle();
-                        //m_Tree = obj.AddComponent<Tree>();
                     }
-
-
                 }
                 if (instance.GetComponent<TreeCache>() == null)
                 {
                     Debug.LogWarning("tree not added yet in instance");
                     InitTree();
-
                 }
                 return instance;
             }
@@ -115,22 +95,12 @@ namespace Clam
         {
             if (instance == null)
             {
-                //instance = this as Cakes;
                 instance = FindObjectOfType<Cakes>();
                 InitTree();
-                //if (instance.GetComponent<Tree>() == null)
-                //{
-                //    Debug.LogWarning("tree not added yet in instance");
-                //    InitTree();
-
-                //}
-                //InitTree();
-                //DontDestroyOnLoad(gameObject);
             }
             else
             {
                 Destroy(gameObject);
-                //Debug.LogWarning("Why is destroy here?...");
             }
         }
 
@@ -138,15 +108,10 @@ namespace Clam
         {
             Debug.Log("OnDestroy cakes");
 
-            //Debug.Log("Application ending after " + Time.time + " seconds");
-            //m_Tree = new Dictionary<string, GameObject>();
-            //m_SelectedNode = null;
-            //if (m_InitResult == FFIError.Ok)
             if (m_Initialized)
             {
                 Clam.FFI.NativeMethods.ForceShutdownPhysics();
                 Clam.FFI.NativeMethods.ShutdownClam();
-                //m_InitResult = FFIError.HandleInitFailed;
             }
         }
 
@@ -155,7 +120,6 @@ namespace Clam
             TreeCache tree = instance.AddComponent<TreeCache>();
             m_SpringPrefab = Resources.Load("Spring") as GameObject;
             m_NodePrefab = Resources.Load("Node") as GameObject;
-
 
             FFIError initResult = tree.Init(m_NodePrefab, m_SpringPrefab);
 
@@ -166,7 +130,11 @@ namespace Clam
             else
             {
                 Debug.LogError("Tree initializtion failed with error " + initResult);
-                Application.Quit();
+#if UNITY_EDITOR
+                UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
             }
         }
 

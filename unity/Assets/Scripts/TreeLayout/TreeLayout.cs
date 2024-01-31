@@ -20,8 +20,6 @@ public class TreeLayout
     {
         m_RootID = rootId;
 
-        //var dataWrapper = NativeMethods.CreateClusterDataWrapper(rootId);
-
         var dataWrapper = new RustResourceWrapper<ClusterData>(ClusterData.Alloc(rootId));
         m_RootDepth = dataWrapper.Data.depth;
 
@@ -31,7 +29,6 @@ public class TreeLayout
         m_MaxDepth = m_CurrentDepth + m_IntervalStep;
 
         NativeMethods.DrawHierarchyOffsetFrom(new RustResourceWrapper<ClusterData>(ClusterData.Alloc(m_RootID)), UpdatePositionCallback, m_RootDepth, m_CurrentDepth, m_MaxDepth);
-        //NativeMethods.DrawHierarchyOffsetFrom(Clam.FFI.NativeMethods.CreateClusterDataWrapper(m_RootID), UpdatePositionCallback, m_RootDepth, m_CurrentDepth, m_MaxDepth);
 
         NativeMethods.ForEachDFT(ClusterVisibilityCallback, m_RootID);
         NativeMethods.ForEachDFT(EdgeVisibilityCallback);
@@ -52,7 +49,6 @@ public class TreeLayout
             Debug.Log("Increasing size");
             m_MaxDepth += m_IntervalStep;
             NativeMethods.DrawHierarchyOffsetFrom(new RustResourceWrapper<ClusterData>(ClusterData.Alloc(m_RootID)), UpdatePositionCallback, m_RootDepth, m_CurrentDepth, m_MaxDepth);
-            //NativeMethods.DrawHierarchyOffsetFrom(Clam.FFI.NativeMethods.CreateClusterDataWrapper(m_RootID), UpdatePositionCallback, m_RootDepth, m_CurrentDepth, m_MaxDepth);
         }
 
         UpdateNodeVisibility(nextDepth);
@@ -74,69 +70,21 @@ public class TreeLayout
 
             m_MaxDepth -= m_IntervalStep;
             NativeMethods.DrawHierarchyOffsetFrom(new RustResourceWrapper<ClusterData>(ClusterData.Alloc(m_RootID)), UpdatePositionCallback, m_RootDepth, m_CurrentDepth, m_MaxDepth);
-            //NativeMethods.DrawHierarchyOffsetFrom(Clam.FFI.NativeMethods.CreateClusterDataWrapper(m_RootID), UpdatePositionCallback, m_RootDepth, m_CurrentDepth, m_MaxDepth);
         }
 
         UpdateNodeVisibility(nextDepth);
     }
 
-    void GrowTree()
-    {
-        m_MaxDepth += m_IntervalStep;
-        //Resize()
-    }
-
-    void ShrinkTree()
-    {
-        m_MaxDepth -= m_IntervalStep;
-        // resize
-    }
-
     void UpdateNodeVisibility(int newDepth)
     {
-        //NativeMethods.DrawHierarchyOffsetFrom(Clam.FFI.NativeMethods.CreateClusterDataWrapper(m_RootID), UpdatePositionCallback, m_RootDepth, m_MaxDepth);
-
         NativeMethods.ForEachDFT(ClusterVisibilityCallback, m_RootID, m_CurrentDepth + 1);
         NativeMethods.ForEachDFT(EdgeVisibilityCallback, m_RootID, m_CurrentDepth + 1);
-        //if (newDepth == m_RootDepth)
-        //{
-        //    // destroy this object
-        //}
-        //if (newDepth > m_CurrentDepth)
-        //{
-        //    //if (newDepth > m_MaxDepth)
-        //    //{
-        //    //    m_CurrentDepth = newDepth;
-        //    //    GrowTree();
-        //    //}
-        //    // traverse children and make active up to newDepth
-        //    NativeMethods.DrawHierarchyOffsetFrom(Clam.FFI.NativeMethods.CreateClusterDataWrapper(m_RootID), VisibilityCallback, m_RootDepth, m_CurrentDepth);
-        //}
-        //else if (newDepth < m_CurrentDepth)
-        //{
-        //    //if (newDepth < m_MaxDepth - m_IntervalStep)
-        //    //{
-        //    //    m_CurrentDepth = newDepth;
-
-        //    //    ShrinkTree();
-        //    //}
-        //    NativeMethods.DrawHierarchyOffsetFrom(Clam.FFI.NativeMethods.CreateClusterDataWrapper(m_RootID), VisibilityCallback, m_RootDepth, m_CurrentDepth);
-
-        //    // traverse children above current depth and make inactive
-        //}
-        //else
-        //{
-        //    Debug.Log("?? tree size change");
-        //    return;
-        //}
     }
 
     void UpdatePositionCallback(ref ClusterData data)
     {
         var id = data.id.AsString;
         GameObject clusterObject = Cakes.Tree.GetOrAdd(id);
-        //Debug.Log("visibility callback");
-
         clusterObject.GetComponent<Clam.Node>().SetPosition(data.pos.AsVector3);
     }
 

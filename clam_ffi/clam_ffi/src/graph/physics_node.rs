@@ -30,7 +30,7 @@ impl PhysicsNode {
     //updates acceleration of node
     pub fn accelerate(&mut self, force: glam::Vec3) {
         // A = F / M
-        self.acceleration = self.acceleration + (force / self.mass());
+        self.acceleration += force / self.mass();
     }
 
     pub fn get_position(&self) -> glam::Vec3 {
@@ -47,12 +47,7 @@ impl PhysicsNode {
             self.velocity = graph::helpers::set_magnitude(self.velocity, self.max_speed);
         }
 
-        //sets back to origin (look further into kiss3d so you dont have to use translations)
-        // self.sphere.append_translation(&Translation3::new(-self.position.x, -self.position.y, -self.position.z));
-
         self.position += self.velocity;
-
-        //resets accel
         self.acceleration.x = 0.;
         self.acceleration.y = 0.;
         self.acceleration.z = 0.;

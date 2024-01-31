@@ -5,4 +5,5 @@ pub mod debug;
 pub mod distances;
 pub mod error;
 pub mod helpers;
+pub mod scoring_functions;
 pub mod types;

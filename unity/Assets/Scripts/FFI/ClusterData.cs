@@ -9,53 +9,25 @@ namespace Clam
 {
     namespace FFI
     {
-
-        //public class ClusterDataWrapper
-        //{
-        //    private ClusterData m_Data;
-
-        //    public ClusterDataWrapper(ClusterData nodeData)
-        //    {
-        //        m_Data = nodeData;
-        //    }
-
-        //    public ClusterData Data
-        //    {
-        //        get { return m_Data; }
-        //        set
-        //        {
-        //            //m_Data.FreeStrings();
-        //            m_Data = value;
-        //        }
-        //    }
-
-        //    ~ClusterDataWrapper()
-        //    {
-        //        //m_Data.FreeStrings();
-        //        //var data = wrapper.Data;
-        //        Clam.FFI.NativeMethods.DeleteClusterData(ref m_Data);
-        //    }
-        //}
-
         [Serializable]
         [StructLayout(LayoutKind.Sequential)]
         public partial struct ClusterData : IRustResource
         {
+            public int depth;
+            public int offset;
+            public int cardinality;
+            public int argCenter;
+            public int argRadial;
+            public float radius;
+            public float lfd;
+
+            public int vertexDegree;
+            public float distToQuery;
+
             public Vec3 pos;
             public Vec3 color;
             public StringFFI id;
-            //public StringFFI leftID;
-            //public StringFFI rightID;
-            // a string storing 100 bytes for passing misc values between rust and unity - allocated by rust
             public StringFFI message;
-            public int cardinality;
-            public int depth;
-            public float radius;
-            public float lfd;
-            public int argCenter;
-            public int argRadius;
-
-            public float distToQuery;
 
             public void SetPos(Vector3 pos)
             {
@@ -81,30 +53,22 @@ namespace Clam
                 Debug.Log("id: " + this.id.AsString);
                 Debug.Log("pos: " + this.pos.AsVector3);
                 Debug.Log("color: " + this.color.AsColor);
-
-                //Debug.Log("leftID: " + this.leftID.AsString);
-                //Debug.Log("rightID: " + this.rightID.AsString);
                 Debug.Log("depth: " + this.depth);
                 Debug.Log("cardinality: " + this.cardinality);
                 Debug.Log("argCenter: " + this.argCenter);
-                Debug.Log("argRadius: " + this.argRadius);
+                Debug.Log("argRadius: " + this.argRadial);
             }
 
             public string GetInfo()
             {
                 StringBuilder stringBuilder = new StringBuilder();
-
                 stringBuilder.AppendLine("id: " + this.id.AsString);
-                //stringBuilder.AppendLine("leftID: " + this.leftID.AsString);
-                //stringBuilder.AppendLine("rightID: " + this.rightID.AsString);
                 stringBuilder.AppendLine("depth " + depth.ToString());
                 stringBuilder.AppendLine("card: " + cardinality.ToString());
                 stringBuilder.AppendLine("radius: " + radius.ToString());
                 stringBuilder.AppendLine("lfd: " + lfd.ToString());
                 stringBuilder.AppendLine("argC: " + argCenter.ToString());
-                stringBuilder.AppendLine("argR: " + argRadius.ToString());
-                //stringBuilder.AppendLine(this.color.ToString());
-
+                stringBuilder.AppendLine("argR: " + argRadial.ToString());
                 return stringBuilder.ToString();
             }
             public string GetInfoForUI()
@@ -117,10 +81,8 @@ namespace Clam
                 stringBuilder.AppendLine(radius.ToString());
                 stringBuilder.AppendLine(lfd.ToString());
                 stringBuilder.AppendLine(argCenter.ToString());
-                stringBuilder.AppendLine(argRadius.ToString());
-
+                stringBuilder.AppendLine(argRadial.ToString());
                 return stringBuilder.ToString();
-
             }
             public void Free()
             {
@@ -130,7 +92,7 @@ namespace Clam
 
         [Serializable]
         [StructLayout(LayoutKind.Sequential)]
-        public partial struct ClusterIDs :IRustResource
+        public partial struct ClusterIDs : IRustResource
         {
             public StringFFI id;
             public StringFFI leftID;
@@ -147,11 +109,5 @@ namespace Clam
                 Clam.FFI.NativeMethods.DeleteClusterIDs(ref this);
             }
         }
-
     }
-
-
-
-
-
 }

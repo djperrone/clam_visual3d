@@ -21,22 +21,15 @@ pub unsafe fn for_each_dft_impl(
 ) -> FFIError {
     if let Some(handle) = ptr {
         if !start_node.is_null() {
-            let c_str = unsafe {
-                // assert!(!start_node.is_null());
-
-                CStr::from_ptr(start_node)
-            };
+            let c_str = unsafe { CStr::from_ptr(start_node) };
             let r_str = c_str.to_str().unwrap();
-            // debug!("start node name {}", r_str);
-
-            // return Handle::from_ptr(ptr).for_each_dft(node_visitor, r_str.to_string());
             return handle.for_each_dft(node_visitor, r_str.to_string(), max_depth);
         } else {
             return FFIError::InvalidStringPassed;
         }
     }
 
-    return FFIError::NullPointerPassed;
+    FFIError::NullPointerPassed
 }
 
 pub unsafe fn set_names_impl(
@@ -45,33 +38,22 @@ pub unsafe fn set_names_impl(
     start_node: *const c_char,
 ) -> FFIError {
     if let Some(handle) = ptr {
-        if !start_node.is_null() {
-            let c_str = unsafe {
-                // assert!(!start_node.is_null());
-
-                CStr::from_ptr(start_node)
-            };
+        return if !start_node.is_null() {
+            let c_str = unsafe { CStr::from_ptr(start_node) };
             let r_str = c_str.to_str().unwrap();
-            // debug!("start node name {}", r_str);
-
-            // return Handle::from_ptr(ptr).for_each_dft(node_visitor, r_str.to_string());
-            return handle.set_names(node_visitor, r_str.to_string());
+            handle.set_names(node_visitor, r_str.to_string())
         } else {
-            return FFIError::InvalidStringPassed;
-        }
+            FFIError::InvalidStringPassed
+        };
     }
-
-    return FFIError::NullPointerPassed;
+    FFIError::NullPointerPassed
 }
 
 pub fn free_resource<T: Clone + Cleanup>(
     in_cluster_data: Option<&T>,
     out_cluster_data: Option<&mut T>,
 ) -> FFIError {
-    // if data.is_none() {
-    // }
-
-    return if let Some(in_data) = in_cluster_data {
+    if let Some(in_data) = in_cluster_data {
         if let Some(out_data) = out_cluster_data {
             *out_data = in_data.clone();
             out_data.free();
@@ -81,44 +63,70 @@ pub fn free_resource<T: Clone + Cleanup>(
         }
     } else {
         FFIError::NullPointerPassed
-    };
+    }
 }
 
 pub unsafe fn tree_height_impl(ptr: InHandlePtr) -> i32 {
-    // Handle::from_ptr(ptr).get_num_nodes() + 1
-
     if let Some(handle) = ptr {
-        // debug!("cardinality: {}", handle.tree_height() + 1);
-
         return handle.tree_height() + 1;
     }
     debug!("handle not created");
 
-    return 0;
+    0
 }
 
 pub unsafe fn tree_cardinality_impl(ptr: InHandlePtr) -> i32 {
-    // Handle::from_ptr(ptr).get_num_nodes() + 1
-
     if let Some(handle) = ptr {
-        // debug!("cardinality: {}", handle.tree_height() + 1);
-
         if let Some(tree) = handle.get_tree() {
             return tree.cardinality() as i32;
         }
     }
     debug!("handle not created");
+    -1
+}
 
-    return -1;
+pub unsafe fn vertex_degree_impl(ptr: InHandlePtr, cluster_id: *const c_char) -> i32 {
+    if let Some(handle) = ptr {
+        if let Some(clam_graph) = handle.clam_graph() {
+            let cluster_id = helpers::c_char_to_string(cluster_id);
+            if let Ok(cluster) = handle.get_cluster_from_string(cluster_id) {
+                if let Ok(degree) = clam_graph.vertex_degree(cluster) {
+                    return degree as i32;
+                }
+            }
+        }
+    }
+    debug!("handle not created");
+    -1
+}
+
+pub unsafe fn max_vertex_degree_impl(ptr: InHandlePtr) -> i32 {
+    if let Some(handle) = ptr {
+        if handle.get_tree().is_some() {
+            if let Some(graph) = handle.clam_graph() {
+                let mut max_degree = -1;
+                for c in graph.clusters() {
+                    let vertex_degree = graph.vertex_degree(c).unwrap_or_else(|_| {
+                        unreachable!(
+                            "We are iterating through clusters in graph so it must be there"
+                        )
+                    });
+                    if vertex_degree as i64 > max_degree {
+                        max_degree = vertex_degree as i64;
+                    }
+                }
+                return max_degree as i32;
+            }
+        }
+    }
+    debug!("root not built");
+    -1
 }
 
 pub unsafe fn max_lfd_impl(ptr: InHandlePtr) -> f32 {
-    // Handle::from_ptr(ptr).get_num_nodes() + 1
-
     if let Some(handle) = ptr {
-        if let Some(cakes) = handle.cakes() {
-            let clusters = cakes.trees().first().unwrap().root().subtree();
-            let lfd = clusters.first().unwrap().lfd();
+        if let Some(tree) = handle.tree() {
+            let clusters = tree.root().subtree();
             let max_lfd = clusters
                 .iter()
                 .map(|c| c.lfd())
@@ -127,110 +135,46 @@ pub unsafe fn max_lfd_impl(ptr: InHandlePtr) -> f32 {
             return max_lfd as f32;
         }
     }
-        return -1.0;
+    -1.0
 }
 
 pub fn color_clusters_by_label_impl(ptr: InHandlePtr, node_visitor: CBFnNodeVisitor) -> FFIError {
     if let Some(handle) = ptr {
         if let Some(root) = handle.root() {
             if let Some(labels) = handle.labels() {
-                // if *(labels.iter().max().unwrap()) > (1) {
-                //     // need error message for labels not matching
-                //     return FFIError::HandleInitFailed;
-                // }
-                color_helper(Some(root), &labels, node_visitor);
+                color_helper(Some(root), labels, node_visitor);
                 return FFIError::Ok;
             }
         }
     }
-    return FFIError::HandleInitFailed;
+    FFIError::HandleInitFailed
 }
 
-fn color_helper(root: Option<&Clusterf32>, labels: &Vec<bool>, node_visitor: CBFnNodeVisitor) {
+fn calc_cluster_entropy_color(cluster: &Clusterf32, labels: &[u8]) -> glam::Vec3 {
+    let indices = cluster.indices();
+    let mut entropy = [0; 2];
+    indices.for_each(|i| entropy[labels[i] as usize] += 1);
+
+    let total_entropy: u32 = entropy.iter().sum();
+
+    let perc_inliers = entropy[0] as f32 / total_entropy as f32;
+    let perc_outliers = entropy[1] as f32 / total_entropy as f32;
+
+    glam::Vec3::new(perc_outliers, perc_inliers, 0.)
+}
+fn color_helper(root: Option<&Clusterf32>, labels: &[u8], node_visitor: CBFnNodeVisitor) {
     if let Some(cluster) = root {
-        let indices = cluster.indices();
-        let mut entropy = vec![0; 2];
-
-        indices.for_each(|i| entropy[labels[i] as usize] += 1);
-
-        let total_entropy: u32 = entropy.iter().sum();
-
-        let perc_inliers = entropy[0] as f32 / total_entropy as f32;
-        let perc_outliers = entropy[1] as f32 / total_entropy as f32;
-        debug!("inliers: {}, outliers: {}", perc_inliers, perc_outliers);
         let mut cluster_data = ClusterDataWrapper::from_cluster(cluster);
-        cluster_data.data_mut().color = glam::Vec3::new(perc_outliers, perc_inliers, 0.);
+        cluster_data.data_mut().color = calc_cluster_entropy_color(cluster, labels);
+
         node_visitor(Some(cluster_data.data()));
 
         if let Some([left, right]) = cluster.children() {
             color_helper(Some(left), labels, node_visitor);
             color_helper(Some(right), labels, node_visitor);
         }
-        // debug!("here4");
     }
 }
-// pub unsafe fn test_mod_struct(context: InHandlePtr, ptr: *mut ClusterData) {
-//     if let Some(handle) = context {
-//         let mut out_node = unsafe { &mut *ptr };
-//         out_node.arg_center = 5;
-//         match out_node.id.as_string() {
-//             Ok(path) => match handle.find_node(path) {
-//                 Ok(cluster_data) => {
-//                     out_node.set_from_clam(&cluster_data);
-//                     if let Some(query) = handle.get_current_query() {
-//                         out_node.dist_to_query =
-//                             cluster_data.distance_to_instance(handle.data().unwrap(), query);
-//                     }
-//                     // return FFIError::Ok;
-//                 }
-//                 Err(e) => {
-//                     debug!("error {:?}", e);
-//                     // return e;
-//                 }
-//             },
-//             Err(e) => {
-//                 debug!("error {:?}", e);
-//                 // return e;
-//             }
-//         }
-//     }
-// }
-
-// pub unsafe fn get_cluster_data_impl(
-//     context: InHandlePtr,
-//     incoming: Option<&ClusterData>,
-//     outgoing: Option<&mut ClusterData>,
-// ) -> FFIError {
-//     if let Some(handle) = context {
-//         if let Some(in_node) = incoming {
-//             if let Some(out_node) = outgoing {
-//                 *out_node = *in_node;
-
-//                 match out_node.id.as_string() {
-//                     Ok(path) => match handle.find_node(path) {
-//                         Ok(cluster_data) => {
-//                             out_node.set_from_clam(&cluster_data);
-//                             if let Some(query) = handle.get_current_query() {
-//                                 out_node.dist_to_query = cluster_data
-//                                     .distance_to_instance(handle.data().unwrap(), query);
-//                             }
-//                             return FFIError::Ok;
-//                         }
-//                         Err(e) => {
-//                             debug!("error {:?}", e);
-//                             return e;
-//                         }
-//                     },
-//                     Err(e) => {
-//                         debug!("error {:?}", e);
-//                         return e;
-//                     }
-//                 }
-//             }
-//         }
-//     }
-//     return FFIError::NullPointerPassed;
-// }
 
 pub unsafe fn color_by_dist_to_query_impl(
     context: InHandlePtr,
@@ -242,7 +186,6 @@ pub unsafe fn color_by_dist_to_query_impl(
         if arr_ptr.is_null() {
             return FFIError::NullPointerPassed;
         }
-        // debug!("creating string arr");
         let arr = std::slice::from_raw_parts(arr_ptr, len as usize);
 
         let mut ids = Vec::new();
@@ -250,13 +193,10 @@ pub unsafe fn color_by_dist_to_query_impl(
             ids.push(node.id.as_string().unwrap());
         }
 
-        let err = handle.color_by_dist_to_query(ids.as_slice(), node_visitor);
-        // debug!("color result {:?}", err);
-        return err;
+        handle.color_by_dist_to_query(ids.as_slice(), node_visitor)
     } else {
-        return FFIError::NullPointerPassed;
+        FFIError::NullPointerPassed
     }
-    // return FFIError::Ok;
 }
 
 pub unsafe fn distance_to_other_impl(
@@ -265,22 +205,21 @@ pub unsafe fn distance_to_other_impl(
     node_name2: *const c_char,
 ) -> f32 {
     if let Some(handle) = ptr {
-        let node1 = handle.get_cluster(helpers::c_char_to_string(node_name1));
-        let node2 = handle.get_cluster(helpers::c_char_to_string(node_name2));
+        let node1 = handle.get_cluster_from_string(helpers::c_char_to_string(node_name1));
+        let node2 = handle.get_cluster_from_string(helpers::c_char_to_string(node_name2));
 
-        if let Ok(node1) = node1 {
+        return if let Ok(node1) = node1 {
             if let Ok(node2) = node2 {
-                let distance = node1.distance_to_other(handle.data().unwrap(), node2);
-                return distance;
+                node1.distance_to_other(handle.data().unwrap(), node2)
             } else {
-                return -1f32;
+                -1f32
             }
         } else {
-            return -1f32;
-        }
+            -1f32
+        };
     }
 
-    return -1f32;
+    -1f32
 }
 
 // pub unsafe fn test_cakes_rnn_query_impl(

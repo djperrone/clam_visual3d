@@ -32,7 +32,6 @@ namespace Clam
             m_Save.RegisterCallback<ClickEvent>(SaveCallback);
 
             BlurFocus();
-            //UnityEngine.Cursor.visible = true;
         }
 
         void SaveCallback(ClickEvent evt)
@@ -57,8 +56,6 @@ namespace Clam
             var err = NativeMethods.SaveCakes(filePath);
 
             Debug.Log("save result: " + err.ToString());
-
-            
         }
 
         void MainMenuCallback(ClickEvent evt)
@@ -80,8 +77,6 @@ namespace Clam
 
             yesButton.clickable.clicked += () =>
             {
-                //Application.Quit();
-                Debug.Log("quit?");
                 MenuEventManager.SwitchState(Menu.Main);
             };
         }
@@ -93,10 +88,7 @@ namespace Clam
 
         private void CreateButtonCallback(ClickEvent evt)
         {
-            Button button = evt.currentTarget as Button;
-
             MenuEventManager.SwitchState(Menu.ResumePlay);
-
         }
 
         // Update is called once per frame
@@ -110,8 +102,6 @@ namespace Clam
             var focusedElement = GetFocusedElement();
             if (focusedElement != null)
             {
-
-                //focusedElement.focusable = false;
                 focusedElement.Blur();
             }
         }

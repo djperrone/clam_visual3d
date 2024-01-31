@@ -1,6 +1,5 @@
-use crate::utils::types::Clusterf32;
-
 use super::string_ffi::StringFFI;
+use crate::utils::types::Clusterf32;
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
@@ -8,7 +7,6 @@ pub struct ClusterIDs {
     pub id: StringFFI,
     pub left_id: StringFFI,
     pub right_id: StringFFI,
-    // pub message: StringFFI,
 }
 
 impl ClusterIDs {
@@ -33,14 +31,12 @@ impl ClusterIDs {
             id: (StringFFI::new(node.name())),
             left_id: StringFFI::new(left_id),
             right_id: StringFFI::new(right_id),
-            // message: StringFFI::new(std::iter::repeat(' ').take(50).collect()),
         }
     }
 
     pub fn free_ids(&mut self) {
-        self.id.free();
-        self.left_id.free();
-        self.right_id.free();
-        // self.message.free();
+        self.id.free_data();
+        self.left_id.free_data();
+        self.right_id.free_data();
     }
 }

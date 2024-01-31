@@ -12,8 +12,9 @@ namespace Clam
         /// Naughty API call detected.
         NullPointerPassed = 1,
         InvalidStringPassed = 2,
-        HandleInitFailed = 3,
-        GraphBuildFailed = 4,
+        HandleInitFailed,
+        LoadTreeFailed,
+        GraphBuildFailed,
         QueryIsNull,
         PhysicsAlreadyShutdown,
         DivisionByZero,
@@ -23,6 +24,8 @@ namespace Clam
         StartupDataInvalid,
         SaveFailed,
         UnsupportedMetric,
+        ScoringFunctionNotFound,
         PathNotFound,
+        NotInCache,
     }
 }
