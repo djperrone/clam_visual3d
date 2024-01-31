@@ -179,7 +179,6 @@ impl<'a> Handle<'a> {
                 Ok(scorer) => {
                     if let Ok(graph) = Graph::from_tree(tree, &scorer) {
                         self.clam_graph = Some(graph);
-
                         for cluster in self.clam_graph().unwrap().clusters() {
                             let baton = ClusterDataWrapper::from_cluster(cluster);
                             cluster_selector(Some(baton.data()));
@@ -431,7 +430,7 @@ impl<'a> Handle<'a> {
                 return self.get_cluster(offset, cardinality);
             }
         }
-        debug!("root not built");
+        debug!("root not built get_cluster from string");
         Err(FFIError::HandleInitFailed)
     }
 
@@ -447,7 +446,7 @@ impl<'a> Handle<'a> {
                 Err(FFIError::InvalidStringPassed)
             };
         }
-        debug!("root not built");
+        debug!("root not built get cluster");
         Err(FFIError::HandleInitFailed)
     }
     pub fn create_reingold_layout(&self, node_visitor: CBFnNodeVisitor) -> FFIError {

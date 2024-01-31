@@ -73,7 +73,14 @@ public class ClamGraphBuildMenu
             node.GetComponent<Node>().Deselect();
         }
 
-        Clam.FFI.NativeMethods.InitClamGraph((ScoringFunction)System.Enum.Parse(typeof(ScoringFunction), m_ScoringSelector.value), clusterSelector);
+        var graphResult = Clam.FFI.NativeMethods.InitClamGraph((ScoringFunction)System.Enum.Parse(typeof(ScoringFunction), m_ScoringSelector.value), clusterSelector);
+        if (graphResult != FFIError.Ok)
+        {
+            string errorMessage = "Error building graph (" + graphResult.ToString() + ")";
+            Debug.LogError(errorMessage);
+            UIHelpers.ShowErrorPopUP(errorMessage);
+            return;
+        }
         m_Graph = new Dictionary<string, GameObject>();
 
         foreach (var (id, node) in Cakes.Tree.GetTree())

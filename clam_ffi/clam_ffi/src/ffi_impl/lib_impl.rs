@@ -119,7 +119,7 @@ pub unsafe fn max_vertex_degree_impl(ptr: InHandlePtr) -> i32 {
             }
         }
     }
-    debug!("root not built");
+    debug!("root not built max vertex degree impl");
     -1
 }
 

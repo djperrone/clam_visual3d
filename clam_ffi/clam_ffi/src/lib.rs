@@ -190,8 +190,7 @@ pub unsafe extern "C" fn init_clam_graph(
     cluster_selector: CBFnNodeVisitor,
 ) -> FFIError {
     if let Some(handle) = context {
-        handle.init_clam_graph(scoring_function, cluster_selector);
-        return FFIError::Ok;
+        return handle.init_clam_graph(scoring_function, cluster_selector);
     }
     FFIError::HandleInitFailed
 }
