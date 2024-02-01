@@ -9,7 +9,7 @@ public class GraphBuilder : MonoBehaviour
     private int m_VertexCounter;
     private int m_IndexCounter;
     private bool m_IsPhysicsRunning;
-    private float m_EdgeScalar = 25.0f;
+    //private float m_EdgeScalar = 25.0f;
 
     // Start is called before the first frame update
     void Start()
@@ -46,7 +46,7 @@ public class GraphBuilder : MonoBehaviour
         m_IndexCounter = 0;
 
         int numNodes = Cakes.Tree.GetTree().Count;
-        int numEdges = Clam.FFI.NativeMethods.GetNumEdgesInGraph();
+        int numEdges = Clam.FFI.NativeMethods.GetNumGraphEdges();
         Debug.Log("num edges in graph : " + numEdges + ", num nodes " + numNodes);
 
         if (numEdges <2) {
@@ -134,11 +134,12 @@ public class GraphBuilder : MonoBehaviour
                     if (m_IndexCounter == m_Indices.Length)
                     {
                         GetComponent<MeshFilter>().mesh.SetIndices(m_Indices, MeshTopology.Lines, 0);
+                        Debug.Log("all edges drawn");
+
                     }
                 }
             }
         }
-        Debug.Log("graph builder edge drawer should never hit this");
     }
 
     public void ToggleEdgeVisibility(bool value)

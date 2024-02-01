@@ -117,7 +117,10 @@ pub unsafe fn max_vertex_degree_impl(ptr: InHandlePtr) -> i32 {
                 }
                 return max_degree as i32;
             }
+            debug!("clam graph not built max vertex degree impl");
+            return -1;
         }
+        debug!("tree not built max vertex degree impl");
     }
     debug!("root not built max vertex degree impl");
     -1

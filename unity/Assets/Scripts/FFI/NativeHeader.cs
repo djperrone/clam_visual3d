@@ -116,6 +116,14 @@ namespace Clam
             [DllImport(__DllName, EntryPoint = "get_num_edges_in_graph", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
             private static extern int get_num_edges_in_graph(IntPtr ptr);
 
+            [DllImport(__DllName, EntryPoint = "get_num_graph_components", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+            private static extern int get_num_graph_components(IntPtr ptr);
+
+            [DllImport(__DllName, EntryPoint = "get_graph_cluster_cardinality", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+            private static extern int get_graph_cluster_cardinality(IntPtr ptr);
+
+            
+
             // ------------------------------------- RNN Search -------------------------------------
 
             [DllImport(__DllName, EntryPoint = "test_cakes_rnn_query", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]

@@ -63,7 +63,26 @@ pub fn shutdown_physics_impl(ptr: InHandlePtr) -> FFIError {
 
 pub fn get_num_edges_in_graph_impl(ptr: InHandlePtr) -> i32 {
     if let Some(handle) = ptr {
+        debug!("num edges {}", handle.get_num_edges_in_graph());
         return handle.get_num_edges_in_graph();
+    }
+    -1
+}
+
+pub fn get_num_graph_components_impl(ptr: InHandlePtr) -> i32 {
+    if let Some(handle) = ptr {
+        if let Some(clam_graph) = handle.clam_graph() {
+            return clam_graph.find_component_clusters().len() as i32;
+        }
+    }
+    -1
+}
+
+pub fn get_graph_cluster_cardinality_impl(ptr: InHandlePtr) -> i32 {
+    if let Some(handle) = ptr {
+        if let Some(clam_graph) = handle.clam_graph() {
+            return clam_graph.vertex_cardinality() as i32;
+        }
     }
     -1
 }

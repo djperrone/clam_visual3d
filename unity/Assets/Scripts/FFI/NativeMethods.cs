@@ -18,7 +18,7 @@ namespace Clam
 
         public static partial class NativeMethods
         {
-	public const string __DllName = "clam_ffi_2024-02-0112-15-30";
+	public const string __DllName = "clam_ffi_2024-02-0115-09-32";
             private static IntPtr m_Handle;
 
             private static bool m_Initialized = false;
@@ -272,9 +272,21 @@ namespace Clam
             }
 
             // -1 if no graph
-            public static int GetNumEdgesInGraph()
+            public static int GetNumGraphEdges()
             {
                 return get_num_edges_in_graph(m_Handle);
+            }
+
+            // -1 if no graph
+            public static int GetGraphClusterCardinality()
+            {
+                return get_graph_cluster_cardinality(m_Handle);
+            }
+
+            // -1 if no graph
+            public static int GetNumGraphComponents()
+            {
+                return get_num_graph_components(m_Handle);
             }
 
             // RNN 

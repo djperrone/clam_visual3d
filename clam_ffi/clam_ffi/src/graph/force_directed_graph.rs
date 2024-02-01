@@ -119,19 +119,18 @@ impl ForceDirectedGraph {
     }
 
     fn calc_max_edge_len(edges: &[Spring]) -> f32 {
-        let max_edge_len: f32 = edges
-            .iter()
-            .reduce(|cur_max: &Spring, val: &Spring| {
-                if cur_max.nat_len() > val.nat_len() {
-                    cur_max
-                } else {
-                    val
-                }
-            })
-            .unwrap()
-            .nat_len();
+        match edges.iter().reduce(|cur_max: &Spring, val: &Spring| {
+            if cur_max.nat_len() > val.nat_len() {
+                cur_max
+            } else {
+                val
+            }
+        }) {
+            Some(spring) => spring.nat_len(),
+            None => -1.,
+        }
 
-        max_edge_len
+        // max_edge_len
     }
 }
 

@@ -37,7 +37,7 @@ pub unsafe fn build_force_directed_graph(
     };
 
     let graph = build_graph(handle, cluster_data_arr);
-    if graph.is_empty() || springs.is_empty() {
+    if graph.is_empty(){
         return Err(FFIError::GraphBuildFailed);
     }
 
