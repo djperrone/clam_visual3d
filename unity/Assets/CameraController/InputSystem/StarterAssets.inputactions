@@ -260,7 +260,7 @@
                 {
                     "name": "",
                     "id": "a626c8f9-858d-49bb-80e3-ff89e8244fc7",
-                    "path": "<Keyboard>/backquote",
+                    "path": "<Keyboard>/escape",
                     "interactions": "",
                     "processors": "",
                     "groups": "KeyboardMouse",
@@ -412,7 +412,7 @@
                 {
                     "name": "",
                     "id": "75590764-d033-4aea-94db-b038a53d1fe5",
-                    "path": "<Keyboard>/backquote",
+                    "path": "<Keyboard>/escape",
                     "interactions": "",
                     "processors": "",
                     "groups": "KeyboardMouse",

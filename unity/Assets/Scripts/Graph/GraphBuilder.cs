@@ -48,6 +48,16 @@ public class GraphBuilder : MonoBehaviour
         int numNodes = Cakes.Tree.GetTree().Count;
         int numEdges = Clam.FFI.NativeMethods.GetNumEdgesInGraph();
         Debug.Log("num edges in graph : " + numEdges + ", num nodes " + numNodes);
+
+        if (numEdges <2) {
+            UIHelpers.ShowErrorPopUP("less than 2 edges in graph");
+            Debug.LogWarning("less than 2 edges in graph");
+            for (int K = 0; K < nodes.Length; K++)
+            {
+                Clam.FFI.NativeMethods.DeleteClusterData(ref nodes[K]);
+            }
+            return;
+        }
         m_Vertices = new Vector3[numNodes];
         m_Indices = new int[numEdges * 2];
         InitNodeIndices();

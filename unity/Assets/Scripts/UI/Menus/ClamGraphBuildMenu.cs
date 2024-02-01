@@ -72,6 +72,12 @@ public class ClamGraphBuildMenu
         {
             node.GetComponent<Node>().Deselect();
         }
+        if (m_ScoringSelector.value == null)
+        {
+            UIHelpers.ShowErrorPopUP("Error: No scoring function selected");
+            Debug.LogError("Error: No scoring function selected");
+            return;
+        }
 
         var graphResult = Clam.FFI.NativeMethods.InitClamGraph((ScoringFunction)System.Enum.Parse(typeof(ScoringFunction), m_ScoringSelector.value), clusterSelector);
         if (graphResult != FFIError.Ok)

@@ -32,6 +32,7 @@ public class SideMenu : MonoBehaviour
         {
             "TreeMenu", "ClusterMenu", "GraphBuildMenu", "ClamGraphBuildMenu"
         };
+        m_DropdownField.value = m_CurrentMenuName;
 
         var rightField = m_UIDocument.rootVisualElement.Q<VisualElement>("Right");
 

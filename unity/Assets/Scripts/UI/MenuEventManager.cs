@@ -125,10 +125,26 @@ namespace Clam
                 Debug.Log("Error cannot destroy graph while physics is running");
                 return;
             }
-            foreach (var spring in GameObject.FindGameObjectsWithTag("Spring"))
+            Edge[] edges = GameObject.FindObjectsOfType<Edge>(true);
+            Debug.Log("num edges" + edges.Length.ToString());
+            var springs = GameObject.FindGameObjectsWithTag("Spring");
+            Debug.Log("num springs" + springs.Length.ToString());
+
+            foreach (var spring in springs)
             {
                 Destroy(spring);
             }
+            springs = GameObject.FindGameObjectsWithTag("Spring");
+            Debug.Log("num springs" + springs.Length.ToString());
+            edges = GameObject.FindObjectsOfType<Edge>(true);
+            Debug.Log("num edges" + edges.Length.ToString());
+            foreach (var edge in edges)
+            {
+                Destroy(edge);
+            }
+            Debug.Log("num edges" + edges.Length.ToString());
+
+
         }
 
         void Pause()

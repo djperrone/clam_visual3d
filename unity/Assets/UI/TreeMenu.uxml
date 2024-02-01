@@ -1,6 +1,12 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
     <ui:VisualElement name="TreeMenu">
-        <ui:VisualElement name="TreeDepth" style="margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; border-left-width: 0; border-right-width: 0; border-top-width: 0; border-bottom-width: 0; border-left-color: rgb(255, 255, 255); border-right-color: rgb(255, 255, 255); border-top-color: rgb(255, 255, 255); border-bottom-color: rgb(255, 255, 255); padding-left: 2px; padding-right: 2px; padding-top: 2px; padding-bottom: 2px;">
+        <ui:VisualElement name="TreeDepthButtonElement" style="flex-direction: row; align-items: center; justify-content: flex-start;">
+            <ui:Label text="Depth:" display-tooltip-when-elided="true" name="TreeDepthButtonLabel" style="-unity-text-align: middle-center;" />
+            <ui:Label text="0" display-tooltip-when-elided="true" name="TreeDepthValue" />
+            <ui:Button text="Less" display-tooltip-when-elided="true" name="TreeDepthLessButton" />
+            <ui:Button text="More" display-tooltip-when-elided="true" name="TreeDepthMoreButton" />
+        </ui:VisualElement>
+        <ui:VisualElement name="TreeDepth" style="margin-left: 0; margin-right: 0; margin-top: 0; margin-bottom: 0; border-left-width: 0; border-right-width: 0; border-top-width: 0; border-bottom-width: 0; border-left-color: rgb(255, 255, 255); border-right-color: rgb(255, 255, 255); border-top-color: rgb(255, 255, 255); border-bottom-color: rgb(255, 255, 255); padding-left: 2px; padding-right: 2px; padding-top: 2px; padding-bottom: 2px; overflow: hidden; display: none; visibility: hidden;">
             <ui:VisualElement name="TreeDepthSlider" style="flex-direction: row; border-bottom-width: 0; border-left-color: rgb(207, 196, 196); border-right-color: rgb(207, 196, 196); border-top-color: rgb(207, 196, 196); border-bottom-color: rgb(207, 196, 196); padding-left: 2px; padding-right: 2px; padding-top: 2px; padding-bottom: 2px; border-left-width: 0; border-right-width: 0; border-top-width: 0;">
                 <ui:Label text="Depth" display-tooltip-when-elided="true" name="TreeDepthLabel" style="justify-content: center; align-items: center; width: 20%; margin-left: 2px; margin-right: 2px; margin-top: 2px; margin-bottom: 2px; padding-left: 2px; padding-right: 2px; padding-top: 2px; padding-bottom: 2px; -unity-text-align: middle-center;" />
                 <ui:MinMaxSlider picking-mode="Ignore" min-value="0" max-value="100" low-limit="0" high-limit="100" name="TreeDepthSlider" style="flex-direction: row-reverse; width: 75%;" />
@@ -13,12 +19,6 @@
         <ui:VisualElement name="TreeColorElement">
             <ui:Label text="Color" display-tooltip-when-elided="true" name="TreeColor" />
             <ui:RadioButtonGroup value="0" name="TreeColorOptions" />
-        </ui:VisualElement>
-        <ui:VisualElement name="TreeDepthButtonElement" style="flex-direction: row; align-items: center; justify-content: flex-start;">
-            <ui:Label text="Depth:" display-tooltip-when-elided="true" name="TreeDepthButtonLabel" style="-unity-text-align: middle-center;" />
-            <ui:Label text="0" display-tooltip-when-elided="true" name="TreeDepthValue" />
-            <ui:Button text="Less" display-tooltip-when-elided="true" name="TreeDepthLessButton" />
-            <ui:Button text="More" display-tooltip-when-elided="true" name="TreeDepthMoreButton" />
         </ui:VisualElement>
         <ui:Button text="Reset" display-tooltip-when-elided="true" name="ResetTreeLayout" />
     </ui:VisualElement>
