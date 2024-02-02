@@ -1,7 +1,9 @@
 using Clam;
+using Clam.FFI;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
+using UnityEngine.Video;
 
 public class ClamGraphBuildMenu
 {
@@ -15,10 +17,12 @@ public class ClamGraphBuildMenu
 
     GameObject m_GraphBuilder = null;
     Dictionary<string, GameObject> m_Graph;
+    UIDocument m_Document;
 
 
     public ClamGraphBuildMenu(UIDocument document, string name)
     {
+        m_Document = document;
         m_CreateGraph = document.rootVisualElement.Q<Button>("CreateClamGraphButton");
         m_DestroyGraph = document.rootVisualElement.Q<Button>("DestroyClamGraph");
         m_SelectClusters = document.rootVisualElement.Q<Button>("SelectClamGraphClusters");
@@ -100,6 +104,17 @@ public class ClamGraphBuildMenu
                 m_Graph[id] = node;
             }
         }
+
+        var numGraphComponentsLabel = m_Document.rootVisualElement.Q<Label>("NumGraphComponents");
+        var numGraphComponents = NativeMethods.GetNumGraphComponents();
+        numGraphComponentsLabel.text = "Num Components: " + numGraphComponents.ToString();
+
+        var numGraphEdgesLabel = m_Document.rootVisualElement.Q<Label>("NumGraphEdges");
+        numGraphEdgesLabel.text = "Num Edgesa: " + NativeMethods.GetNumGraphEdges().ToString();
+
+        var numGraphClustersLabel = m_Document.rootVisualElement.Q<Label>("NumGraphClusters");
+        numGraphClustersLabel.text = "Num Clusters: " + NativeMethods.GetGraphClusterCardinality().ToString();
+
     }
 
     void CreateGraphCallback(ClickEvent evt)
@@ -144,7 +159,7 @@ public class ClamGraphBuildMenu
                 return;
             }
         }
-        MenuEventManager.instance.m_IsPhysicsRunning = true;
+        //MenuEventManager.instance.m_IsPhysicsRunning = true;
         Debug.Log("finished setting up unity physics sim - passing to rust");
         GameObject graphBuilderPrefab = Resources.Load("Graph") as GameObject;
         m_GraphBuilder = MenuEventManager.Instantiate(graphBuilderPrefab);

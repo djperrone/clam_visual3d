@@ -15,10 +15,7 @@ use crate::file_io::load_save::save_cakes_single_impl;
 use ffi_impl::{
     cluster_data::ClusterData, cluster_ids::ClusterIDs, lib_impl::*, string_ffi::StringFFI,
 };
-use graph::entry::{
-    get_num_edges_in_graph_impl, init_force_directed_graph_impl, init_graph_vertices_impl,
-    physics_update_async_impl, shutdown_physics_impl,
-};
+use graph::entry::*;
 use tree_layout::entry_point::{draw_hierarchy_impl, draw_hierarchy_offset_from_impl};
 use utils::{
     debug,
@@ -315,6 +312,15 @@ pub extern "C" fn shutdown_physics(ptr: InHandlePtr) -> FFIError {
 #[no_mangle]
 pub extern "C" fn get_num_edges_in_graph(ptr: InHandlePtr) -> i32 {
     get_num_edges_in_graph_impl(ptr)
+}
+
+#[no_mangle]
+pub extern "C" fn get_graph_cluster_cardinality(ptr: InHandlePtr) -> i32 {
+    get_graph_cluster_cardinality_impl(ptr)
+}
+#[no_mangle]
+pub extern "C" fn get_num_graph_components(ptr: InHandlePtr) -> i32 {
+    get_num_graph_components_impl(ptr)
 }
 
 #[no_mangle]

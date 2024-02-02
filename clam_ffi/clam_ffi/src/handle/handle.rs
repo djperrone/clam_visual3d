@@ -192,6 +192,14 @@ impl<'a> Handle<'a> {
                                 .find_component_clusters()
                                 .len()
                         );
+                        debug!(
+                            "num edges {}",
+                            self.clam_graph.as_ref().unwrap().edge_cardinality()
+                        );
+                        debug!(
+                            "num clusters {}",
+                            self.clam_graph.as_ref().unwrap().clusters().len()
+                        );
 
                         return FFIError::Ok;
                     }
@@ -248,7 +256,11 @@ impl<'a> Handle<'a> {
     }
 
     pub fn get_num_edges_in_graph(&self) -> i32 {
-        self.num_edges_in_graph.unwrap_or(-1)
+        // self.num_edges_in_graph.unwrap_or(-1)
+        if let Some(g) = self.clam_graph() {
+            return g.edge_cardinality() as i32;
+        }
+        return -1;
     }
 
     pub unsafe fn color_by_dist_to_query(
