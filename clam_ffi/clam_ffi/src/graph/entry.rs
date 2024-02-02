@@ -36,7 +36,7 @@ pub unsafe fn init_force_directed_graph_impl(
                 FFIError::Ok
             }
             Err(e) => {
-                debug!("launch thread result {:?}", e);
+                debug!("launch physics thread result {:?}", e);
                 e
             }
         }

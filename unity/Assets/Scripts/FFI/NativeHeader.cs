@@ -97,7 +97,7 @@ namespace Clam
             // ------------------------------------- Graph Physics -------------------------------------
             [System.Security.SecurityCritical]
             [DllImport(__DllName, EntryPoint = "init_force_directed_graph", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-            private static unsafe extern void init_force_directed_graph(IntPtr handle, [In, Out] ClusterData[] arr, int len, float scalar, int maxIters);
+            private static unsafe extern FFIError init_force_directed_graph(IntPtr handle, [In, Out] ClusterData[] arr, int len, float scalar, int maxIters);
 
             [System.Security.SecurityCritical]
             [DllImport(__DllName, EntryPoint = "init_graph_vertices", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]

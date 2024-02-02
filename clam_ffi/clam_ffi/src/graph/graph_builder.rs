@@ -17,7 +17,11 @@ use crate::{
 
 type Edge = (String, String, f32, bool);
 
-use super::{force_directed_graph::ForceDirectedGraph, physics_node::PhysicsNode, spring::Spring};
+use super::{
+    force_directed_graph::ForceDirectedGraph,
+    physics_node::PhysicsNode,
+    spring::{self, Spring},
+};
 
 pub unsafe fn build_force_directed_graph(
     cluster_data_arr: &[ClusterData],
@@ -37,7 +41,7 @@ pub unsafe fn build_force_directed_graph(
     };
 
     let graph = build_graph(handle, cluster_data_arr);
-    if graph.is_empty(){
+    if graph.is_empty() {
         return Err(FFIError::GraphBuildFailed);
     }
 
@@ -79,11 +83,13 @@ pub fn detect_edges(clusters: &Vec<&Clusterf32>, dataset: &Option<&DataSet>) -> 
                 let distance = clusters[i].distance_to_other(data, clusters[j]);
                 if distance <= clusters[i].radius() + clusters[j].radius() {
                     edges.push((clusters[i].name(), clusters[j].name(), distance, true));
+                    debug!("edge detected");
                 }
             }
         }
+    } else {
+        debug!("error detect edges no dataset found");
     }
-    debug!("number of edges in graph: {}", edges.len());
     edges
 }
 

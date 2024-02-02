@@ -63,6 +63,11 @@ impl ForceDirectedGraph {
                     g.0.data_ready = false;
                     return false;
                 } else {
+                    // if self.edges.is_empty() {
+                    //     debug!("no edges in produce comp");
+                    //     g.0.data_ready = false;
+                    //     return false;
+                    // }
                     for spring in self.edges.iter() {
                         spring.move_nodes(&mut g.1, self.max_edge_len, self.scalar);
                     }

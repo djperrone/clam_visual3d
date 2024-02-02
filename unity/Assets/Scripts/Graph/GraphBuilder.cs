@@ -40,8 +40,13 @@ public class GraphBuilder : MonoBehaviour
     public void Init(Clam.FFI.ClusterData[] nodes, float edgeScalar, int numIters)
     {
         GetComponent<MeshFilter>().mesh = new Mesh();
-        Clam.FFI.NativeMethods.InitForceDirectedGraph(nodes, edgeScalar, numIters);
-
+        var buildResult = Clam.FFI.NativeMethods.InitForceDirectedGraph(nodes, edgeScalar, numIters);
+        if (buildResult != FFIError.Ok)
+        {
+            UIHelpers.ShowErrorPopUP("Graph build failed");
+            Debug.LogError("Graph build failed");
+            return;
+        }
         m_VertexCounter = 0;
         m_IndexCounter = 0;
 

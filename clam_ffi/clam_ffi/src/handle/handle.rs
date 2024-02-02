@@ -192,6 +192,14 @@ impl<'a> Handle<'a> {
                                 .find_component_clusters()
                                 .len()
                         );
+                        debug!(
+                            "num edges {}",
+                            self.clam_graph.as_ref().unwrap().edge_cardinality()
+                        );
+                        debug!(
+                            "num clusters {}",
+                            self.clam_graph.as_ref().unwrap().clusters().len()
+                        );
 
                         return FFIError::Ok;
                     }

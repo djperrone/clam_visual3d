@@ -159,7 +159,7 @@ public class ClamGraphBuildMenu
                 return;
             }
         }
-        MenuEventManager.instance.m_IsPhysicsRunning = true;
+        //MenuEventManager.instance.m_IsPhysicsRunning = true;
         Debug.Log("finished setting up unity physics sim - passing to rust");
         GameObject graphBuilderPrefab = Resources.Load("Graph") as GameObject;
         m_GraphBuilder = MenuEventManager.Instantiate(graphBuilderPrefab);

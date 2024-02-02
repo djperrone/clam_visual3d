@@ -18,7 +18,7 @@ namespace Clam
 
         public static partial class NativeMethods
         {
-	public const string __DllName = "clam_ffi_2024-02-0115-09-32";
+	public const string __DllName = "clam_ffi_2024-02-0211-56-39";
             private static IntPtr m_Handle;
 
             private static bool m_Initialized = false;
@@ -248,9 +248,9 @@ namespace Clam
             }
 
             // Graph Physics
-            public static void InitForceDirectedGraph(ClusterData[] nodes, float scalar, int maxIters)
+            public static FFIError InitForceDirectedGraph(ClusterData[] nodes, float scalar, int maxIters)
             {
-                init_force_directed_graph(m_Handle, nodes, nodes.Length, scalar, maxIters);
+                return init_force_directed_graph(m_Handle, nodes, nodes.Length, scalar, maxIters);
             }
             public static void InitGraphVertices(NodeVisitorMut edgeCB)
             {
