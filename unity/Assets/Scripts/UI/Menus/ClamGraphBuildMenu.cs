@@ -107,8 +107,8 @@ public class ClamGraphBuildMenu
 
         var numGraphComponentsLabel = m_Document.rootVisualElement.Q<Label>("NumGraphComponents");
         var numGraphComponents = NativeMethods.GetNumGraphComponents();
-        
         numGraphComponentsLabel.text = "Num Components: " + numGraphComponents.ToString();
+
         var numGraphEdgesLabel = m_Document.rootVisualElement.Q<Label>("NumGraphEdges");
         numGraphEdgesLabel.text = "Num Edgesa: " + NativeMethods.GetNumGraphEdges().ToString();
 
