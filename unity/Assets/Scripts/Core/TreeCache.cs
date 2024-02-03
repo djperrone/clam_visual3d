@@ -86,6 +86,7 @@ namespace Clam
 
         private void PopulateEdgeDictionary()
         {
+            Debug.Log("Populting edge keya");
             m_EdgeCache = new Dictionary<string, GameObject>();
             Edge[] edges = GameObject.FindObjectsOfType<Edge>(true);
             foreach (Edge edge in edges)

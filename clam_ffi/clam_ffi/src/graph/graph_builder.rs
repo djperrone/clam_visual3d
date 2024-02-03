@@ -83,7 +83,6 @@ pub fn detect_edges(clusters: &Vec<&Clusterf32>, dataset: &Option<&DataSet>) -> 
                 let distance = clusters[i].distance_to_other(data, clusters[j]);
                 if distance <= clusters[i].radius() + clusters[j].radius() {
                     edges.push((clusters[i].name(), clusters[j].name(), distance, true));
-                    debug!("edge detected");
                 }
             }
         }
