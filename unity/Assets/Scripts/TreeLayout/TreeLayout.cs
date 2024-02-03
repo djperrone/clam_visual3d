@@ -25,7 +25,7 @@ public class TreeLayout
 
         Debug.Log("root depth: " + m_RootDepth);
 
-        m_CurrentDepth = m_RootDepth;
+        m_CurrentDepth = m_RootDepth+1;
         m_MaxDepth = m_CurrentDepth + m_IntervalStep;
 
         NativeMethods.DrawHierarchyOffsetFrom(new RustResourceWrapper<ClusterData>(ClusterData.Alloc(m_RootID)), UpdatePositionCallback, m_RootDepth, m_CurrentDepth, m_MaxDepth);

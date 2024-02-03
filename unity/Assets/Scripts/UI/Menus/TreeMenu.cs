@@ -47,6 +47,8 @@ public class TreeMenu
         m_MaxVertexDegree = NativeMethods.MaxVertexDegree();
         var depthLabel = m_UIDocument.rootVisualElement.Q<Label>("TreeDepthButtonLabel");
         depthLabel.text = "visible depth (max " + Clam.FFI.NativeMethods.TreeHeight().ToString() + "):";
+        m_DepthValue.text = m_Layout.CurrentDepth().ToString();
+
     }
 
     void ResetCallback(ClickEvent evt)

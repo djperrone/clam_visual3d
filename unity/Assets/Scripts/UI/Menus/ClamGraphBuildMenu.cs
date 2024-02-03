@@ -24,13 +24,13 @@ public class ClamGraphBuildMenu
     {
         m_Document = document;
         m_CreateGraph = document.rootVisualElement.Q<Button>("CreateClamGraphButton");
-        m_DestroyGraph = document.rootVisualElement.Q<Button>("DestroyClamGraph");
+        m_DestroyGraph = document.rootVisualElement.Q<Button>("ResetClamGraph");
         m_SelectClusters = document.rootVisualElement.Q<Button>("SelectClamGraphClusters");
         m_EdgeScalar = document.rootVisualElement.Q<Slider>("ClamEdgeScalar");
         m_ScoringSelector = document.rootVisualElement.Q<DropdownField>("ScoringFunctionSelector");
         m_ShowEdges = document.rootVisualElement.Q<Toggle>("ShowEdgesToggle");
 
-        m_DestroyGraph.RegisterCallback<ClickEvent>(DestroyGraphCallback);
+        m_DestroyGraph.RegisterCallback<ClickEvent>(ResetCallback);
 
         m_SpringPrefab = Resources.Load("Spring") as GameObject;
 
@@ -166,10 +166,19 @@ public class ClamGraphBuildMenu
         m_GraphBuilder.GetComponent<GraphBuilder>().Init(selectedClusters, m_EdgeScalar.value, 500);
     }
 
-    public void DestroyGraphCallback(ClickEvent evt)
+    void ResetCallback(ClickEvent evt)
     {
-        MenuEventManager.SwitchState(Menu.DestroyTree);
-        MenuEventManager.SwitchState(Menu.DestroyGraph);
+        if (!MenuEventManager.instance.m_IsPhysicsRunning)
+        {
+
+            MenuEventManager.SwitchState(Menu.DestroyGraph);
+            MenuEventManager.SwitchState(Menu.DestroyTree);
+            Cakes.Tree.ResetTree();
+        }
+        else
+        {
+            Debug.LogWarning("Cannot reset tree while physics is running");
+        }
     }
 
     void IncludeHiddenCallback(ClickEvent evt)

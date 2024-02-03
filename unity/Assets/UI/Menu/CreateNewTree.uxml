@@ -1,24 +1,24 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
-    <ui:VisualElement name="MainBackground" style="flex-grow: 1; align-items: center; justify-content: center; background-color: rgb(85, 196, 229);">
-        <ui:VisualElement name="MenuBackground" style="align-items: center; justify-content: center; width: 50%; height: 100%; flex-grow: 0; background-color: rgb(115, 110, 110); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-top-left-radius: 10px; border-bottom-left-radius: 10px; border-top-right-radius: 10px; border-bottom-right-radius: 10px; border-left-color: rgb(0, 0, 0); border-right-color: rgb(0, 0, 0); border-top-color: rgb(0, 0, 0); border-bottom-color: rgb(0, 0, 0);">
-            <ui:Label text="Create New" display-tooltip-when-elided="true" name="ClamLabel" style="font-size: 24px;" />
+    <ui:VisualElement name="MainBackground" style="flex-grow: 1; align-items: center; justify-content: center; background-color: rgb(86, 109, 122);">
+        <ui:VisualElement name="MenuBackground" style="align-items: center; justify-content: center; width: 50%; height: 100%; flex-grow: 0; background-color: rgb(158, 200, 225); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-top-left-radius: 10px; border-bottom-left-radius: 10px; border-top-right-radius: 10px; border-bottom-right-radius: 10px; border-left-color: rgb(0, 0, 0); border-right-color: rgb(0, 0, 0); border-top-color: rgb(0, 0, 0); border-bottom-color: rgb(0, 0, 0);">
+            <ui:Label text="Create New" display-tooltip-when-elided="true" name="ClamLabel" style="font-size: 24px; color: rgb(0, 0, 0);" />
             <ui:VisualElement name="DatasetInput" style="flex-direction: row; align-items: center; justify-content: center; width: 100%; flex-shrink: 0;">
-                <ui:Label text="Dataset" display-tooltip-when-elided="true" name="DatasetInputLabel" style="width: 27%; -unity-text-align: middle-center; margin-left: 2px; margin-right: 4px; margin-top: 4px; margin-bottom: 2px; padding-left: 1px; padding-right: 2px; padding-top: 4px; padding-bottom: 4px;" />
-                <ui:TextField picking-mode="Ignore" name="DatasetInputField" style="width: 33%;" />
+                <ui:Label text="Dataset" display-tooltip-when-elided="true" name="DatasetInputLabel" style="width: 27%; -unity-text-align: middle-center; margin-left: 2px; margin-right: 4px; margin-top: 4px; margin-bottom: 2px; padding-left: 1px; padding-right: 2px; padding-top: 4px; padding-bottom: 4px; color: rgb(0, 0, 0);" />
+                <ui:TextField picking-mode="Ignore" name="DatasetInputField" text="Choose a Dataset" style="width: 33%;" />
                 <ui:DropdownField index="-1" choices="System.Collections.Generic.List`1[System.String]" name="DatasetDropdown" style="width: 27%;" />
             </ui:VisualElement>
             <ui:VisualElement name="CardinalityInput" style="flex-direction: row; align-items: center; justify-content: center; width: 100%;">
-                <ui:Label text="Cardinality" display-tooltip-when-elided="true" name="CardinalityInputLabel" style="width: 25%; -unity-text-align: middle-center;" />
+                <ui:Label text="Cardinality" display-tooltip-when-elided="true" name="CardinalityInputLabel" style="width: 25%; -unity-text-align: middle-center; color: rgb(0, 0, 0);" />
                 <ui:TextField picking-mode="Ignore" name="CardinalityInputField" tabindex="0" style="width: 33%;" />
                 <ui:VisualElement style="width: 27%;" />
             </ui:VisualElement>
             <ui:VisualElement name="DistanceMetricInput" style="flex-direction: row; align-items: center; justify-content: center; width: 100%; flex-shrink: 0;">
-                <ui:Label text="Distance Metric" display-tooltip-when-elided="true" name="DistanceMetricInputLabel" style="width: 25%; -unity-text-align: middle-center; margin-left: 2px; margin-right: 4px; margin-top: 4px; margin-bottom: 2px; padding-left: 1px; padding-right: 2px; padding-top: 4px; padding-bottom: 4px;" />
+                <ui:Label text="Distance Metric" display-tooltip-when-elided="true" name="DistanceMetricInputLabel" style="width: 25%; -unity-text-align: middle-center; margin-left: 2px; margin-right: 4px; margin-top: 4px; margin-bottom: 2px; padding-left: 1px; padding-right: 2px; padding-top: 4px; padding-bottom: 4px; color: rgb(0, 0, 0);" />
                 <ui:DropdownField index="-1" choices="System.Collections.Generic.List`1[System.String]" name="DistanceMetricDropdown" style="width: 33%;" />
                 <ui:VisualElement style="width: 27%;" />
             </ui:VisualElement>
-            <ui:Button text="Create" display-tooltip-when-elided="true" name="CreateButton" tabindex="0" style="width: 25%; border-left-color: rgb(19, 18, 18); border-right-color: rgb(19, 18, 18); border-top-color: rgb(19, 18, 18); border-bottom-color: rgb(19, 18, 18); border-top-left-radius: 0; border-bottom-left-radius: 0; border-top-right-radius: 0; border-bottom-right-radius: 0;" />
-            <ui:Button text="Back" display-tooltip-when-elided="true" name="BackButton" tabindex="0" style="width: 25%; border-left-color: rgb(0, 0, 0); border-right-color: rgb(0, 0, 0); border-top-color: rgb(0, 0, 0); border-bottom-color: rgb(0, 0, 0);" />
+            <ui:Button text="Create" display-tooltip-when-elided="true" name="CreateButton" tabindex="0" style="width: 25%; border-left-color: rgb(19, 18, 18); border-right-color: rgb(19, 18, 18); border-top-color: rgb(19, 18, 18); border-bottom-color: rgb(19, 18, 18); border-top-left-radius: 0; border-bottom-left-radius: 0; border-top-right-radius: 0; border-bottom-right-radius: 0; background-color: rgb(156, 167, 173); color: rgb(0, 0, 0);" />
+            <ui:Button text="Back" display-tooltip-when-elided="true" name="BackButton" tabindex="0" style="width: 25%; border-left-color: rgb(0, 0, 0); border-right-color: rgb(0, 0, 0); border-top-color: rgb(0, 0, 0); border-bottom-color: rgb(0, 0, 0); background-color: rgb(156, 167, 173); color: rgb(0, 0, 0);" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>
