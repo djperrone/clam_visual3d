@@ -25,4 +25,4 @@ This is my master's thesis I'm working on at the University of Rhode Island. The
 - You can then run the unity project from the main menu scene and select a dataset to view.
 - The dataset needs to be formatted in a particular way and the project currently only supports floating point type data. There are several datasets built into the repo you can use as a demo.
 - I am also working on developing CHAODA so the main branch does not currently have a working cluster selection for the graph
-- The latest working branch with an experimental version of CHAODA is located on the 'visualization-demo' branch
+- The main branch will have the latest stable features.
