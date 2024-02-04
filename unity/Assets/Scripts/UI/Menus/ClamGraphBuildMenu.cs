@@ -59,8 +59,13 @@ public class ClamGraphBuildMenu
         List<string> scoringFunctionStrings = new List<string>();
         foreach (ScoringFunction scoringFunction in System.Enum.GetValues(typeof(ScoringFunction)))
         {
+            var distanceMetric = Cakes.Tree.GetComponent<TreeCache>().m_TreeData.distanceMetric;
             string scoringFunctionString = scoringFunction.ToString();
-            scoringFunctionStrings.Add(scoringFunctionString);
+            if (scoringFunctionString.Contains(distanceMetric.ToString()))
+            {
+
+                scoringFunctionStrings.Add(scoringFunctionString);
+            }
         }
 
         m_ScoringSelector.choices = scoringFunctionStrings;

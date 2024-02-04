@@ -1,10 +1,10 @@
+using Clam;
 using Clam.FFI;
-using System.Collections;
+using StarterAssets;
 using System.Collections.Generic;
 using System.Linq;
-using System.Xml;
-using System.Xml.Linq;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 
 public class SideMenu : MonoBehaviour
@@ -20,6 +20,8 @@ public class SideMenu : MonoBehaviour
     GraphBuildMenu m_GraphBuildMenu;
     ClamGraphBuildMenu m_ClamGraphBuildMenu;
     TreeMenu m_TreeMenu;
+
+    RadioButtonGroup m_UIMode;
 
     // Start is called before the first frame update
     void Start()
@@ -46,7 +48,10 @@ public class SideMenu : MonoBehaviour
             }
 
             instance.name = m_DropdownField.choices[i];
-            rightField.hierarchy.Add(instance);
+            rightField.hierarchy.Insert(i + 1, instance);
+            Debug.Log("right children");
+            rightField.hierarchy.Children().ToList().ForEach(x => Debug.Log(x.name));
+            //rightField.hierarchy.Add(instance);
         }
         m_DropdownField.RegisterValueChangedCallback(Callback);
 
@@ -54,6 +59,35 @@ public class SideMenu : MonoBehaviour
         m_ClusterMenu = new ClusterMenu(GetComponent<UIDocument>());
         m_GraphBuildMenu = new GraphBuildMenu(GetComponent<UIDocument>(), "GraphBuildMenu");
         m_ClamGraphBuildMenu = new ClamGraphBuildMenu(GetComponent<UIDocument>(), "ClamGraphBuildMenu");
+        m_UIMode = m_UIDocument.rootVisualElement.Q<RadioButtonGroup>("UIMode");
+        m_UIMode.choices = new List<string>() { "In-World", "Overlay" };
+        m_UIMode.RegisterValueChangedCallback(UIModeCallback);
+
+    }
+    void UIModeCallback(ChangeEvent<int> changeEvent)
+    {
+        if (changeEvent.newValue == 0)
+        {
+            Debug.Log("changing ui mode to 0");
+            ClamUserInput input = (ClamUserInput)FindObjectOfType(typeof(ClamUserInput));
+            input.GetComponent<ClamUserInput>().OnChangeMapToPlayer(new InputValue());
+        }
+        else
+        {
+            Debug.Log("changing ui mode to 1");
+
+            FirstPersonController input = (FirstPersonController)FindObjectOfType(typeof(FirstPersonController));
+            input.GetComponent<FirstPersonController>().OnChangeMapToWorldUI(new InputValue());
+        }
+    }
+    public void SwitchToOverlayUIMode()
+    {
+        m_UIMode.value = 1;
+    }
+
+    public void SwitchToCameraControlMode()
+    {
+        m_UIMode.value = 0;
     }
 
     public void DisplayClusterInfo(ClusterData data)

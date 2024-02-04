@@ -8,8 +8,8 @@
                 <ui:DropdownField index="-1" choices="System.Collections.Generic.List`1[System.String]" name="DatasetDropdown" style="width: 27%;" />
             </ui:VisualElement>
             <ui:VisualElement name="CardinalityInput" style="flex-direction: row; align-items: center; justify-content: center; width: 100%;">
-                <ui:Label text="Cardinality" display-tooltip-when-elided="true" name="CardinalityInputLabel" style="width: 25%; -unity-text-align: middle-center; color: rgb(0, 0, 0);" />
-                <ui:TextField picking-mode="Ignore" name="CardinalityInputField" tabindex="0" style="width: 33%;" />
+                <ui:Label text="Min Cardinality" display-tooltip-when-elided="true" name="CardinalityInputLabel" style="width: 25%; -unity-text-align: middle-center; color: rgb(0, 0, 0);" />
+                <ui:TextField name="CardinalityInputField" tabindex="0" usage-hints="None" tooltip="Recommended 1 - 50 unless dataset is large" text="1" value="1" style="width: 33%;" />
                 <ui:VisualElement style="width: 27%;" />
             </ui:VisualElement>
             <ui:VisualElement name="DistanceMetricInput" style="flex-direction: row; align-items: center; justify-content: center; width: 100%; flex-shrink: 0;">

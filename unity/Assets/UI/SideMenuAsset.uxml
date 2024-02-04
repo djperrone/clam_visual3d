@@ -2,8 +2,9 @@
     <ui:VisualElement name="MainBackground" picking-mode="Ignore" style="flex-grow: 1; flex-direction: row;">
         <ui:VisualElement name="Left" picking-mode="Ignore" style="width: 25%;" />
         <ui:VisualElement name="Middle" picking-mode="Ignore" style="width: 50%;" />
-        <ui:VisualElement name="Right" style="width: 25%; background-color: rgb(89, 89, 89);">
+        <ui:VisualElement name="Right" style="width: 25%; background-color: rgb(156, 167, 173);">
             <ui:DropdownField index="-1" choices="System.Collections.Generic.List`1[System.String]" name="MenuSelector" />
+            <ui:RadioButtonGroup label="UI Mode (LCTRL)" value="0" name="UIMode" choices="In-World, Overlay" picking-mode="Ignore" focusable="false" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

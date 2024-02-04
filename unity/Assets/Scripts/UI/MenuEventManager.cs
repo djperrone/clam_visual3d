@@ -292,6 +292,16 @@ namespace Clam
             {
                 thisEvent.Invoke();
             }
+
+            if (eventName == Menu.Unlock)
+            {
+                instance.GetCurrentMenu().GetComponent<SideMenu>().SwitchToOverlayUIMode();
+            }
+            else if(eventName == Menu.Lock)
+            {
+                instance.GetCurrentMenu().GetComponent<SideMenu>().SwitchToCameraControlMode();
+
+            }
         }
 
         public void Update()

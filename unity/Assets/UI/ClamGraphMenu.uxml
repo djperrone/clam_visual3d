@@ -2,7 +2,7 @@
     <ui:VisualElement name="ClamGraphBuildMenu">
         <ui:VisualElement name="EdgeScalerContainer" style="flex-direction: row;">
             <ui:Label text="Edge Scale" display-tooltip-when-elided="true" name="EdgeScalerLabel" style="width: 35%;" />
-            <ui:Slider picking-mode="Ignore" value="100" high-value="100" name="ClamEdgeScalar" focusable="false" style="width: 55%;" />
+            <ui:Slider picking-mode="Ignore" value="100" high-value="1000" name="ClamEdgeScalar" focusable="false" style="width: 55%;" />
         </ui:VisualElement>
         <ui:Button text="Select Clusters" display-tooltip-when-elided="true" name="SelectClamGraphClusters" focusable="false" />
         <ui:Button text="Create Graph" display-tooltip-when-elided="true" name="CreateClamGraphButton" focusable="false" />

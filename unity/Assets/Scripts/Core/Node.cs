@@ -1,7 +1,4 @@
-using System;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.InputSystem;
 
 //public interface IClickable
 //{
@@ -51,19 +48,17 @@ namespace Clam
         {
             if (m_IsSelected)
             {
-                SetColor(m_ActualColor);
-                m_IsSelected = false;
+                Deselect();
             }
             else
             {
-                SetColor(new Color(0.0f, 0.0f, 1.0f));
-                m_IsSelected = true;
+                Select();
             }
         }
 
         public void Select()
         {
-            SetColor(new Color(0.0f, 0.0f, 1.0f));
+            GetComponent<Renderer>().material.color = new Color(0.0f, 0.0f, 1.0f);
             m_IsSelected = true;
         }
 
@@ -87,6 +82,7 @@ namespace Clam
         public void SetColor(Color color)
         {
             GetComponent<Renderer>().material.color = color;
+            m_ActualColor = color;
         }
 
         public bool IsSelected()
