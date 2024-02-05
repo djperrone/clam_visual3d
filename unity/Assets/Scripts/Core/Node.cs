@@ -140,7 +140,7 @@ namespace Clam
 
         public bool IsLeaf()
         {
-            print("-------------------------------------------------lid " + m_LeftChildID + ", rid " + m_RightChildID);
+            //print("-------------------------------------------------lid " + m_LeftChildID + ", rid " + m_RightChildID);
             return m_LeftChildID == "None" && m_RightChildID == "None";
         }
     }

@@ -49,16 +49,29 @@ public class TreeMenu
         depthLabel.text = "visible depth (max " + Clam.FFI.NativeMethods.TreeHeight().ToString() + "):";
         m_DepthValue.text = m_Layout.CurrentDepth().ToString();
 
+        MenuEventManager.StartListening(Menu.ResetTree, ResetTree);
+
     }
 
     void ResetCallback(ClickEvent evt)
     {
+        ResetTree();
+    }
+
+    void ResetTree()
+    {
         if (!MenuEventManager.instance.m_IsPhysicsRunning)
         {
 
-            MenuEventManager.SwitchState(Menu.DestroyGraph);
-            MenuEventManager.SwitchState(Menu.DestroyTree);
+            //MenuEventManager.SwitchState(Menu.DestroyGraph);
+            //MenuEventManager.SwitchState(Menu.DestroyTree);
             Cakes.Tree.ResetTree();
+            var foundRoot = NativeMethods.GetRootData(out var rootData);
+            m_Layout = new TreeLayout(rootData.Data.id.AsString);
+            var depthLabel = m_UIDocument.rootVisualElement.Q<Label>("TreeDepthButtonLabel");
+            depthLabel.text = "visible depth (max " + Clam.FFI.NativeMethods.TreeHeight().ToString() + "):";
+            m_DepthValue.text = m_Layout.CurrentDepth().ToString();
+
         }
         else
         {
@@ -68,20 +81,17 @@ public class TreeMenu
 
     void ShowMoreCallback(ClickEvent evt)
     {
-        Debug.Log("Show more");
         m_Layout.ShowMore();
         m_DepthValue.text = m_Layout.CurrentDepth().ToString();
     }
     void ShowLessCallback(ClickEvent evt)
     {
-        Debug.Log("Show less");
         m_Layout.ShowLess();
         m_DepthValue.text = m_Layout.CurrentDepth().ToString();
     }
 
     bool InputFieldChangeCallback()
     {
-        Debug.Log("tree depth clbk");
         return true;
     }
 
@@ -92,11 +102,9 @@ public class TreeMenu
             ColorByLabel, ColorByCardinality, ColorByRadius,ColorByLFD, ColorByDepth, ColorByVertexDegree
         };
 
-        Debug.Log("color by " + m_ColorOptions.choices.ToList()[changeEvent.newValue]);
         if (changeEvent.newValue == 0)
         {
             NativeMethods.ColorClustersByLabel(ColorByLabel);
-            Debug.Log("label");
         }
         else
         {

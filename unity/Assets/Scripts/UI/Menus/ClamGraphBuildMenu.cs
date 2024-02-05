@@ -11,7 +11,7 @@ public class ClamGraphBuildMenu
     Button m_CreateGraph;
     Button m_DestroyGraph;
     DropdownField m_ScoringSelector;
-    GameObject m_SpringPrefab;
+    //GameObject m_SpringPrefab;
     Slider m_EdgeScalar;
     Toggle m_ShowEdges;
 
@@ -32,7 +32,7 @@ public class ClamGraphBuildMenu
 
         m_DestroyGraph.RegisterCallback<ClickEvent>(ResetCallback);
 
-        m_SpringPrefab = Resources.Load("Spring") as GameObject;
+        //m_SpringPrefab = Resources.Load("Spring") as GameObject;
 
         m_CreateGraph.RegisterCallback<ClickEvent>(CreateGraphCallback);
         m_SelectClusters.RegisterCallback<ClickEvent>(SelectClustersForGraphCallback);
@@ -40,6 +40,12 @@ public class ClamGraphBuildMenu
         m_ShowEdges.RegisterValueChangedCallback(ShowEdgesCallback);
 
         InitScoringSelector();
+
+        if (m_GraphBuilder == null)
+        {
+            GameObject graphBuilderPrefab = Resources.Load("Graph") as GameObject;
+            m_GraphBuilder = MenuEventManager.Instantiate(graphBuilderPrefab);
+        }
     }
 
     void ShowEdgesCallback(ChangeEvent<bool> evt)
@@ -81,6 +87,7 @@ public class ClamGraphBuildMenu
         {
             node.GetComponent<Node>().Deselect();
         }
+
         if (m_ScoringSelector.value == null)
         {
             UIHelpers.ShowErrorPopUP("Error: No scoring function selected");
@@ -166,24 +173,27 @@ public class ClamGraphBuildMenu
         }
         //MenuEventManager.instance.m_IsPhysicsRunning = true;
         Debug.Log("finished setting up unity physics sim - passing to rust");
-        GameObject graphBuilderPrefab = Resources.Load("Graph") as GameObject;
-        m_GraphBuilder = MenuEventManager.Instantiate(graphBuilderPrefab);
+        
+
         m_GraphBuilder.GetComponent<GraphBuilder>().Init(selectedClusters, m_EdgeScalar.value, 500);
     }
 
     void ResetCallback(ClickEvent evt)
     {
-        if (!MenuEventManager.instance.m_IsPhysicsRunning)
-        {
+        //if (!MenuEventManager.instance.m_IsPhysicsRunning)
+        //{
 
-            MenuEventManager.SwitchState(Menu.DestroyGraph);
-            MenuEventManager.SwitchState(Menu.DestroyTree);
-            Cakes.Tree.ResetTree();
-        }
-        else
-        {
-            Debug.LogWarning("Cannot reset tree while physics is running");
-        }
+        //    //MenuEventManager.SwitchState(Menu.DestroyGraph);
+
+        m_GraphBuilder.GetComponent<GraphBuilder>().DestroyGraph();
+        MenuEventManager.SwitchState(Menu.ResetTree);
+        //    m_GraphBuilder.GetComponent<GraphBuilder>().DestroyGraph();
+        //    Cakes.Tree.ResetTree();
+        //}
+        //else
+        //{
+        //    Debug.LogWarning("Cannot reset tree while physics is running");
+        //}
     }
 
     void IncludeHiddenCallback(ClickEvent evt)
