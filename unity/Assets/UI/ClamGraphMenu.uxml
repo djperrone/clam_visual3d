@@ -4,7 +4,8 @@
             <ui:Label text="Edge Scale" display-tooltip-when-elided="true" name="EdgeScalerLabel" style="width: 35%;" />
             <ui:Slider picking-mode="Ignore" value="100" high-value="1000" name="ClamEdgeScalar" focusable="false" style="width: 55%;" />
         </ui:VisualElement>
-        <ui:Button text="Select Clusters" display-tooltip-when-elided="true" name="SelectClamGraphClusters" focusable="false" />
+        <ui:Button text="Auto Select Clusters" display-tooltip-when-elided="true" name="SelectClamGraphClusters" focusable="false" />
+        <ui:Button text="Manually Select Clusters" display-tooltip-when-elided="true" name="ManuallySelectClamGraphClusters" />
         <ui:Button text="Create Graph" display-tooltip-when-elided="true" name="CreateClamGraphButton" focusable="false" />
         <ui:Button text="Reset" display-tooltip-when-elided="true" name="ResetClamGraph" />
         <ui:VisualElement name="ScoringFunctions" style="flex-direction: row;">

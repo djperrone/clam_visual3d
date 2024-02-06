@@ -18,7 +18,7 @@ namespace Clam
 
         public static partial class NativeMethods
         {
-	public const string __DllName = "clam_ffi_2024-02-0513-18-41";
+	public const string __DllName = "clam_ffi_2024-02-0613-01-23";
             private static IntPtr m_Handle;
 
             private static bool m_Initialized = false;
@@ -52,6 +52,16 @@ namespace Clam
             public static FFIError InitClamGraph(ScoringFunction scoringFunction, NodeVisitor clusterSelector)
             {
                 var e = init_clam_graph(m_Handle, scoringFunction, clusterSelector);
+                if (e == FFIError.Ok)
+                {
+                    m_Initialized = true;
+                }
+                return e;
+            }
+
+            public static FFIError InitClamGraphFromLeaves()
+            {
+                var e = init_clam_graph_from_leaves(m_Handle);
                 if (e == FFIError.Ok)
                 {
                     m_Initialized = true;

@@ -7,7 +7,8 @@ using UnityEngine.Video;
 
 public class ClamGraphBuildMenu
 {
-    Button m_SelectClusters;
+    Button m_AutoSelectClusters;
+    Button m_ManuallySelectClusters;
     Button m_CreateGraph;
     Button m_DestroyGraph;
     DropdownField m_ScoringSelector;
@@ -25,7 +26,8 @@ public class ClamGraphBuildMenu
         m_Document = document;
         m_CreateGraph = document.rootVisualElement.Q<Button>("CreateClamGraphButton");
         m_DestroyGraph = document.rootVisualElement.Q<Button>("ResetClamGraph");
-        m_SelectClusters = document.rootVisualElement.Q<Button>("SelectClamGraphClusters");
+        m_AutoSelectClusters = document.rootVisualElement.Q<Button>("SelectClamGraphClusters");
+        m_ManuallySelectClusters = document.rootVisualElement.Q<Button>("ManuallySelectClamGraphClusters");
         m_EdgeScalar = document.rootVisualElement.Q<Slider>("ClamEdgeScalar");
         m_ScoringSelector = document.rootVisualElement.Q<DropdownField>("ScoringFunctionSelector");
         m_ShowEdges = document.rootVisualElement.Q<Toggle>("ShowEdgesToggle");
@@ -35,7 +37,8 @@ public class ClamGraphBuildMenu
         //m_SpringPrefab = Resources.Load("Spring") as GameObject;
 
         m_CreateGraph.RegisterCallback<ClickEvent>(CreateGraphCallback);
-        m_SelectClusters.RegisterCallback<ClickEvent>(SelectClustersForGraphCallback);
+        m_AutoSelectClusters.RegisterCallback<ClickEvent>(AutoSelectClustersForGraphCallback);
+        m_ManuallySelectClusters.RegisterCallback<ClickEvent>(ManuallySelectClustersForGraphCallback);
 
         m_ShowEdges.RegisterValueChangedCallback(ShowEdgesCallback);
 
@@ -56,7 +59,7 @@ public class ClamGraphBuildMenu
         }
         else
         {
-            Debug.Log("Warning: Graph builder does not exist yet");
+            Debug.LogWarning("Warning: Graph builder does not exist yet");
         }
     }
 
@@ -77,7 +80,7 @@ public class ClamGraphBuildMenu
         m_ScoringSelector.choices = scoringFunctionStrings;
     }
 
-    void SelectClustersForGraphCallback(ClickEvent evt)
+    void AutoSelectClustersForGraphCallback(ClickEvent evt)
     {
         if (MenuEventManager.instance.m_IsPhysicsRunning)
         {
@@ -91,11 +94,11 @@ public class ClamGraphBuildMenu
         if (m_ScoringSelector.value == null)
         {
             UIHelpers.ShowErrorPopUP("Error: No scoring function selected");
-            Debug.LogError("Error: No scoring function selected");
+            Debug.LogWarning("Warning: No scoring function selected");
             return;
         }
 
-        var graphResult = Clam.FFI.NativeMethods.InitClamGraph((ScoringFunction)System.Enum.Parse(typeof(ScoringFunction), m_ScoringSelector.value), clusterSelector);
+        var graphResult = Clam.FFI.NativeMethods.InitClamGraph((ScoringFunction)System.Enum.Parse(typeof(ScoringFunction), m_ScoringSelector.value), AutoclusterSelector);
         if (graphResult != FFIError.Ok)
         {
             string errorMessage = "Error building graph (" + graphResult.ToString() + ")";
@@ -116,6 +119,98 @@ public class ClamGraphBuildMenu
                 m_Graph[id] = node;
             }
         }
+
+        var numGraphComponentsLabel = m_Document.rootVisualElement.Q<Label>("NumGraphComponents");
+        var numGraphComponents = NativeMethods.GetNumGraphComponents();
+        numGraphComponentsLabel.text = "Num Components: " + numGraphComponents.ToString();
+
+        var numGraphEdgesLabel = m_Document.rootVisualElement.Q<Label>("NumGraphEdges");
+        numGraphEdgesLabel.text = "Num Edgesa: " + NativeMethods.GetNumGraphEdges().ToString();
+
+        var numGraphClustersLabel = m_Document.rootVisualElement.Q<Label>("NumGraphClusters");
+        numGraphClustersLabel.text = "Num Clusters: " + NativeMethods.GetGraphClusterCardinality().ToString();
+
+    }
+
+    void ManuallySelectClustersForGraphCallback(ClickEvent evt)
+    {
+        if (MenuEventManager.instance.m_IsPhysicsRunning)
+        {
+            return;
+        }
+        //foreach ((var id, var node) in Cakes.Tree.GetTree())
+        //{
+        //    node.GetComponent<Node>().Deselect();
+        //}
+
+        //if (m_ScoringSelector.value == null)
+        //{
+        //    UIHelpers.ShowErrorPopUP("Error: No scoring function selected");
+        //    Debug.LogWarning("Warning: No scoring function selected");
+        //    return;
+        //}
+        m_Graph = new Dictionary<string, GameObject>();
+
+        foreach ((var id, var node) in Cakes.Tree.GetTree())
+        {
+            
+            if (node.GetComponent<Node>().IsLeaf())
+            {
+                node.GetComponent<Node>().Select();
+                if (!node.activeSelf)
+                {
+                    node.SetActive(true);
+                }
+                m_Graph[id] = node;
+            }
+            else
+            {
+                GameObject.Destroy(node);
+            }
+        }
+
+        Cakes.Tree.Set(m_Graph);
+
+        MenuEventManager.SwitchState(Menu.DestroyGraph);
+        MenuEventManager.SwitchState(Menu.DestroyTree);
+
+       
+       
+
+        var selectedClusters = new Clam.FFI.ClusterData[m_Graph.Count];
+        int i = 0;
+
+        foreach (var (name, node) in m_Graph)
+        {
+            var x = Random.Range(0, 100);
+            var y = Random.Range(0, 100);
+            var z = Random.Range(0, 100);
+
+            node.GetComponent<Transform>().position = new Vector3(x, y, z);
+
+            var result = Clam.FFI.NativeMethods.CreateClusterDataMustFree(node.GetComponent<Node>().GetId(), out var clusterData);
+            if (result == FFIError.Ok)
+            {
+                selectedClusters[i++] = clusterData;
+            }
+            else
+            {
+                Debug.LogError("Node could not be found");
+                return;
+            }
+        }
+        //MenuEventManager.instance.m_IsPhysicsRunning = true;
+        Debug.Log("finished setting up unity physics sim - passing to rust");
+        var graphResult = Clam.FFI.NativeMethods.InitClamGraphFromLeaves();
+        if (graphResult != FFIError.Ok)
+        {
+            string errorMessage = "Error building graph (" + graphResult.ToString() + ")";
+            Debug.LogError(errorMessage);
+            UIHelpers.ShowErrorPopUP(errorMessage);
+            return;
+        }
+
+        m_GraphBuilder.GetComponent<GraphBuilder>().Init(selectedClusters, m_EdgeScalar.value, 500);
 
         var numGraphComponentsLabel = m_Document.rootVisualElement.Q<Label>("NumGraphComponents");
         var numGraphComponents = NativeMethods.GetNumGraphComponents();
@@ -201,15 +296,28 @@ public class ClamGraphBuildMenu
         MenuEventManager.SwitchState(Menu.IncludeHidden);
     }
 
-    public void clusterSelector(ref Clam.FFI.ClusterData nodeData)
+    public void AutoclusterSelector(ref Clam.FFI.ClusterData nodeData)
     {
-        if (Cakes.Tree.GetTree().TryGetValue(nodeData.id.AsString, out var node))
+        var cluster = Cakes.Tree.GetOrAdd(nodeData.id.AsString);
+        //if (Cakes.Tree.GetTree().TryGetValue(nodeData.id.AsString, out var node))
         {
-            node.GetComponent<Node>().Select();
+            cluster.GetComponent<Node>().Select();
         }
-        else
-        {
-            Debug.LogError("cluster not found");
-        }
+        //else
+        //{
+        //    Debug.LogError("cluster not found");
+        //}
     }
+    //public void ManualClusterSelector(ref Clam.FFI.ClusterData nodeData)
+    //{
+    //    var cluster = Cakes.Tree.GetOrAdd(nodeData.id.AsString);
+    //    //if (Cakes.Tree.GetTree().TryGetValue(nodeData.id.AsString, out var node))
+    //    {
+    //        cluster.GetComponent<Node>().Select();
+    //    }
+    //    //else
+    //    //{
+    //    //    Debug.LogError("cluster not found");
+    //    //}
+    //}
 }

@@ -18,6 +18,7 @@ public class ClusterMenu
     Label m_ClusterInfoLabel;
     Dictionary<string, IntTextField> m_IntInputFields;
     Button m_DeselectAllClusters;
+    Button m_SelectAllLeafClusters;
 
     // Start is called before the first frame update
     public ClusterMenu(UIDocument uiDoc)
@@ -43,7 +44,9 @@ public class ClusterMenu
         }
 
         m_DeselectAllClusters = m_UIDocument.rootVisualElement.Q<Button>("DeselectAllClusters");
+        m_SelectAllLeafClusters = m_UIDocument.rootVisualElement.Q<Button>("SelectAllLeafClustersButton");
         m_DeselectAllClusters.RegisterCallback<ClickEvent>(DeselectClustersCallback);
+        m_SelectAllLeafClusters.RegisterCallback<ClickEvent>(SelectAllLeafClustersCallback);
     }
 
     void DeselectClustersCallback(ClickEvent evt)
@@ -51,6 +54,26 @@ public class ClusterMenu
         foreach ((var id, var cluster) in Cakes.Tree.GetTree())
         {
             cluster.GetComponent<Node>().Deselect();
+        }
+    }
+
+    void SelectAllLeafClustersCallback(ClickEvent evt)
+    {
+        MenuEventManager.SwitchState(Menu.ShowEntireTree);
+        Clam.FFI.NativeMethods.ForEachDFT(SelectAllLeafClusters);
+    }
+    void SelectAllLeafClusters(ref Clam.FFI.ClusterData data)
+    {
+        if (Cakes.Tree.GetTree().TryGetValue(data.id.AsString, out var cluster))
+        {
+            if (cluster.GetComponent<Node>().IsLeaf())
+            {
+                cluster.GetComponent<Node>().Select();
+            }
+        }
+        else
+        {
+            Debug.Log("reingoldify key not found - " + data.id.AsString);
         }
     }
 

@@ -26,6 +26,7 @@ public enum Menu
     DestroyGraph,
     DestroyTree,
     ResetTree,
+    ShowEntireTree,
     WorldInput,
     MenuInput
 }
@@ -123,7 +124,7 @@ namespace Clam
         {
             if (m_IsPhysicsRunning)
             {
-                Debug.Log("Error cannot destroy graph while physics is running");
+                Debug.LogWarning("Warning cannot destroy graph while physics is running");
                 return;
             }
 
@@ -135,7 +136,7 @@ namespace Clam
             var existingPauseMenu = FindObjectOfType(typeof(PauseMenu)) as PauseMenu;
             if (existingPauseMenu != null)
             {
-                Debug.Log("already paused");
+                Debug.LogWarning("already paused");
                 return;
             }
 

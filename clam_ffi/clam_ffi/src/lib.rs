@@ -16,6 +16,7 @@ use ffi_impl::{
     cluster_data::ClusterData, cluster_ids::ClusterIDs, lib_impl::*, string_ffi::StringFFI,
 };
 use graph::entry::*;
+use handle::handle::Handle;
 use tree_layout::entry_point::{draw_hierarchy_impl, draw_hierarchy_offset_from_impl};
 use utils::{
     debug,
@@ -188,6 +189,14 @@ pub unsafe extern "C" fn init_clam_graph(
 ) -> FFIError {
     if let Some(handle) = context {
         return handle.init_clam_graph(scoring_function, cluster_selector);
+    }
+    FFIError::HandleInitFailed
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn init_clam_graph_from_leaves(context: InHandlePtr) -> FFIError {
+    if let Some(handle) = context {
+        return handle.init_clam_graph_from_leaves();
     }
     FFIError::HandleInitFailed
 }

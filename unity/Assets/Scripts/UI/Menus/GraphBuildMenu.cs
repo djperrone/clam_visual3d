@@ -61,6 +61,22 @@ public class GraphBuildMenu
         }
     }
 
+    void ManuallyCreateGraphCallback(ClickEvent evt)
+    {
+        if (MenuEventManager.instance.m_IsPhysicsRunning)
+        {
+            return;
+        }
+
+        var graphResult = Clam.FFI.NativeMethods.InitClamGraphFromLeaves();
+
+    }
+
+    void ClusterSelectorCallback(ref Clam.FFI.ClusterData clusterData)
+    {
+
+    }
+
     void CreateGraphCallback(ClickEvent evt)
     {
         if (MenuEventManager.instance.m_IsPhysicsRunning)

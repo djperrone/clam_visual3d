@@ -45,7 +45,7 @@ public class GraphBuilder : MonoBehaviour
         if (buildResult != FFIError.Ok)
         {
             UIHelpers.ShowErrorPopUP("Graph build failed");
-            Debug.LogError("Graph build failed");
+            Debug.LogError("Graph build failed " + buildResult.ToString());
             return;
         }
         m_VertexCounter = 0;

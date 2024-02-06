@@ -49,8 +49,6 @@ public class SideMenu : MonoBehaviour
 
             instance.name = m_DropdownField.choices[i];
             rightField.hierarchy.Insert(i + 1, instance);
-            Debug.Log("right children");
-            rightField.hierarchy.Children().ToList().ForEach(x => Debug.Log(x.name));
             //rightField.hierarchy.Add(instance);
         }
         m_DropdownField.RegisterValueChangedCallback(Callback);
@@ -68,14 +66,11 @@ public class SideMenu : MonoBehaviour
     {
         if (changeEvent.newValue == 0)
         {
-            Debug.Log("changing ui mode to 0");
             ClamUserInput input = (ClamUserInput)FindObjectOfType(typeof(ClamUserInput));
             input.GetComponent<ClamUserInput>().OnChangeMapToPlayer(new InputValue());
         }
         else
         {
-            Debug.Log("changing ui mode to 1");
-
             FirstPersonController input = (FirstPersonController)FindObjectOfType(typeof(FirstPersonController));
             input.GetComponent<FirstPersonController>().OnChangeMapToWorldUI(new InputValue());
         }

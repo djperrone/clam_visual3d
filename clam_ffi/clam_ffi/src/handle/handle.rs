@@ -1,6 +1,7 @@
 extern crate nalgebra as na;
 
 use std::collections::HashMap;
+use std::collections::HashSet;
 use std::path::Path;
 use std::sync::Arc;
 use std::thread::JoinHandle;
@@ -12,6 +13,7 @@ use abd_clam::{Graph, PartitionCriteria};
 
 use crate::ffi_impl::cluster_ids_wrapper::ClusterIDsWrapper;
 use crate::graph::force_directed_graph::{self, ForceDirectedGraph};
+use crate::graph::graph_builder;
 use crate::graph::spring;
 use crate::tree_layout::reingold_tilford;
 use crate::utils::distances::DistanceMetric;
@@ -169,6 +171,13 @@ impl<'a> Handle<'a> {
         }
     }
 
+    // pub unsafe fn init_clam_graph_with_selected(
+    //     handle: &Handle,
+    //     arr_ptr: *mut ClusterData,
+    //     len: i32,
+    // ) -> Result<HashSet<&'a Clusterf32>, FFIError> {
+    // }
+
     pub fn init_clam_graph(
         &'a mut self,
         scoring_function: ScoringFunction,
@@ -207,6 +216,37 @@ impl<'a> Handle<'a> {
                 Err(e) => {
                     return e;
                 }
+            }
+        }
+        FFIError::GraphBuildFailed
+    }
+    pub fn init_clam_graph_from_leaves(&'a mut self) -> FFIError {
+        if let Some(tree) = &self.tree {
+            if let Ok(graph) = Graph::from_tree_leaves(tree) {
+                self.clam_graph = Some(graph);
+                // for cluster in self.clam_graph().unwrap().clusters() {
+                //     let baton = ClusterDataWrapper::from_cluster(cluster);
+                //     cluster_selector(Some(baton.data()));
+                // }
+
+                debug!(
+                    "num components {}",
+                    self.clam_graph
+                        .as_ref()
+                        .unwrap()
+                        .find_component_clusters()
+                        .len()
+                );
+                debug!(
+                    "num edges {}",
+                    self.clam_graph.as_ref().unwrap().edge_cardinality()
+                );
+                debug!(
+                    "num clusters {}",
+                    self.clam_graph.as_ref().unwrap().clusters().len()
+                );
+
+                return FFIError::Ok;
             }
         }
         FFIError::GraphBuildFailed
@@ -250,6 +290,13 @@ impl<'a> Handle<'a> {
 
     pub fn set_graph(&mut self, graph: (JoinHandle<()>, Arc<ForceDirectedGraph>)) {
         self.force_directed_graph = Some(graph);
+        if let Some(g) = &self.force_directed_graph {
+            self.num_edges_in_graph = Some(force_directed_graph::get_num_edges(&g.1));
+        }
+    }
+
+    pub fn set_clam_graph(&mut self, graph: abd_clam::Graph<'a, f32>) {
+        self.clam_graph = Some(graph);
         if let Some(g) = &self.force_directed_graph {
             self.num_edges_in_graph = Some(force_directed_graph::get_num_edges(&g.1));
         }

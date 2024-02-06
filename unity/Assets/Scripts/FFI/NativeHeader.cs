@@ -19,6 +19,9 @@ namespace Clam
             [DllImport(__DllName, EntryPoint = "init_clam_graph", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
             private static extern FFIError init_clam_graph(IntPtr ptr,ScoringFunction scoringFunction,  NodeVisitor cluster_selector);
 
+            [DllImport(__DllName, EntryPoint = "init_clam_graph_from_leaves", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+            private static extern FFIError init_clam_graph_from_leaves(IntPtr ptr);
+
             [DllImport(__DllName, EntryPoint = "init_clam_struct", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
             private static extern FFIError init_clam(out IntPtr ptr, ref TreeStartupDataFFI data);
 

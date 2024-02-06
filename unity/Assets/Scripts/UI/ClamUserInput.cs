@@ -160,7 +160,7 @@ namespace Clam
             }
             else
             {
-                Debug.Log("reingoldify key not found - " + nodeData.id);
+                Debug.LogError("reingoldify key not found - " + nodeData.id);
             }
         }
         void OnExit()
