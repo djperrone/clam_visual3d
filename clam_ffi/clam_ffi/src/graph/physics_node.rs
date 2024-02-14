@@ -1,6 +1,16 @@
 use crate::graph;
 use crate::utils::types::Clusterf32;
 use crate::ClusterData;
+
+// pub struct NodeNDim<const N: usize> {
+//     position: [f32; N],
+//     friction: f32,
+//     max_speed: f32,
+//     velocity: [f32; N],
+//     acceleration: [f32; N],
+//     mass: f32,
+// }
+
 pub struct PhysicsNode {
     position: glam::Vec3,
     friction: f32,
