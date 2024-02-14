@@ -1,9 +1,9 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
     <ui:VisualElement name="Overlay" style="flex-grow: 1; opacity: 1;">
-        <ui:VisualElement name="PopUpBackground" style="width: 25%; background-color: rgb(135, 145, 178); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgb(0, 0, 0); border-right-color: rgb(0, 0, 0); border-top-color: rgb(0, 0, 0); border-bottom-color: rgb(0, 0, 0); position: absolute; align-items: center; justify-content: center; left: 40%; right: auto; top: 40%; flex-grow: 0; flex-shrink: 0; -unity-background-scale-mode: scale-to-fit;">
-            <ui:Label text="Error: Invalid Input" display-tooltip-when-elided="true" name="InvalidInputLabel" style="align-items: center; -unity-text-align: middle-center; flex-grow: 1; width: 100%; height: 50%;" />
+        <ui:VisualElement name="PopUpBackground" style="width: auto; background-color: rgb(158, 200, 225); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgb(0, 0, 0); border-right-color: rgb(0, 0, 0); border-top-color: rgb(0, 0, 0); border-bottom-color: rgb(0, 0, 0); position: absolute; align-items: center; justify-content: center; left: 70px; right: 71px; top: 150px; flex-grow: 0; flex-shrink: 0; -unity-background-scale-mode: scale-to-fit; flex-wrap: nowrap;">
+            <ui:Label text="Error: Invalid Input" display-tooltip-when-elided="true" name="InvalidInputLabel" style="align-items: center; -unity-text-align: middle-center; flex-grow: 1; width: 100%; height: 50%; color: rgb(0, 0, 0); padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; font-size: 14px;" />
             <ui:VisualElement name="PopUpButtonBackground" style="align-items: center; justify-content: center; flex-direction: row; margin-left: 2px; margin-right: 2px; margin-top: 2px; margin-bottom: 2px; width: 100%; height: 50%;">
-                <ui:Button text="Ok" display-tooltip-when-elided="true" enable-rich-text="true" name="PopUpOkButton" />
+                <ui:Button text="Ok" display-tooltip-when-elided="true" enable-rich-text="true" name="PopUpOkButton" style="background-color: rgb(156, 167, 173);" />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>

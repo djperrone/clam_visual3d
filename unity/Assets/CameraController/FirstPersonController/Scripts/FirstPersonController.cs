@@ -96,6 +96,7 @@ namespace StarterAssets
             {
                 m_MainCamera = GameObject.FindGameObjectWithTag("MainCamera");
             }
+
         }
 
         private void Start()
@@ -111,6 +112,7 @@ namespace StarterAssets
             // reset our timeouts on start
             m_JumpTimeoutDelta = JumpTimeout;
             m_FallTimeoutDelta = FallTimeout;
+
         }
 
         private void Update()

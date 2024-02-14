@@ -36,7 +36,7 @@ public class CreateNewTree : MonoBehaviour
 
         m_DatasetDropdownField = m_UIDocument.rootVisualElement.Q<DropdownField>("DatasetDropdown");
         m_DistanceMetricDropdownField = m_UIDocument.rootVisualElement.Q<DropdownField>("DistanceMetricDropdown");
-
+        m_DistanceMetricDropdownField.RegisterValueChangedCallback(DropdownCallback);
         var fileNames = GetAnomalyFiles(m_DataDirectory);
 
         m_DatasetDropdownField.choices = fileNames.ToList();
@@ -59,8 +59,12 @@ public class CreateNewTree : MonoBehaviour
         //"Levenshtein" };
     }
 
-    void DropdownCallback(EventCallback<ChangeEvent<string>> evt)
+    void DropdownCallback(ChangeEvent<string> evt)
     {
+        if (evt.newValue != "Euclidean" && evt.newValue != "Manhattan")
+        {
+            UIHelpers.ShowErrorPopUP("Warning: only Euclidean and Manhattan are officially supported for building graphs");
+        }
 
     }
     void BackButtonCallback(ClickEvent evt)

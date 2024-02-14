@@ -17,6 +17,7 @@ public class ClusterMenu
     Label m_ClusterInfo;
     Label m_ClusterInfoLabel;
     Dictionary<string, IntTextField> m_IntInputFields;
+    Button m_DeselectAllClusters;
 
     // Start is called before the first frame update
     public ClusterMenu(UIDocument uiDoc)
@@ -39,6 +40,17 @@ public class ClusterMenu
         else
         {
             Debug.LogError("root not found");
+        }
+
+        m_DeselectAllClusters = m_UIDocument.rootVisualElement.Q<Button>("DeselectAllClusters");
+        m_DeselectAllClusters.RegisterCallback<ClickEvent>(DeselectClustersCallback);
+    }
+
+    void DeselectClustersCallback(ClickEvent evt)
+    {
+        foreach ((var id, var cluster) in Cakes.Tree.GetTree())
+        {
+            cluster.GetComponent<Node>().Deselect();
         }
     }
 

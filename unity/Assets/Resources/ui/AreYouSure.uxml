@@ -1,10 +1,10 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
     <ui:VisualElement name="Overlay" style="flex-grow: 1; opacity: 1;">
-        <ui:VisualElement name="PopUpBackground" style="width: 25%; background-: rgb(135, 145, 178); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgb(0, 0, 0); border-right-color: rgb(0, 0, 0); border-top-color: rgb(0, 0, 0); border-bottom-color: rgb(0, 0, 0); position: absolute; align-items: center; justify-content: center; left: 40%; right: auto; top: 40%; flex-grow: 0; flex-shrink: 0; -unity-background-scale-mode: scale-to-fit; background-color: rgba(96, 96, 96, 255);">
+        <ui:VisualElement name="PopUpBackground" style="width: 25%; background-: rgb(135, 145, 178); border-left-width: 1px; border-right-width: 1px; border-top-width: 1px; border-bottom-width: 1px; border-left-color: rgb(0, 0, 0); border-right-color: rgb(0, 0, 0); border-top-color: rgb(0, 0, 0); border-bottom-color: rgb(0, 0, 0); position: absolute; align-items: center; justify-content: center; left: 40%; right: auto; top: 40%; flex-grow: 0; flex-shrink: 0; -unity-background-scale-mode: scale-to-fit; background-color: rgb(158, 200, 225); color: rgba(0, 0, 0, 255);">
             <ui:Label text="Are You Sure?" display-tooltip-when-elided="true" name="PopupLabel" style="align-items: center; -unity-text-align: middle-center; flex-grow: 1; width: 100%; height: 50%;" />
             <ui:VisualElement name="PopUpButtonBackground" style="align-items: center; justify-content: center; flex-direction: row; margin-left: 2px; margin-right: 2px; margin-top: 2px; margin-bottom: 2px; width: 100%; height: 50%;">
-                <ui:Button text="Yes" display-tooltip-when-elided="true" name="PopUpYesButton" />
-                <ui:Button text="No" display-tooltip-when-elided="true" enable-rich-text="true" name="PopUpNoButton" />
+                <ui:Button text="Yes" display-tooltip-when-elided="true" name="PopUpYesButton" style="background-color: rgb(156, 167, 173); color: rgba(0, 0, 0, 255); border-left-color: rgb(0, 0, 0); border-right-color: rgb(0, 0, 0); border-top-color: rgb(0, 0, 0); border-bottom-color: rgb(0, 0, 0);" />
+                <ui:Button text="No" display-tooltip-when-elided="true" enable-rich-text="true" name="PopUpNoButton" style="background-color: rgb(156, 167, 173); color: rgba(0, 0, 0, 255); border-left-color: rgb(0, 0, 0); border-right-color: rgb(0, 0, 0); border-top-color: rgb(0, 0, 0); border-bottom-color: rgb(0, 0, 0);" />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>

@@ -19,7 +19,8 @@ public class GraphBuilder : MonoBehaviour
         Debug.Log("physics is running start val " + m_IsPhysicsRunning);
         MenuEventManager.StartListening(Menu.DestroyGraph, DestroyGraph);
     }
-    void DestroyGraph()
+
+    public void DestroyGraph()
     {
         GetComponent<MeshFilter>().mesh = new Mesh();
     }

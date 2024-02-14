@@ -25,6 +25,7 @@ public enum Menu
     IncludeHidden,
     DestroyGraph,
     DestroyTree,
+    ResetTree,
     WorldInput,
     MenuInput
 }
@@ -125,26 +126,8 @@ namespace Clam
                 Debug.Log("Error cannot destroy graph while physics is running");
                 return;
             }
-            Edge[] edges = GameObject.FindObjectsOfType<Edge>(true);
-            Debug.Log("num edges" + edges.Length.ToString());
-            var springs = GameObject.FindGameObjectsWithTag("Spring");
-            Debug.Log("num springs" + springs.Length.ToString());
 
-            foreach (var spring in springs)
-            {
-                Destroy(spring);
-            }
-            springs = GameObject.FindGameObjectsWithTag("Spring");
-            Debug.Log("num springs" + springs.Length.ToString());
-            edges = GameObject.FindObjectsOfType<Edge>(true);
-            Debug.Log("num edges" + edges.Length.ToString());
-            foreach (var edge in edges)
-            {
-                Destroy(edge);
-            }
-            Debug.Log("num edges" + edges.Length.ToString());
-
-
+            Cakes.Tree.DestroyEdges();
         }
 
         void Pause()
@@ -249,6 +232,7 @@ namespace Clam
         {
             UnityEngine.Cursor.lockState = CursorLockMode.Locked;
             m_CurrentMenu.GetComponent<SideMenu>().SetFocusable(false);
+            m_CurrentMenu.GetComponent<SideMenu>().SwitchToCameraControlMode();
             UnityEngine.Cursor.visible = false;
         }
 
@@ -256,6 +240,8 @@ namespace Clam
         {
             UnityEngine.Cursor.lockState = CursorLockMode.None;
             m_CurrentMenu.GetComponent<SideMenu>().SetFocusable(true);
+            m_CurrentMenu.GetComponent<SideMenu>().SwitchToOverlayUIMode();
+
             UnityEngine.Cursor.visible = true;
         }
 

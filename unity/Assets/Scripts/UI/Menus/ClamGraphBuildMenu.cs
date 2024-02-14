@@ -11,7 +11,7 @@ public class ClamGraphBuildMenu
     Button m_CreateGraph;
     Button m_DestroyGraph;
     DropdownField m_ScoringSelector;
-    GameObject m_SpringPrefab;
+    //GameObject m_SpringPrefab;
     Slider m_EdgeScalar;
     Toggle m_ShowEdges;
 
@@ -24,15 +24,15 @@ public class ClamGraphBuildMenu
     {
         m_Document = document;
         m_CreateGraph = document.rootVisualElement.Q<Button>("CreateClamGraphButton");
-        m_DestroyGraph = document.rootVisualElement.Q<Button>("DestroyClamGraph");
+        m_DestroyGraph = document.rootVisualElement.Q<Button>("ResetClamGraph");
         m_SelectClusters = document.rootVisualElement.Q<Button>("SelectClamGraphClusters");
         m_EdgeScalar = document.rootVisualElement.Q<Slider>("ClamEdgeScalar");
         m_ScoringSelector = document.rootVisualElement.Q<DropdownField>("ScoringFunctionSelector");
         m_ShowEdges = document.rootVisualElement.Q<Toggle>("ShowEdgesToggle");
 
-        m_DestroyGraph.RegisterCallback<ClickEvent>(DestroyGraphCallback);
+        m_DestroyGraph.RegisterCallback<ClickEvent>(ResetCallback);
 
-        m_SpringPrefab = Resources.Load("Spring") as GameObject;
+        //m_SpringPrefab = Resources.Load("Spring") as GameObject;
 
         m_CreateGraph.RegisterCallback<ClickEvent>(CreateGraphCallback);
         m_SelectClusters.RegisterCallback<ClickEvent>(SelectClustersForGraphCallback);
@@ -40,6 +40,12 @@ public class ClamGraphBuildMenu
         m_ShowEdges.RegisterValueChangedCallback(ShowEdgesCallback);
 
         InitScoringSelector();
+
+        if (m_GraphBuilder == null)
+        {
+            GameObject graphBuilderPrefab = Resources.Load("Graph") as GameObject;
+            m_GraphBuilder = MenuEventManager.Instantiate(graphBuilderPrefab);
+        }
     }
 
     void ShowEdgesCallback(ChangeEvent<bool> evt)
@@ -59,8 +65,13 @@ public class ClamGraphBuildMenu
         List<string> scoringFunctionStrings = new List<string>();
         foreach (ScoringFunction scoringFunction in System.Enum.GetValues(typeof(ScoringFunction)))
         {
+            var distanceMetric = Cakes.Tree.GetComponent<TreeCache>().m_TreeData.distanceMetric;
             string scoringFunctionString = scoringFunction.ToString();
-            scoringFunctionStrings.Add(scoringFunctionString);
+            if (scoringFunctionString.Contains(distanceMetric.ToString()))
+            {
+
+                scoringFunctionStrings.Add(scoringFunctionString);
+            }
         }
 
         m_ScoringSelector.choices = scoringFunctionStrings;
@@ -76,6 +87,7 @@ public class ClamGraphBuildMenu
         {
             node.GetComponent<Node>().Deselect();
         }
+
         if (m_ScoringSelector.value == null)
         {
             UIHelpers.ShowErrorPopUP("Error: No scoring function selected");
@@ -161,15 +173,27 @@ public class ClamGraphBuildMenu
         }
         //MenuEventManager.instance.m_IsPhysicsRunning = true;
         Debug.Log("finished setting up unity physics sim - passing to rust");
-        GameObject graphBuilderPrefab = Resources.Load("Graph") as GameObject;
-        m_GraphBuilder = MenuEventManager.Instantiate(graphBuilderPrefab);
+        
+
         m_GraphBuilder.GetComponent<GraphBuilder>().Init(selectedClusters, m_EdgeScalar.value, 500);
     }
 
-    public void DestroyGraphCallback(ClickEvent evt)
+    void ResetCallback(ClickEvent evt)
     {
-        MenuEventManager.SwitchState(Menu.DestroyTree);
-        MenuEventManager.SwitchState(Menu.DestroyGraph);
+        //if (!MenuEventManager.instance.m_IsPhysicsRunning)
+        //{
+
+        //    //MenuEventManager.SwitchState(Menu.DestroyGraph);
+
+        m_GraphBuilder.GetComponent<GraphBuilder>().DestroyGraph();
+        MenuEventManager.SwitchState(Menu.ResetTree);
+        //    m_GraphBuilder.GetComponent<GraphBuilder>().DestroyGraph();
+        //    Cakes.Tree.ResetTree();
+        //}
+        //else
+        //{
+        //    Debug.LogWarning("Cannot reset tree while physics is running");
+        //}
     }
 
     void IncludeHiddenCallback(ClickEvent evt)

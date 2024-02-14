@@ -27,5 +27,6 @@
                 <ui:TextField name="ClusterCardinalityMax" is-delayed="true" style="width: 45%; margin-left: 2px; margin-right: 2px; margin-top: 2px; margin-bottom: 2px;" />
             </ui:VisualElement>
         </ui:VisualElement>
+        <ui:Button text="Deselect All Clusters" display-tooltip-when-elided="true" name="DeselectAllClusters" />
     </ui:VisualElement>
 </ui:UXML>

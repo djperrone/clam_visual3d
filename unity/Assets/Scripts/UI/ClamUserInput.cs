@@ -147,7 +147,7 @@ namespace Clam
             }
             else
             {
-                Debug.Log("set inactive key not found - " + nodeData.id);
+                Debug.LogWarning("set inactive key not found - " + nodeData.id);
             }
         }
         unsafe void PositionUpdater(ref Clam.FFI.ClusterData nodeData)
