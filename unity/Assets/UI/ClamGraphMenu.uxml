@@ -1,16 +1,20 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
     <ui:VisualElement name="ClamGraphBuildMenu">
-        <ui:VisualElement name="EdgeScalerContainer" style="flex-direction: row;">
-            <ui:Label text="Edge Scale" display-tooltip-when-elided="true" name="EdgeScalerLabel" style="width: 35%;" />
-            <ui:Slider picking-mode="Ignore" value="100" high-value="1000" name="ClamEdgeScalar" focusable="false" style="width: 55%;" />
-        </ui:VisualElement>
-        <ui:Button text="Select Clusters" display-tooltip-when-elided="true" name="SelectClamGraphClusters" focusable="false" />
-        <ui:Button text="Create Graph" display-tooltip-when-elided="true" name="CreateClamGraphButton" focusable="false" />
-        <ui:Button text="Reset" display-tooltip-when-elided="true" name="ResetClamGraph" />
         <ui:VisualElement name="ScoringFunctions" style="flex-direction: row;">
-            <ui:Label text="Scoring Function" display-tooltip-when-elided="true" name="ScoringFunctionLabel" />
+            <ui:Label text="Scoring Function" display-tooltip-when-elided="true" name="ScoringFunctionLabel" style="justify-content: center; align-items: center; -unity-text-align: middle-left; width: 35%;" />
             <ui:DropdownField index="0" name="ScoringFunctionSelector" style="flex-grow: 1;" />
         </ui:VisualElement>
+        <ui:VisualElement style="flex-direction: row;">
+            <ui:Label text="Min Depth" display-tooltip-when-elided="true" name="MinDepthLabel" style="-unity-text-align: middle-left; width: 35%;" />
+            <ui:TextField picking-mode="Ignore" value="4" text="4&#x9;" name="GraphMinDepth" password="false" style="flex-grow: 1;" />
+        </ui:VisualElement>
+        <ui:VisualElement name="EdgeScalerContainer" style="flex-direction: row;">
+            <ui:Label text="Edge Scale" display-tooltip-when-elided="true" name="EdgeScalerLabel" style="width: 30%;" />
+            <ui:Slider picking-mode="Ignore" value="100" high-value="1000" name="ClamEdgeScalar" focusable="false" style="width: 55%; flex-grow: 1;" />
+        </ui:VisualElement>
+        <ui:Button text="Preview Graph" display-tooltip-when-elided="true" name="SelectClamGraphClusters" focusable="false" />
+        <ui:Button text="Create Graph" display-tooltip-when-elided="true" name="CreateClamGraphButton" focusable="false" />
+        <ui:Button text="Reset" display-tooltip-when-elided="true" name="ResetClamGraph" />
         <ui:VisualElement name="ShowEdges" style="flex-direction: row;">
             <ui:Label text="Show Edges" display-tooltip-when-elided="true" name="ShowEdgesLabel" style="margin-right: 0;" />
             <ui:Toggle name="ShowEdgesToggle" value="true" />

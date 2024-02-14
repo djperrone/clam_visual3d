@@ -3,7 +3,6 @@ using Clam.FFI;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
-using UnityEngine.Video;
 
 public class ClamGraphBuildMenu
 {
@@ -14,10 +13,12 @@ public class ClamGraphBuildMenu
     //GameObject m_SpringPrefab;
     Slider m_EdgeScalar;
     Toggle m_ShowEdges;
+    TextField m_MinDepth;
 
     GameObject m_GraphBuilder = null;
     Dictionary<string, GameObject> m_Graph;
     UIDocument m_Document;
+
 
 
     public ClamGraphBuildMenu(UIDocument document, string name)
@@ -29,6 +30,7 @@ public class ClamGraphBuildMenu
         m_EdgeScalar = document.rootVisualElement.Q<Slider>("ClamEdgeScalar");
         m_ScoringSelector = document.rootVisualElement.Q<DropdownField>("ScoringFunctionSelector");
         m_ShowEdges = document.rootVisualElement.Q<Toggle>("ShowEdgesToggle");
+        m_MinDepth = document.rootVisualElement.Q<TextField>("GraphMinDepth");
 
         m_DestroyGraph.RegisterCallback<ClickEvent>(ResetCallback);
 
@@ -38,6 +40,7 @@ public class ClamGraphBuildMenu
         m_SelectClusters.RegisterCallback<ClickEvent>(SelectClustersForGraphCallback);
 
         m_ShowEdges.RegisterValueChangedCallback(ShowEdgesCallback);
+        m_MinDepth.RegisterValueChangedCallback(MinDepthCallback);
 
         InitScoringSelector();
 
@@ -45,6 +48,29 @@ public class ClamGraphBuildMenu
         {
             GameObject graphBuilderPrefab = Resources.Load("Graph") as GameObject;
             m_GraphBuilder = MenuEventManager.Instantiate(graphBuilderPrefab);
+        }
+    }
+
+    void MinDepthCallback(ChangeEvent<string> changeEvent)
+    {
+        if (changeEvent.newValue.Length == 0)
+        {
+            return;
+        }
+        
+        var textField = changeEvent.target as TextField;
+        if (!UIHelpers.ValidateCharacters(changeEvent.newValue, "0123456789"))
+        {
+            textField.value = changeEvent.previousValue;
+            return;
+        }
+
+        int minDepthValue = int.Parse(textField.value);
+
+        if (minDepthValue < 0 || minDepthValue > NativeMethods.TreeHeight())
+        {
+            textField.value = changeEvent.previousValue;
+            return;
         }
     }
 
@@ -95,7 +121,13 @@ public class ClamGraphBuildMenu
             return;
         }
 
-        var graphResult = Clam.FFI.NativeMethods.InitClamGraph((ScoringFunction)System.Enum.Parse(typeof(ScoringFunction), m_ScoringSelector.value), clusterSelector);
+        if (m_MinDepth.value.Length == 0)
+        {
+            UIHelpers.ShowErrorPopUP("Please enter a minimum depth for cluster selection");
+            return;
+        }
+
+        var graphResult = Clam.FFI.NativeMethods.InitClamGraph((ScoringFunction)System.Enum.Parse(typeof(ScoringFunction), m_ScoringSelector.value),int.Parse(m_MinDepth.value), clusterSelector);
         if (graphResult != FFIError.Ok)
         {
             string errorMessage = "Error building graph (" + graphResult.ToString() + ")";

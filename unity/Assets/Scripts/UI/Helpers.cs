@@ -79,4 +79,17 @@ public static class UIHelpers
     {
         popupRoot.Remove(popup);
     }
+
+    public static bool ValidateCharacters(string value, string validCharacters)
+    {
+        foreach (var c in value)
+        {
+            if ((c < '0' || c > '9'))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }

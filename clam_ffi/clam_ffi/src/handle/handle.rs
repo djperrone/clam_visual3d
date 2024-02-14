@@ -172,12 +172,13 @@ impl<'a> Handle<'a> {
     pub fn init_clam_graph(
         &'a mut self,
         scoring_function: ScoringFunction,
+        min_depth: i32,
         cluster_selector: CBFnNodeVisitor,
     ) -> FFIError {
         if let Some(tree) = &self.tree {
             match enum_to_function(&scoring_function) {
                 Ok(scorer) => {
-                    if let Ok(graph) = Graph::from_tree(tree, &scorer) {
+                    if let Ok(graph) = Graph::from_tree(tree, &scorer, min_depth as usize) {
                         self.clam_graph = Some(graph);
                         for cluster in self.clam_graph().unwrap().clusters() {
                             let baton = ClusterDataWrapper::from_cluster(cluster);

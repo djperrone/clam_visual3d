@@ -47,6 +47,7 @@ namespace Clam
             m_MinField.focusable = false;
             m_MaxField.focusable = false;
             m_Slider.focusable = false;
+            m_Slider.pickingMode = PickingMode.Ignore;
 
             m_MaxField.RegisterValueChangedCallback(MaxFieldCallback);
             m_MinField.RegisterValueChangedCallback(MinFieldCallback);

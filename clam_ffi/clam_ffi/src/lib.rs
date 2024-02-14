@@ -184,10 +184,11 @@ pub unsafe extern "C" fn shutdown_clam(context_ptr: OutHandlePtr) -> FFIError {
 pub unsafe extern "C" fn init_clam_graph(
     context: InHandlePtr,
     scoring_function: ScoringFunction,
+    min_depth : i32,
     cluster_selector: CBFnNodeVisitor,
 ) -> FFIError {
     if let Some(handle) = context {
-        return handle.init_clam_graph(scoring_function, cluster_selector);
+        return handle.init_clam_graph(scoring_function, min_depth, cluster_selector);
     }
     FFIError::HandleInitFailed
 }
