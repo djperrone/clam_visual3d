@@ -48,7 +48,6 @@ MonoBehaviour:
   m_TreeAssets:
   - {fileID: 9197481963319205126, guid: 23a4fa6e078689d46b27c5c6f1e2d04a, type: 3}
   - {fileID: 9197481963319205126, guid: 513e0d4aaf6b3634b80844bf130b9fa5, type: 3}
-  - {fileID: 9197481963319205126, guid: ebecf659de7a0d245841004b0c5272b8, type: 3}
   - {fileID: 9197481963319205126, guid: 646d55514e0f6994ebd3afb9dd93e40a, type: 3}
 --- !u!114 &8557082117718180649
 MonoBehaviour:

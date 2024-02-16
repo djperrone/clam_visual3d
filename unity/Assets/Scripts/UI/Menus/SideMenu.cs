@@ -17,7 +17,7 @@ public class SideMenu : MonoBehaviour
     DropdownField m_DropdownField;
 
     ClusterMenu m_ClusterMenu;
-    GraphBuildMenu m_GraphBuildMenu;
+    //GraphBuildMenu m_GraphBuildMenu;
     ClamGraphBuildMenu m_ClamGraphBuildMenu;
     TreeMenu m_TreeMenu;
 
@@ -32,7 +32,7 @@ public class SideMenu : MonoBehaviour
 
         m_DropdownField.choices = new List<string>()
         {
-            "TreeMenu", "ClusterMenu", "Manually Create Graph (beta)", "CHAODA Graph"
+            "TreeMenu", "ClusterMenu", "CHAODA Graph"
         };
         m_DropdownField.value = m_CurrentMenuName;
 
@@ -57,7 +57,7 @@ public class SideMenu : MonoBehaviour
 
         m_TreeMenu = new TreeMenu(m_UIDocument);
         m_ClusterMenu = new ClusterMenu(GetComponent<UIDocument>());
-        m_GraphBuildMenu = new GraphBuildMenu(GetComponent<UIDocument>(), "GraphBuildMenu");
+        //m_GraphBuildMenu = new GraphBuildMenu(GetComponent<UIDocument>(), "GraphBuildMenu");
         m_ClamGraphBuildMenu = new ClamGraphBuildMenu(GetComponent<UIDocument>(), "ClamGraphBuildMenu");
         m_UIMode = m_UIDocument.rootVisualElement.Q<RadioButtonGroup>("UIMode");
         m_UIMode.choices = new List<string>() { "In-World", "Overlay" };
