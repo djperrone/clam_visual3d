@@ -230,6 +230,11 @@ pub unsafe extern "C" fn vertex_degree(ptr: InHandlePtr, cluster_id: *const c_ch
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn get_cluster_label(ptr: InHandlePtr, cluster_id: *const c_char) -> i32 {
+    get_cluster_label_impl(ptr, cluster_id)
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn max_vertex_degree(ptr: InHandlePtr) -> i32 {
     max_vertex_degree_impl(ptr)
 }

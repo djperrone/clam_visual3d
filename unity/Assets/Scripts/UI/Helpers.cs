@@ -1,6 +1,7 @@
 
 using Clam;
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -92,4 +93,25 @@ public static class UIHelpers
 
         return true;
     }
+
+    public static List<Color> LabelColors()
+    {
+        float denom = 255.0f;
+
+        return new List<Color>
+        {
+            new Color(34.0f / denom, 199.0f / denom, 148.0f / denom),
+            new Color(249.0f / denom, 0.0f / denom, 152.0f / denom),
+            new Color(189.0f / denom, 129.0f / denom, 250.0f / denom),
+            new Color(0.0f / denom, 231.0f / denom, 250.0f / denom),
+            new Color(227.0f / denom, 250.0f / denom, 0.0f / denom),
+            new Color(250.0f / denom, 133.0f / denom, 0.0f / denom),
+            new Color(144.0f / denom, 0.0f / denom, 158.0f / denom),
+            new Color(245.0f / denom, 162.0f / denom, 218.0f / denom),
+            new Color(131.0f / denom, 44.0f / denom, 64.0f / denom),
+            new Color(210.0f / denom, 250.0f / denom, 198.0f / denom)
+        };
+    }
+
+
 }

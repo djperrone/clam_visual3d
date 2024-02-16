@@ -136,7 +136,7 @@ namespace Clam
             DestroyEdges();
 
             Clam.FFI.NativeMethods.DrawHierarchy(PositionUpdater);
-            Clam.FFI.NativeMethods.ColorClustersByEntropy(ColorFiller);
+            Clam.FFI.NativeMethods.ColorClustersByDominantLabel(ColorFiller);
             Clam.FFI.NativeMethods.ForEachDFT(EdgeDrawer);
             //PopulateEdgeDictionary();
         }

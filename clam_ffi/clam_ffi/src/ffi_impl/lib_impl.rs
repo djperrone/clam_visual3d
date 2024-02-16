@@ -2,6 +2,8 @@ use core::num;
 use std::collections::HashSet;
 use std::ffi::{c_char, CStr};
 
+use distances::Number;
+
 use crate::ffi_impl::cleanup::Cleanup;
 use crate::{
     debug,
@@ -102,6 +104,38 @@ pub unsafe fn vertex_degree_impl(ptr: InHandlePtr, cluster_id: *const c_char) ->
     -1
 }
 
+pub unsafe fn get_cluster_label_impl(ptr: InHandlePtr, cluster_id: *const c_char) -> i32 {
+    if let Some(handle) = ptr {
+        if let Some(labels) = handle.labels() {
+            let cluster_id = helpers::c_char_to_string(cluster_id);
+            if let Ok(cluster) = handle.get_cluster_from_string(cluster_id) {
+                let num_unique_labels = {
+                    let unique_labels: HashSet<_> = labels.iter().cloned().collect();
+                    unique_labels.len()
+                };
+
+                let colors = helpers::label_colors();
+                if num_unique_labels > colors.len() {
+                    return -1;
+                }
+                match calc_cluster_dominant_label(cluster, labels, num_unique_labels, &colors) {
+                    Some(label) => {
+                        return label as i32;
+                    }
+                    None => {
+                        return -1;
+                    }
+                }
+                // if let Ok(degree) = clam_graph.vertex_degree(cluster) {
+                //     return degree as i32;
+                // }
+            }
+        }
+    }
+    debug!("handle not created");
+    -1
+}
+
 pub unsafe fn max_vertex_degree_impl(ptr: InHandlePtr) -> i32 {
     if let Some(handle) = ptr {
         if handle.get_tree().is_some() {
@@ -174,6 +208,22 @@ fn calc_cluster_dominant_color(
     num_unique_labels: usize,
     color_choices: &Vec<glam::Vec3>,
 ) -> Result<glam::Vec3, String> {
+    let max_index = calc_cluster_dominant_label(cluster, labels, num_unique_labels, color_choices);
+
+    match max_index {
+        Some(dom_label) => Ok(color_choices[dom_label as usize]),
+        None => Err("invalid labels? i guess".to_string()),
+    }
+
+    // glam::Vec3::new(perc_outliers, perc_inliers, 0.)
+}
+
+fn calc_cluster_dominant_label(
+    cluster: &Clusterf32,
+    labels: &[u8],
+    num_unique_labels: usize,
+    color_choices: &Vec<glam::Vec3>,
+) -> Option<usize> {
     let indices = cluster.indices();
     // let unique_values: HashSet<_> = labels.iter().cloned().collect();
 
@@ -185,10 +235,7 @@ fn calc_cluster_dominant_color(
         .max_by_key(|&(_, val)| val)
         .map(|(index, _)| index);
 
-    match max_index {
-        Some(dom_label) => Ok(color_choices[dom_label as usize]),
-        None => Err("invalid labels? i guess".to_string()),
-    }
+    max_index
 
     // glam::Vec3::new(perc_outliers, perc_inliers, 0.)
 }

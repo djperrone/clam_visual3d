@@ -22,5 +22,6 @@
         <ui:Label text="Num Components: " display-tooltip-when-elided="true" name="NumGraphComponents" />
         <ui:Label text="Num Clusters:" display-tooltip-when-elided="true" name="NumGraphClusters" />
         <ui:Label text="Num Edges:" display-tooltip-when-elided="true" name="NumGraphEdges" />
+        <ui:VisualElement name="GraphLabelFilter" style="flex-direction: row; flex-wrap: wrap; flex-grow: 1;" />
     </ui:VisualElement>
 </ui:UXML>

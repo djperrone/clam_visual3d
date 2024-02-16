@@ -55,6 +55,9 @@ namespace Clam
             [DllImport(__DllName, EntryPoint = "vertex_degree", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
             private static extern int vertex_degree(IntPtr handle, string cluster_id);
 
+            [DllImport(__DllName, EntryPoint = "get_cluster_label", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+            private static extern int get_cluster_label(IntPtr handle, string cluster_id);
+
             [DllImport(__DllName, EntryPoint = "color_clusters_by_entropy", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
             private static extern FFIError color_clusters_by_entropy(IntPtr ptr, NodeVisitor callback);
 

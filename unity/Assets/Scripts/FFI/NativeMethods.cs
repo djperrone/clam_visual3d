@@ -18,7 +18,7 @@ namespace Clam
 
         public static partial class NativeMethods
         {
-	public const string __DllName = "clam_ffi_2024-02-1615-36-19";
+	public const string __DllName = "clam_ffi_2024-02-1618-24-01";
             private static IntPtr m_Handle;
 
             private static bool m_Initialized = false;
@@ -117,6 +117,11 @@ namespace Clam
                 {
                     return for_each_dft(m_Handle, callback, startNode, maxDepth);
                 }
+            }
+
+            public static int GetClusterLabel(string id)
+            {
+                return get_cluster_label(m_Handle, id);
             }
 
             public static FFIError SetNames(NameSetter callback, string startNode = "root")
