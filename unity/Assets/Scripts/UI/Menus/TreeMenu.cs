@@ -104,7 +104,7 @@ public class TreeMenu
 
         if (changeEvent.newValue == 0)
         {
-            NativeMethods.ColorClustersByLabel(ColorByLabel);
+            NativeMethods.ColorClustersByEntropy(ColorByLabel);
         }
         else
         {

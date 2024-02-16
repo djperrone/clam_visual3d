@@ -18,7 +18,7 @@ namespace Clam
 
         public static partial class NativeMethods
         {
-	public const string __DllName = "clam_ffi_2024-02-1613-52-22";
+	public const string __DllName = "clam_ffi_2024-02-1615-36-19";
             private static IntPtr m_Handle;
 
             private static bool m_Initialized = false;
@@ -148,9 +148,13 @@ namespace Clam
                 return tree_cardinality(m_Handle);
             }
 
-            public static FFIError ColorClustersByLabel(NodeVisitor callback)
+            public static FFIError ColorClustersByEntropy(NodeVisitor callback)
             {
-                return color_clusters_by_label(m_Handle, callback);
+                return color_clusters_by_entropy(m_Handle, callback);
+            }
+            public static FFIError ColorClustersByDominantLabel(NodeVisitor callback)
+            {
+                return color_clusters_by_dominant_label(m_Handle, callback);
             }
 
             // ------------------------------------- Cluster Helpers ------------------------------------- 

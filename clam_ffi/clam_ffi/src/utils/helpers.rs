@@ -2,6 +2,23 @@ use std::ffi::{c_char, CStr};
 
 use super::error::FFIError;
 
+pub fn label_colors() -> Vec<glam::Vec3> {
+    let denom: f32 = 255.0;
+
+    vec![
+        glam::vec3(34.0 / denom, 199.0 / denom, 148.0 / denom),
+        glam::vec3(249.0 / denom, 0.0 / denom, 152.0 / denom),
+        glam::vec3(189.0 / denom, 129.0 / denom, 250.0 / denom),
+        glam::vec3(0.0 / denom, 231.0 / denom, 250.0 / denom),
+        glam::vec3(227.0 / denom, 250.0 / denom, 0.0 / denom),
+        glam::vec3(250.0 / denom, 133.0 / denom, 0.0 / denom),
+        glam::vec3(144.0 / denom, 0.0 / denom, 158.0 / denom),
+        glam::vec3(245.0 / denom, 162.0 / denom, 218.0 / denom),
+        glam::vec3(131.0 / denom, 44.0 / denom, 64.0 / denom),
+        glam::vec3(210.0 / denom, 250.0 / denom, 198.0 / denom),
+    ]
+}
+
 fn parse_cluster_id(cluster_id: String) -> Result<(usize, usize), FFIError> {
     let mut parts = cluster_id.split('-');
 

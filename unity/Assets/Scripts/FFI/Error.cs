@@ -27,5 +27,8 @@ namespace Clam
         ScoringFunctionNotFound,
         PathNotFound,
         NotInCache,
+        TooManyLabels,
+        ColoringFailed,
+
     }
 }

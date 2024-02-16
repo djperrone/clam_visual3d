@@ -1,3 +1,5 @@
+use core::num;
+use std::collections::HashSet;
 use std::ffi::{c_char, CStr};
 
 use crate::ffi_impl::cleanup::Cleanup;
@@ -141,7 +143,7 @@ pub unsafe fn max_lfd_impl(ptr: InHandlePtr) -> f32 {
     -1.0
 }
 
-pub fn color_clusters_by_label_impl(ptr: InHandlePtr, node_visitor: CBFnNodeVisitor) -> FFIError {
+pub fn color_clusters_by_entropy_impl(ptr: InHandlePtr, node_visitor: CBFnNodeVisitor) -> FFIError {
     if let Some(handle) = ptr {
         if let Some(root) = handle.root() {
             if let Some(labels) = handle.labels() {
@@ -165,6 +167,31 @@ fn calc_cluster_entropy_color(cluster: &Clusterf32, labels: &[u8]) -> glam::Vec3
 
     glam::Vec3::new(perc_outliers, perc_inliers, 0.)
 }
+
+fn calc_cluster_dominant_color(
+    cluster: &Clusterf32,
+    labels: &[u8],
+    num_unique_labels: usize,
+    color_choices: &Vec<glam::Vec3>,
+) -> Result<glam::Vec3, String> {
+    let indices = cluster.indices();
+    // let unique_values: HashSet<_> = labels.iter().cloned().collect();
+
+    let mut entropy = vec![0; num_unique_labels];
+    indices.for_each(|i| entropy[labels[i] as usize] += 1);
+    let max_index = entropy
+        .iter()
+        .enumerate()
+        .max_by_key(|&(_, val)| val)
+        .map(|(index, _)| index);
+
+    match max_index {
+        Some(dom_label) => Ok(color_choices[dom_label as usize]),
+        None => Err("invalid labels? i guess".to_string()),
+    }
+
+    // glam::Vec3::new(perc_outliers, perc_inliers, 0.)
+}
 fn color_helper(root: Option<&Clusterf32>, labels: &[u8], node_visitor: CBFnNodeVisitor) {
     if let Some(cluster) = root {
         let mut cluster_data = ClusterDataWrapper::from_cluster(cluster);
@@ -177,6 +204,42 @@ fn color_helper(root: Option<&Clusterf32>, labels: &[u8], node_visitor: CBFnNode
             color_helper(Some(right), labels, node_visitor);
         }
     }
+}
+
+pub fn color_clusters_by_dominant_label_impl(
+    ptr: InHandlePtr,
+    node_visitor: CBFnNodeVisitor,
+) -> FFIError {
+    if let Some(handle) = ptr {
+        if let Some(root) = handle.root() {
+            if let Some(labels) = handle.labels() {
+                let num_unique_labels = {
+                    let unique_labels: HashSet<_> = labels.iter().cloned().collect();
+                    unique_labels.len()
+                };
+
+                let colors = helpers::label_colors();
+                if num_unique_labels > colors.len() {
+                    return FFIError::TooManyLabels;
+                }
+
+                for c in root.subtree() {
+                    let mut cluster_data = ClusterDataWrapper::from_cluster(c);
+                    if let Ok(color) =
+                        calc_cluster_dominant_color(c, labels, num_unique_labels, &colors)
+                    {
+                        cluster_data.data_mut().color = color;
+                        node_visitor(Some(cluster_data.data()));
+                    } else {
+                        return FFIError::ColoringFailed;
+                    }
+                }
+                return FFIError::Ok;
+            }
+        }
+    }
+
+    FFIError::HandleInitFailed
 }
 
 pub unsafe fn color_by_dist_to_query_impl(

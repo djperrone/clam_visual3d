@@ -61,7 +61,7 @@ public class ClusterUI_View : MonoBehaviour
         {
             if (changeEvent.newValue == 0)
             {
-                NativeMethods.ColorClustersByLabel(ColorFiller);
+                NativeMethods.ColorClustersByEntropy(ColorFiller);
             }
         }
     }
