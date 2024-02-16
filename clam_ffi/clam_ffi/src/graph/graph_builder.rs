@@ -4,6 +4,8 @@ use std::{
     thread::{self, JoinHandle},
 };
 
+use abd_clam::Cluster;
+
 use crate::{
     debug,
     ffi_impl::cluster_data::ClusterData,
@@ -11,7 +13,7 @@ use crate::{
     handle::handle::Handle,
     utils::{
         error::FFIError,
-        types::{Clusterf32, DataSet},
+        types::{DataSetf32, Vertexf32},
     },
 };
 
@@ -20,7 +22,7 @@ type Edge = (String, String, f32, bool);
 use super::{
     force_directed_graph::ForceDirectedGraph,
     physics_node::PhysicsNode,
-    spring::{self, Spring},
+    spring::Spring,
 };
 
 pub unsafe fn build_force_directed_graph(
@@ -30,7 +32,7 @@ pub unsafe fn build_force_directed_graph(
     max_iters: i32,
 ) -> Result<(JoinHandle<()>, Arc<ForceDirectedGraph>), FFIError> {
     let springs: Vec<Spring> = {
-        let mut clusters: Vec<&Clusterf32> = Vec::new();
+        let mut clusters: Vec<&Vertexf32> = Vec::new();
 
         for c in cluster_data_arr.iter() {
             if let Ok(cluster) = handle.get_cluster_from_string(c.id.as_string().unwrap()) {
@@ -75,7 +77,7 @@ pub unsafe fn build_graph(
     graph
 }
 
-pub fn detect_edges(clusters: &Vec<&Clusterf32>, dataset: &Option<&DataSet>) -> Vec<Edge> {
+pub fn detect_edges(clusters: &Vec<&Vertexf32>, dataset: &Option<&DataSetf32>) -> Vec<Edge> {
     let mut edges: Vec<Edge> = Vec::new();
     if let Some(data) = *dataset {
         for i in 0..clusters.len() {

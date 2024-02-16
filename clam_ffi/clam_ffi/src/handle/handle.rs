@@ -5,10 +5,13 @@ use std::path::Path;
 use std::sync::Arc;
 use std::thread::JoinHandle;
 
+use abd_clam::graph::Graph;
+use abd_clam::graph::Vertex;
+use abd_clam::Cluster;
 // use abd_clam::criteria::detect_edges;
 use abd_clam::Tree;
 use abd_clam::VecDataset;
-use abd_clam::{Graph, PartitionCriteria};
+use abd_clam::PartitionCriteria;
 
 use crate::ffi_impl::cluster_ids_wrapper::ClusterIDsWrapper;
 use crate::graph::force_directed_graph::{self, ForceDirectedGraph};
@@ -17,7 +20,8 @@ use crate::tree_layout::reingold_tilford;
 use crate::utils::distances::DistanceMetric;
 use crate::utils::error::FFIError;
 use crate::utils::scoring_functions::enum_to_function;
-use crate::utils::types::{Clusterf32, DataSet};
+use crate::utils::types::Treef32;
+use crate::utils::types::{DataSetf32, Vertexf32};
 use crate::utils::{self, anomaly_readers};
 
 use crate::{debug, CBFnNodeVisitor, CBFnNodeVisitorMut};
@@ -30,7 +34,7 @@ use crate::utils::scoring_functions::ScoringFunction;
 use spring::Spring;
 
 pub struct Handle<'a> {
-    tree: Option<Tree<Vec<f32>, f32, DataSet>>,
+    tree: Option<Tree<Vec<f32>, f32, DataSetf32, Vertex<f32>>>,
     // labels: Option<Vec<usize>>,
     graph: Option<HashMap<String, PhysicsNode>>,
     clam_graph: Option<Graph<'a, f32>>,
@@ -45,22 +49,22 @@ impl<'a> Handle<'a> {
         // self.labels = None;
     }
 
-    pub fn get_tree(&self) -> Option<&Tree<Vec<f32>, f32, VecDataset<Vec<f32>, f32, u8>>> {
+    pub fn get_tree(&self) -> Option<&Treef32> {
         self.tree.as_ref()
     }
 
-    pub fn tree(&self) -> Option<&Tree<Vec<f32>, f32, VecDataset<Vec<f32>, f32, u8>>> {
+    pub fn tree(&self) -> Option<&Treef32> {
         self.tree.as_ref()
     }
 
-    pub fn data(&self) -> Option<&DataSet> {
+    pub fn data(&self) -> Option<&DataSetf32> {
         return if let Some(tree) = self.tree() {
             Some(tree.data())
         } else {
             None
         };
     }
-    pub fn root(&self) -> Option<&Clusterf32> {
+    pub fn root(&self) -> Option<&Vertexf32> {
         return if let Some(t) = self.tree() {
             Some(t.root())
         } else {
@@ -84,9 +88,8 @@ impl<'a> Handle<'a> {
         let criteria = PartitionCriteria::new(true).with_min_cardinality(cardinality);
         match Self::create_dataset(data_name, distance_metric, is_expensive) {
             Ok(dataset) => {
-                let tree = Tree::new(dataset, Some(1))
-                    .partition(&criteria)
-                    .with_ratios(false);
+                let tree = Tree::new(dataset, Some(1)).partition(&criteria, None);
+
                 Ok(Handle {
                     tree: Some(tree),
                     // labels: Some(labels.to_vec()),
@@ -118,10 +121,8 @@ impl<'a> Handle<'a> {
                 return Err(e);
             }
         };
-        if let Ok(tree) =
-            Tree::<Vec<f32>, f32, DataSet>::load(Path::new(&data_name), metric, data.is_expensive)
-        {
-            let tree = tree.with_ratios(false);
+        if let Ok(tree) = Treef32::load(Path::new(&data_name), metric, data.is_expensive) {
+            // let tree = tree.with_ratios(false);
             // let labels = tree.data().metadata().to_vec();
             Ok(Handle {
                 tree: Some(tree),
@@ -142,7 +143,7 @@ impl<'a> Handle<'a> {
         data_name: &str,
         distance_metric: DistanceMetric,
         is_expensive: bool,
-    ) -> Result<DataSet, FFIError> {
+    ) -> Result<DataSetf32, FFIError> {
         let metric = match utils::distances::from_enum(distance_metric) {
             Ok(metric) => metric,
             Err(e) => {
@@ -180,7 +181,7 @@ impl<'a> Handle<'a> {
                 Ok(scorer) => {
                     if let Ok(graph) = Graph::from_tree(tree, &scorer, min_depth as usize) {
                         self.clam_graph = Some(graph);
-                        for cluster in self.clam_graph().unwrap().clusters() {
+                        for cluster in self.clam_graph().unwrap().ordered_clusters() {
                             let baton = ClusterDataWrapper::from_cluster(cluster);
                             cluster_selector(Some(baton.data()));
                         }
@@ -199,7 +200,7 @@ impl<'a> Handle<'a> {
                         );
                         debug!(
                             "num clusters {}",
-                            self.clam_graph.as_ref().unwrap().clusters().len()
+                            self.clam_graph.as_ref().unwrap().ordered_clusters().len()
                         );
 
                         return FFIError::Ok;
@@ -352,7 +353,7 @@ impl<'a> Handle<'a> {
         };
     }
 
-    fn set_names_helper(root: &Clusterf32, node_visitor: crate::CBFnNameSetter) {
+    fn set_names_helper(root: &Vertexf32, node_visitor: crate::CBFnNameSetter) {
         if root.is_leaf() {
             let baton = ClusterIDsWrapper::from_cluster(root);
 
@@ -367,7 +368,7 @@ impl<'a> Handle<'a> {
             Self::set_names_helper(right, node_visitor);
         }
     }
-    fn for_each_dft_helper(root: &Clusterf32, node_visitor: CBFnNodeVisitor, max_depth: i32) {
+    fn for_each_dft_helper(root: &Vertexf32, node_visitor: CBFnNodeVisitor, max_depth: i32) {
         if root.is_leaf() || root.depth() as i32 >= max_depth {
             let baton = ClusterDataWrapper::from_cluster(root);
             node_visitor(Some(baton.data()));
@@ -441,7 +442,7 @@ impl<'a> Handle<'a> {
     pub unsafe fn get_cluster_from_string(
         &self,
         cluster_id: String,
-    ) -> Result<&Clusterf32, FFIError> {
+    ) -> Result<&Vertexf32, FFIError> {
         let mut parts = cluster_id.split('-');
 
         if let (Some(offset_str), Some(cardinality_str)) = (parts.next(), parts.next()) {
@@ -460,7 +461,7 @@ impl<'a> Handle<'a> {
         &self,
         offset: usize,
         cardinality: usize,
-    ) -> Result<&Clusterf32, FFIError> {
+    ) -> Result<&Vertexf32, FFIError> {
         if let Some(tree) = self.get_tree() {
             return if let Some(cluster) = tree.get_cluster(offset, cardinality) {
                 Ok(cluster)

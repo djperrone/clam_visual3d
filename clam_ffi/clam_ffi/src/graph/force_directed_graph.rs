@@ -116,8 +116,8 @@ impl ForceDirectedGraph {
 
                 FFIError::PhysicsRunning
             }
-            Err(e) => {
-                debug!("Data not ready...try again later {}", e);
+            Err(_e) => {
+                // debug!("Data not ready...try again later {}", e);
                 FFIError::PhysicsNotReady
             }
         }

@@ -55,13 +55,13 @@ pub fn enum_to_string(scoring_function: &ScoringFunction) -> Result<String, FFIE
         ScoringFunction::DtEuclideanCr => Ok("dt_euclidean_cr".to_string()),
         ScoringFunction::DtEuclideanSp => Ok("dt_euclidean_sp".to_string()),
         ScoringFunction::DtEuclideanVd => Ok("dt_euclidean_vd".to_string()),
-        _ => Err(FFIError::ScoringFunctionNotFound),
+        // _ => Err(FFIError::ScoringFunctionNotFound),
     }
 }
 
 pub fn enum_to_function(
     scoring_function: &ScoringFunction,
-) -> Result<abd_clam::MetaMLScorer, FFIError> {
+) -> Result<abd_clam::graph::MetaMLScorer, FFIError> {
     let pretrained_models = abd_clam::chaoda::pretrained_models::get_meta_ml_scorers();
     match enum_to_string(scoring_function) {
         Ok(function_name) => {

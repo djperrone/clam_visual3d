@@ -1,7 +1,7 @@
 use crate::handle::handle::Handle;
 use crate::utils::distances::DistanceMetric;
 use crate::utils::helpers;
-use crate::utils::types::{InHandlePtr, OutHandlePtr};
+use crate::utils::types::OutHandlePtr;
 
 use crate::utils::error::FFIError;
 

@@ -1,12 +1,14 @@
 use std::ffi::{c_char, CStr};
 
+use abd_clam::Cluster;
+
 use crate::ffi_impl::cleanup::Cleanup;
 use crate::{
     debug,
     utils::{
         error::FFIError,
         helpers,
-        types::{Clusterf32, InHandlePtr},
+        types::{InHandlePtr, Vertexf32},
     },
     CBFnNameSetter, CBFnNodeVisitor,
 };
@@ -105,7 +107,7 @@ pub unsafe fn max_vertex_degree_impl(ptr: InHandlePtr) -> i32 {
         if handle.get_tree().is_some() {
             if let Some(graph) = handle.clam_graph() {
                 let mut max_degree = -1;
-                for c in graph.clusters() {
+                for c in graph.ordered_clusters() {
                     let vertex_degree = graph.vertex_degree(c).unwrap_or_else(|_| {
                         unreachable!(
                             "We are iterating through clusters in graph so it must be there"
@@ -153,7 +155,7 @@ pub fn color_clusters_by_label_impl(ptr: InHandlePtr, node_visitor: CBFnNodeVisi
     FFIError::HandleInitFailed
 }
 
-fn calc_cluster_entropy_color(cluster: &Clusterf32, labels: &[u8]) -> glam::Vec3 {
+fn calc_cluster_entropy_color(cluster: &Vertexf32, labels: &[u8]) -> glam::Vec3 {
     let indices = cluster.indices();
     let mut entropy = [0; 2];
     indices.for_each(|i| entropy[labels[i] as usize] += 1);
@@ -165,7 +167,7 @@ fn calc_cluster_entropy_color(cluster: &Clusterf32, labels: &[u8]) -> glam::Vec3
 
     glam::Vec3::new(perc_outliers, perc_inliers, 0.)
 }
-fn color_helper(root: Option<&Clusterf32>, labels: &[u8], node_visitor: CBFnNodeVisitor) {
+fn color_helper(root: Option<&Vertexf32>, labels: &[u8], node_visitor: CBFnNodeVisitor) {
     if let Some(cluster) = root {
         let mut cluster_data = ClusterDataWrapper::from_cluster(cluster);
         cluster_data.data_mut().color = calc_cluster_entropy_color(cluster, labels);

@@ -18,7 +18,7 @@ namespace Clam
 
         public static partial class NativeMethods
         {
-	public const string __DllName = "clam_ffi_2024-02-1415-35-42";
+	public const string __DllName = "clam_ffi_2024-02-1613-39-59";
             private static IntPtr m_Handle;
 
             private static bool m_Initialized = false;
