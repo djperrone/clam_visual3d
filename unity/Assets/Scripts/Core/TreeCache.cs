@@ -184,6 +184,7 @@ namespace Clam
                         else
                         {
                             Debug.LogWarning("Duplicate edge key found: " + edgeKey);
+                            Destroy(edge.gameObject);
                         }
 
                     }

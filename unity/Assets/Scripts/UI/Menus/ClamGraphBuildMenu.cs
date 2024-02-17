@@ -1,6 +1,8 @@
 using Clam;
 using Clam.FFI;
 using System.Collections.Generic;
+using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -214,20 +216,18 @@ public class ClamGraphBuildMenu
 
     void ResetCallback(ClickEvent evt)
     {
-        //if (!MenuEventManager.instance.m_IsPhysicsRunning)
-        //{
-
-        //    //MenuEventManager.SwitchState(Menu.DestroyGraph);
+        var toggleMenu = m_Document.rootVisualElement.Q<VisualElement>("GraphLabelFilter");
+        foreach (var child in toggleMenu.hierarchy.Children().ToList())
+        {
+            var c = child as Toggle;
+            // why on earth is this necessary?... -
+            // causes whole tree to appear with bugged clusters and edges
+            c.SetValueWithoutNotify(true);
+        }
 
         m_GraphBuilder.GetComponent<GraphBuilder>().DestroyGraph();
         MenuEventManager.SwitchState(Menu.ResetTree);
-        //    m_GraphBuilder.GetComponent<GraphBuilder>().DestroyGraph();
-        //    Cakes.Tree.ResetTree();
-        //}
-        //else
-        //{
-        //    Debug.LogWarning("Cannot reset tree while physics is running");
-        //}
+
     }
 
     void IncludeHiddenCallback(ClickEvent evt)
@@ -274,13 +274,14 @@ public class ClamGraphBuildMenu
     
     void ToggleLabelCallback(ChangeEvent<bool> evt)
     {
+        Debug.Log("triggered toggle callback");
         foreach ((var id, var cluster) in m_Graph)
         {
             var label = Clam.FFI.NativeMethods.GetClusterLabel(id);
             var target = evt.target as VisualElement;
             if (target.name == label.ToString())
             {
-                cluster.SetActive(!cluster.activeSelf);
+                cluster.SetActive(evt.newValue);
             }
         }
     }
