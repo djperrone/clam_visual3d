@@ -22,4 +22,6 @@ pub enum FFIError {
     ScoringFunctionNotFound,
     PathNotFound,
     NotInCache,
+    TooManyLabels,
+    ColoringFailed,
 }

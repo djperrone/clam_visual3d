@@ -65,7 +65,13 @@ namespace Clam
                 Debug.Log("ERROR " + e);
             }
             Clam.FFI.NativeMethods.DrawHierarchy(PositionUpdater);
-            Clam.FFI.NativeMethods.ColorClustersByLabel(ColorFiller);
+            //Clam.FFI.NativeMethods.ColorClustersByEntropy(ColorFiller);
+            var colorErr = Clam.FFI.NativeMethods.ColorClustersByDominantLabel(ColorFiller);
+            if (colorErr != FFIError.Ok)
+            {
+                return FFIError.ColoringFailed;
+            }
+
 
             Clam.FFI.NativeMethods.ForEachDFT(EdgeDrawer);
             PopulateEdgeDictionary();
@@ -130,7 +136,7 @@ namespace Clam
             DestroyEdges();
 
             Clam.FFI.NativeMethods.DrawHierarchy(PositionUpdater);
-            Clam.FFI.NativeMethods.ColorClustersByLabel(ColorFiller);
+            Clam.FFI.NativeMethods.ColorClustersByDominantLabel(ColorFiller);
             Clam.FFI.NativeMethods.ForEachDFT(EdgeDrawer);
             //PopulateEdgeDictionary();
         }
@@ -178,6 +184,7 @@ namespace Clam
                         else
                         {
                             Debug.LogWarning("Duplicate edge key found: " + edgeKey);
+                            Destroy(edge.gameObject);
                         }
 
                     }

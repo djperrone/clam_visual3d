@@ -184,7 +184,7 @@ pub unsafe extern "C" fn shutdown_clam(context_ptr: OutHandlePtr) -> FFIError {
 pub unsafe extern "C" fn init_clam_graph(
     context: InHandlePtr,
     scoring_function: ScoringFunction,
-    min_depth : i32,
+    min_depth: i32,
     cluster_selector: CBFnNodeVisitor,
 ) -> FFIError {
     if let Some(handle) = context {
@@ -230,6 +230,11 @@ pub unsafe extern "C" fn vertex_degree(ptr: InHandlePtr, cluster_id: *const c_ch
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn get_cluster_label(ptr: InHandlePtr, cluster_id: *const c_char) -> i32 {
+    get_cluster_label_impl(ptr, cluster_id)
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn max_vertex_degree(ptr: InHandlePtr) -> i32 {
     max_vertex_degree_impl(ptr)
 }
@@ -241,11 +246,19 @@ pub unsafe extern "C" fn max_lfd(ptr: InHandlePtr) -> f32 {
 
 #[no_mangle]
 // add recursive bool option and node name
-pub unsafe extern "C" fn color_clusters_by_label(
+pub unsafe extern "C" fn color_clusters_by_entropy(
     ptr: InHandlePtr,
     node_visitor: CBFnNodeVisitor,
 ) -> FFIError {
-    ffi_impl::lib_impl::color_clusters_by_label_impl(ptr, node_visitor)
+    ffi_impl::lib_impl::color_clusters_by_entropy_impl(ptr, node_visitor)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn color_clusters_by_dominant_label(
+    ptr: InHandlePtr,
+    node_visitor: CBFnNodeVisitor,
+) -> FFIError {
+    ffi_impl::lib_impl::color_clusters_by_dominant_label_impl(ptr, node_visitor)
 }
 // ------------------------------------- Cluster Helpers -------------------------------------
 

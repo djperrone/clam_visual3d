@@ -1,6 +1,8 @@
 using Clam;
 using Clam.FFI;
 using System.Collections.Generic;
+using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -49,6 +51,8 @@ public class ClamGraphBuildMenu
             GameObject graphBuilderPrefab = Resources.Load("Graph") as GameObject;
             m_GraphBuilder = MenuEventManager.Instantiate(graphBuilderPrefab);
         }
+
+        InitLabelFilter();
     }
 
     void MinDepthCallback(ChangeEvent<string> changeEvent)
@@ -212,20 +216,18 @@ public class ClamGraphBuildMenu
 
     void ResetCallback(ClickEvent evt)
     {
-        //if (!MenuEventManager.instance.m_IsPhysicsRunning)
-        //{
-
-        //    //MenuEventManager.SwitchState(Menu.DestroyGraph);
+        var toggleMenu = m_Document.rootVisualElement.Q<VisualElement>("GraphLabelFilter");
+        foreach (var child in toggleMenu.hierarchy.Children().ToList())
+        {
+            var c = child as Toggle;
+            // why on earth is this necessary?... -
+            // causes whole tree to appear with bugged clusters and edges
+            c.SetValueWithoutNotify(true);
+        }
 
         m_GraphBuilder.GetComponent<GraphBuilder>().DestroyGraph();
         MenuEventManager.SwitchState(Menu.ResetTree);
-        //    m_GraphBuilder.GetComponent<GraphBuilder>().DestroyGraph();
-        //    Cakes.Tree.ResetTree();
-        //}
-        //else
-        //{
-        //    Debug.LogWarning("Cannot reset tree while physics is running");
-        //}
+
     }
 
     void IncludeHiddenCallback(ClickEvent evt)
@@ -244,4 +246,46 @@ public class ClamGraphBuildMenu
             Debug.LogError("cluster not found");
         }
     }
+
+    void InitLabelFilter()
+    {
+        var baseMenu = m_Document.rootVisualElement.Q<VisualElement>("GraphLabelFilter");
+        var numLabels = 2;
+        if (Cakes.Tree.m_TreeData.dataName == "mnist")
+        {
+            numLabels = 10;
+        }
+
+        for (int i = 0; i < numLabels; i++)
+        {
+            Toggle t = new Toggle();
+            t.style.width = Length.Percent(20);
+            t.style.backgroundColor = UIHelpers.LabelColors()[i];
+            t.text = i.ToString();
+            t.value = true;
+            t.name = i.ToString();
+            t.RegisterValueChangedCallback(ToggleLabelCallback);
+
+
+            //Toggle t = new Toggle(i.ToString());
+            baseMenu.Add(t);
+        }
+    }
+    
+    void ToggleLabelCallback(ChangeEvent<bool> evt)
+    {
+        Debug.Log("triggered toggle callback");
+        foreach ((var id, var cluster) in m_Graph)
+        {
+            var label = Clam.FFI.NativeMethods.GetClusterLabel(id);
+            var target = evt.target as VisualElement;
+            if (target.name == label.ToString())
+            {
+                cluster.SetActive(evt.newValue);
+            }
+        }
+    }
+
+
+    
 }
