@@ -10,7 +10,7 @@
         </ui:VisualElement>
         <ui:VisualElement name="EdgeScalerContainer" style="flex-direction: row;">
             <ui:Label text="Edge Scale" display-tooltip-when-elided="true" name="EdgeScalerLabel" style="width: 30%;" />
-            <ui:Slider picking-mode="Ignore" value="100" high-value="1000" name="ClamEdgeScalar" focusable="false" style="width: 55%; flex-grow: 1;" />
+            <ui:TextField picking-mode="Ignore" value="100.0" text="100.0" name="ClamEdgeScalar" style="width: 55%; flex-grow: 1; flex-wrap: wrap-reverse;" />
         </ui:VisualElement>
         <ui:Button text="Preview Graph" display-tooltip-when-elided="true" name="SelectClamGraphClusters" focusable="false" />
         <ui:Button text="Create Graph" display-tooltip-when-elided="true" name="CreateClamGraphButton" focusable="false" />

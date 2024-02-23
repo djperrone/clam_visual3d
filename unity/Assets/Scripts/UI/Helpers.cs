@@ -85,7 +85,20 @@ public static class UIHelpers
     {
         foreach (var c in value)
         {
-            if ((c < '0' || c > '9'))
+            if (!validCharacters.Contains(c))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public static bool ValidatePositiveFloatString(string value, string validCharacters)
+    {
+        foreach (var c in value)
+        {
+            if ((c < '0' || c > '9') && c != '.')
             {
                 return false;
             }

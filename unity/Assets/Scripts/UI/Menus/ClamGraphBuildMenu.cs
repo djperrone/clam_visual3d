@@ -13,7 +13,7 @@ public class ClamGraphBuildMenu
     Button m_DestroyGraph;
     DropdownField m_ScoringSelector;
     //GameObject m_SpringPrefab;
-    Slider m_EdgeScalar;
+    TextField m_EdgeScalar;
     Toggle m_ShowEdges;
     TextField m_MinDepth;
 
@@ -29,7 +29,7 @@ public class ClamGraphBuildMenu
         m_CreateGraph = document.rootVisualElement.Q<Button>("CreateClamGraphButton");
         m_DestroyGraph = document.rootVisualElement.Q<Button>("ResetClamGraph");
         m_SelectClusters = document.rootVisualElement.Q<Button>("SelectClamGraphClusters");
-        m_EdgeScalar = document.rootVisualElement.Q<Slider>("ClamEdgeScalar");
+        m_EdgeScalar = document.rootVisualElement.Q<TextField>("ClamEdgeScalar");
         m_ScoringSelector = document.rootVisualElement.Q<DropdownField>("ScoringFunctionSelector");
         m_ShowEdges = document.rootVisualElement.Q<Toggle>("ShowEdgesToggle");
         m_MinDepth = document.rootVisualElement.Q<TextField>("GraphMinDepth");
@@ -43,6 +43,7 @@ public class ClamGraphBuildMenu
 
         m_ShowEdges.RegisterValueChangedCallback(ShowEdgesCallback);
         m_MinDepth.RegisterValueChangedCallback(MinDepthCallback);
+        m_EdgeScalar.RegisterValueChangedCallback(EdgeScalarCallback);
 
         InitScoringSelector();
 
@@ -76,6 +77,36 @@ public class ClamGraphBuildMenu
             textField.value = changeEvent.previousValue;
             return;
         }
+    }
+
+    void EdgeScalarCallback(ChangeEvent<string> changeEvent)
+    {
+        if (changeEvent.newValue.Length == 0)
+        {
+            return;
+        }
+
+        var textField = changeEvent.target as TextField;
+
+        if (changeEvent.newValue.Count(c => c == '.') > 1)
+        {
+            textField.value = changeEvent.previousValue;
+            Debug.LogWarning("too many .s in edgesclar");
+            return;
+        }
+        if (!UIHelpers.ValidateCharacters(changeEvent.newValue, ".0123456789"))
+        {
+            textField.value = changeEvent.previousValue;
+            return;
+        }
+
+        //float minDepthValue = float.Parse(textField.value);
+
+        //if (minDepthValue <= 0.0)
+        //{
+        //    textField.value = changeEvent.previousValue;
+        //    return;
+        //}
     }
 
     void ShowEdgesCallback(ChangeEvent<bool> evt)
@@ -211,7 +242,7 @@ public class ClamGraphBuildMenu
         Debug.Log("finished setting up unity physics sim - passing to rust");
         
 
-        m_GraphBuilder.GetComponent<GraphBuilder>().Init(selectedClusters, m_EdgeScalar.value, 500);
+        m_GraphBuilder.GetComponent<GraphBuilder>().Init(selectedClusters, float.Parse(m_EdgeScalar.value), 500);
     }
 
     void ResetCallback(ClickEvent evt)

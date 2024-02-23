@@ -17,7 +17,7 @@ use crate::tree_layout::reingold_tilford;
 use crate::utils::distances::DistanceMetric;
 use crate::utils::error::FFIError;
 use crate::utils::scoring_functions::enum_to_function;
-use crate::utils::types::{Clusterf32, DataSet};
+use crate::utils::types::{Clusterf32, DataSetf32};
 use crate::utils::{self, anomaly_readers};
 
 use crate::{debug, CBFnNodeVisitor, CBFnNodeVisitorMut};
@@ -30,7 +30,7 @@ use crate::utils::scoring_functions::ScoringFunction;
 use spring::Spring;
 
 pub struct Handle<'a> {
-    tree: Option<Tree<Vec<f32>, f32, DataSet>>,
+    tree: Option<Tree<Vec<f32>, f32, DataSetf32>>,
     // labels: Option<Vec<usize>>,
     graph: Option<HashMap<String, PhysicsNode>>,
     clam_graph: Option<Graph<'a, f32>>,
@@ -53,7 +53,7 @@ impl<'a> Handle<'a> {
         self.tree.as_ref()
     }
 
-    pub fn data(&self) -> Option<&DataSet> {
+    pub fn data(&self) -> Option<&DataSetf32> {
         return if let Some(tree) = self.tree() {
             Some(tree.data())
         } else {
@@ -118,9 +118,11 @@ impl<'a> Handle<'a> {
                 return Err(e);
             }
         };
-        if let Ok(tree) =
-            Tree::<Vec<f32>, f32, DataSet>::load(Path::new(&data_name), metric, data.is_expensive)
-        {
+        if let Ok(tree) = Tree::<Vec<f32>, f32, DataSetf32>::load(
+            Path::new(&data_name),
+            metric,
+            data.is_expensive,
+        ) {
             let tree = tree.with_ratios(false);
             // let labels = tree.data().metadata().to_vec();
             Ok(Handle {
@@ -142,7 +144,7 @@ impl<'a> Handle<'a> {
         data_name: &str,
         distance_metric: DistanceMetric,
         is_expensive: bool,
-    ) -> Result<DataSet, FFIError> {
+    ) -> Result<DataSetf32, FFIError> {
         let metric = match utils::distances::from_enum(distance_metric) {
             Ok(metric) => metric,
             Err(e) => {
@@ -242,7 +244,11 @@ impl<'a> Handle<'a> {
                 debug!("shutting down physics");
                 FFIError::PhysicsFinished
             } else {
-                force_directed_graph::try_update_unity(&force_directed_graph.1, updater)
+                force_directed_graph::try_update_unity(
+                    &force_directed_graph.1,
+                    self.tree().as_ref().unwrap(),
+                    updater,
+                )
             };
         }
 

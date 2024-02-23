@@ -11,7 +11,7 @@ use crate::{
     handle::handle::Handle,
     utils::{
         error::FFIError,
-        types::{Clusterf32, DataSet},
+        types::{Clusterf32, DataSetf32},
     },
 };
 
@@ -75,7 +75,7 @@ pub unsafe fn build_graph(
     graph
 }
 
-pub fn detect_edges(clusters: &Vec<&Clusterf32>, dataset: &Option<&DataSet>) -> Vec<Edge> {
+pub fn detect_edges(clusters: &Vec<&Clusterf32>, dataset: &Option<&DataSetf32>) -> Vec<Edge> {
     let mut edges: Vec<Edge> = Vec::new();
     if let Some(data) = *dataset {
         for i in 0..clusters.len() {
