@@ -1,10 +1,10 @@
 {
-    "name": "mnist",
+    "name": "anomaly_mnist",
     "url": "https://www.dropbox.com/s/n3wurjt8v9qi6nc/mnist.mat?dl=0",
     "mmap_threshold": 1073741824,
     "mmap_mode": null,
-    "raw_path": "raw/mnist.mat",
-    "features_path": "preprocessed/mnist_features.npy",
-    "normalized_features_path": "preprocessed/mnist_features_normalized.npy",
-    "scores_path": "preprocessed/mnist_scores.npy"
+    "raw_path": "raw/anomaly_mnist.mat",
+    "features_path": "preprocessed/anomaly_mnist_features.npy",
+    "normalized_features_path": "preprocessed/anomaly_mnist_features_normalized.npy",
+    "scores_path": "preprocessed/anomaly_mnist_scores.npy"
 }
