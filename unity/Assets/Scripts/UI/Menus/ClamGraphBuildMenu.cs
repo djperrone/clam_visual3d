@@ -186,22 +186,9 @@ public class ClamGraphBuildMenu
             else
             {
                 node.GetComponent<Node>().Deselect();
-                node.SetActive(false);
-
+                //node.SetActive(false);
             }
         }
-
-        //foreach (var (id, node) in Cakes.Tree.GetTree())
-        //{
-        //    if (node.GetComponent<Node>().IsSelected())
-        //    {
-        //        if (!node.activeSelf)
-        //        {
-        //            node.SetActive(true);
-        //        }
-        //        m_Graph[id] = node;
-        //    }
-        //}
 
         var numGraphComponentsLabel = m_Document.rootVisualElement.Q<Label>("NumGraphComponents");
         var numGraphComponents = NativeMethods.GetNumGraphComponents();
@@ -222,43 +209,17 @@ public class ClamGraphBuildMenu
             return;
         }
 
-        //foreach ((var id, var node) in Cakes.Tree.GetTree())
-        //{
-        //    if (!m_Graph.ContainsKey(id))
-        //    {
-        //        GameObject.Destroy(node);
-        //    }
-        //}
-        //Cakes.Tree.Set(m_Graph);
+        foreach ((var id, var node) in Cakes.Tree.GetTree())
+        {
+            if (!m_Graph.ContainsKey(id))
+            {
+                GameObject.Destroy(node);
+            }
+        }
+        Cakes.Tree.Set(m_Graph);
 
         MenuEventManager.SwitchState(Menu.DestroyGraph);
         MenuEventManager.SwitchState(Menu.DestroyHierarchyEdges);
-
-        //var selectedClusters = new Clam.FFI.ClusterData[m_Graph.Count];
-        //int i = 0;
-
-        //foreach (var (name, node) in m_Graph)
-        //{
-        //    var x = Random.Range(0, 100);
-        //    var y = Random.Range(0, 100);
-        //    var z = Random.Range(0, 100);
-
-        //    node.GetComponent<Transform>().position = new Vector3(x, y, z);
-
-        //    var result = Clam.FFI.NativeMethods.CreateClusterDataMustFree(node.GetComponent<Node>().GetId(), out var clusterData);
-        //    if (result == FFIError.Ok)
-        //    {
-        //        selectedClusters[i++] = clusterData;
-        //    }
-        //    else
-        //    {
-        //        Debug.LogError("Node could not be found");
-        //        return;
-        //    }
-        //}
-        ////MenuEventManager.instance.m_IsPhysicsRunning = true;
-        //Debug.Log("finished setting up unity physics sim - passing to rust");
-        
 
         m_GraphBuilder.GetComponent<GraphBuilder>().Init(m_Graph, float.Parse(m_EdgeScalar.value), 500);
     }
@@ -276,7 +237,6 @@ public class ClamGraphBuildMenu
 
         m_GraphBuilder.GetComponent<GraphBuilder>().DestroyGraph();
         MenuEventManager.SwitchState(Menu.ResetTree);
-
     }
 
     void IncludeHiddenCallback(ClickEvent evt)

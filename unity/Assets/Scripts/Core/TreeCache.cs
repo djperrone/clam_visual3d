@@ -159,7 +159,7 @@ namespace Clam
 
             //edges = GameObject.FindObjectsOfType<Edge>(true);
             //Debug.Log("after2 num edges" + edges.Length.ToString());
-            m_EdgeCache.Clear();
+            //m_EdgeCache.Clear();
             m_EdgeCache = new Dictionary<string, GameObject>();
         }
 

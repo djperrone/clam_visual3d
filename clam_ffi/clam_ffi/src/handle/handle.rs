@@ -187,23 +187,6 @@ impl<'a> Handle<'a> {
                             cluster_selector(Some(baton.data()));
                         }
 
-                        debug!(
-                            "num components {}",
-                            self.clam_graph
-                                .as_ref()
-                                .unwrap()
-                                .find_component_clusters()
-                                .len()
-                        );
-                        debug!(
-                            "num edges {}",
-                            self.clam_graph.as_ref().unwrap().edge_cardinality()
-                        );
-                        debug!(
-                            "num clusters {}",
-                            self.clam_graph.as_ref().unwrap().clusters().len()
-                        );
-
                         return FFIError::Ok;
                     }
                 }

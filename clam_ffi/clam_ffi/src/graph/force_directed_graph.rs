@@ -124,7 +124,6 @@ impl ForceDirectedGraph {
                 }
                 for (key, value) in &mut g.1 {
                     value.update_position();
-                    // call to clone ?
                     let baton_data =
                         ClusterDataWrapper::from_physics(key.as_str(), value.get_position());
 
@@ -136,7 +135,7 @@ impl ForceDirectedGraph {
 
                 FFIError::PhysicsRunning
             }
-            Err(e) => {
+            Err(_) => {
                 // debug!("Data not ready...try again later {}", e);
                 FFIError::PhysicsNotReady
             }
@@ -181,13 +180,13 @@ pub unsafe fn force_shutdown(force_directed_graph: &ForceDirectedGraph) -> FFIEr
     force_directed_graph.force_shutdown()
 }
 
-pub fn get_num_edges(force_directed_graph: &ForceDirectedGraph) -> i32 {
-    return force_directed_graph
-        .edges
-        .iter()
-        .filter(|&edge| edge.is_detected)
-        .count() as i32;
-}
+// pub fn get_num_edges(force_directed_graph: &ForceDirectedGraph) -> i32 {
+//     return force_directed_graph
+//         .edges
+//         .iter()
+//         .filter(|&edge| edge.is_detected)
+//         .count() as i32;
+// }
 
 pub fn init_unity_edges(force_directed_graph: &ForceDirectedGraph, init_edges: CBFnNodeVisitorMut) {
     for edge in &force_directed_graph.edges {

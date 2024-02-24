@@ -31,16 +31,6 @@ pub unsafe fn build_force_directed_graph(
     scalar: f32,
     max_iters: i32,
 ) -> Result<(JoinHandle<()>, Arc<ForceDirectedGraph>), FFIError> {
-    // let springs: Vec<Spring> = {
-    //     // let mut clusters: Vec<&Clusterf32> = Vec::new();
-
-    //     // for c in cluster_data_arr.iter() {
-    //     //     if let Ok(cluster) = handle.get_cluster_from_string(c.id.as_string().unwrap()) {
-    //     //         clusters.push(cluster);
-    //     //     }
-    //     // }
-    //     // create_springs(detect_edges(&clusters, &handle.data())) //, edge_detector_cb))
-    // };
     if let Some(_) = handle.get_tree() {
         if let Some(clam_graph) = handle.clam_graph() {
             let mut graph: HashMap<String, PhysicsNode> = HashMap::new();
@@ -74,10 +64,6 @@ pub unsafe fn build_force_directed_graph(
     }
 
     Err(FFIError::GraphBuildFailed)
-    // let graph = build_graph(handle, cluster_data_arr);
-    // if graph.is_empty() {
-    //     return Err(FFIError::GraphBuildFailed);
-    // }
 }
 
 // pub unsafe fn build_graph(

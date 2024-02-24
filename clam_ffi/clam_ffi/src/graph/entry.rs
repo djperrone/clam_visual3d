@@ -20,7 +20,6 @@ pub unsafe fn physics_update_async_impl(
 
 pub unsafe fn init_force_directed_graph_impl(
     context: InHandlePtr,
-
     scalar: f32,
     max_iters: i32,
 ) -> FFIError {
@@ -59,7 +58,9 @@ pub unsafe fn init_graph_vertices_impl(
 pub fn get_num_edges_in_graph_impl(ptr: InHandlePtr) -> i32 {
     if let Some(handle) = ptr {
         debug!("num edges {}", handle.get_num_edges_in_graph());
-        return handle.get_num_edges_in_graph();
+        if let Some(graph) = handle.clam_graph() {
+            return graph.edge_cardinality() as i32;
+        }
     }
     -1
 }
