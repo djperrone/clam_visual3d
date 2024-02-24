@@ -1,0 +1,1000 @@
+ 1011  git rm CONT*
+ 1012  git pull origin windows_dev_setup
+ 1013  git reset --hard windows_dev_setup
+ 1014  code CONT*
+ 1015  git fetch origin
+ 1016  git pull
+ 1017  git pull origin windows_dev_setup
+ 1018  git reset --hard windows_dev_setup
+ 1019  git status
+ 1020  git diff
+ 1021  wtf
+ 1022  git reset --hard bbc3548
+ 1023  git add .
+ 1024  git commit -m "added extra info on restarting wsl and added link for help"
+ 1025  git push origin windows_dev_setup
+ 1026  cd ../../
+ 1027  ls
+ 1028  cd clam-ratios
+ 1029  ls
+ 1030  git branch
+ 1031  git fetch origin
+ 1032  git status
+ 1033  git pull origin feat/graph-chaoda-merge
+ 1034  git rm abd-clam/src/core/graph/cluster_se*
+ 1035  git rm abd-clam/src/core/graph/cluster_se* -f
+ 1036  git pull origin feat/graph-chaoda-merge
+ 1037  git reset --hard 7a1af6a
+ 1038  ls
+ 1039  code .
+ 1040  git branch
+ 1041  pre-commit --test-all
+ 1042  source .venv/bin/activate
+ 1043  cd ../
+ 1044  source .venv/bin/activate
+ 1045  cd -
+ 1046  pre-commit --test-all
+ 1047  pre-commit --help
+ 1048  pre-commit --run
+ 1049  pre-commit run
+ 1050  git add .
+ 1051  git commit -m "changed cluster selection to return result if to handle if not built with ratios"
+ 1052  git add .
+ 1053  git commit -m "changed cluster selection to return result if to handle if not built with ratios"
+ 1054  git push origin feat/graph-chaoda-merge
+ 1055  cd ../../
+ 1056  cd uri/thesis/clam-ratios
+ 1057  ls
+ 1058  git branch
+ 1059  git status
+ 1060  git branch
+ 1061  git status
+ 1062  git checkout master
+ 1063  git pull
+ 1064  git checkout feat/new-scoring
+ 1065  git rebase origin/master
+ 1066  git rm crates/abd-clam/src/core/graph/_graph.rs
+ 1067  git rebase --continue
+ 1068  git rm crates/abd-clam/src/core/graph/mod.rs
+ 1069  git rebase --continue
+ 1070  git rm crates/abd-clam/src/core/graph/_graph.rs
+ 1071  git rebase --continue
+ 1072  git add crates/abd-clam/src/core/graph/_graph.rs
+ 1073  git rm abd-clam/src/core/graph/_graph.rs
+ 1074  git rebase --continue
+ 1075  git branch -d feat/new-scoring
+ 1076  git branch -d feat/graph-scoring
+ 1077  git checko feat/new-graph-scoring
+ 1078  git branch -D feat/new-graph-scoring
+ 1079  git checkout master
+ 1080  git checkout user/alefebvre/scoring
+ 1081  git rebase origin/master
+ 1082  git branch
+ 1083  git rebase --continue
+ 1084  git rebase --abort
+ 1085  git branch
+ 1086  git reset --hard user/alefebvre/scoring
+ 1087  git pull
+ 1088  git fetch origin
+ 1089  git status
+ 1090  git reset --hard HEAD
+ 1091  git reset --hard origin user/alefebvre/scoring
+ 1092  git reset --hard origin/user/alefebvre/scoring
+ 1093  git pull
+ 1094  cd ../
+ 1095  mkdir new_clam_ratios
+ 1096  cd new_clam_ratios
+ 1097  git clone git@github.com:djperrone/clam-ratios.git
+ 1098  ls
+ 1099  cd clam-ratios
+ 1100  git checkout user/alefebvre/scoring
+ 1101  git checkout -b feat/new-scoring
+ 1102  ls
+ 1103  git fetch origin
+ 1104  git branch
+ 1105  git checkout user/alefebvre/scoring-graph
+ 1106  git rebase origin/master
+ 1107  git add .
+ 1108  git branch
+ 1109  git reset --hard user/alefebvre/scoring-graph
+ 1110  git checkout -b feat/new-graph-scoring
+ 1111  git rebase origin/master
+ 1112  git rebase --continue
+ 1113  git rebase --skip
+ 1114  git rebase --continue
+ 1115  git rebase --skip
+ 1116  git rebase --continue
+ 1117  cd ../
+ 1118  rm -rf clam-ratios
+ 1119  ls
+ 1120  cd clam-ratios
+ 1121  ls
+ 1122  cd ..
+ 1123  rm clam-ratios
+ 1124  rm -rf clam-ratios
+ 1125  cd ../../
+ 1126  cd uri/thesis
+ 1127  git clone git@github.com:djperrone/clam-ratios.git
+ 1128  ls
+ 1129  cd clam-ratios
+ 1130  ls
+ 1131  git branch
+ 1132  git checkout user/alefebvre/graph-scoring
+ 1133  git branch
+ 1134  git fetch origin
+ 1135  git checkout user/alefebvre/graph-scoring
+ 1136  git branch
+ 1137  git checkout user/alefebvre/scoring-graph
+ 1138  git checkout -b feat/scoring-graph-andrew
+ 1139  git add .
+ 1140  git commit -m "init"
+ 1141  git push origin feat/scoring-graph-andrew
+ 1142  ls
+ 1143  git branch
+ 1144  git add .
+ 1145  git commit -m "deleting conflicts"
+ 1146  git push origin feat/scoring-graph-andrew
+ 1147  git checkout master
+ 1148  git checkout -b feat/new-scoring
+ 1149  git add .
+ 1150  git commit -m "
+ 1151  git commit -m "init"
+ 1152  git push origin feat/new-scoring
+ 1153  git checkout feat/scoring-graph-andrew
+ 1154  git rebase origin/master
+ 1155  git rebase --abort
+ 1156  git branch
+ 1157  git add .
+ 1158  git reset --hard feat/scoring-graph-andrew
+ 1159  git status
+ 1160  git history
+ 1161  git log
+ 1162  git reset --soft feat/scoring-graph-andrew
+ 1163  git add .
+ 1164  git commit -m "test squash"
+ 1165  git push -f feat/scoring-graph-andrew
+ 1166  git push -f feat/scoring-graph-andrew
+ 1167  git push -f 
+ 1168  git push -f origin feat/scoring-graph-andrew
+ 1169  git reset --soft master
+ 1170  git add .
+ 1171  git commit -m "squashing?"
+ 1172  git push origin feat/scoring-graph-andrew
+ 1173  git push origin feat/scoring-graph-andrew -f
+ 1174  git branch -D feat/scoring-graph-andrew
+ 1175  git checkout master
+ 1176  git branch -D feat/scoring-graph-andrew
+ 1177  git push
+ 1178  git push -D feat/scoring-graph-andrew
+ 1179  git push -d feat/scoring-graph-andrew
+ 1180  git fetch origin
+ 1181  git pull
+ 1182  git branch
+ 1183  git push -d origin feat/scoring-graph-andrew
+ 1184  git branch
+ 1185  git checkout feat/scoring-refactor
+ 1186  git fetch origin
+ 1187  git checkout feat/scoring-refactor
+ 1188  cargo test
+ 1189  ls
+ 1190  earthly +test
+ 1191  git branch
+ 1192  git checkout -b feat/scoring-refactor2
+ 1193  git add .
+ 1194  git commit -m ".."
+ 1195  git push origin feat/scoring-refactor2
+ 1196  cd /mnt/c/uri/clam_visual_3d
+ 1197  cd /mnt/c/uri/thesis/clam_visual_3d
+ 1198  cd /mnt/c/uri/thesis/clam_visual3d
+ 1199  cd /mnt/c/uri/clamvisual_3d
+ 1200  cd /mnt/c/uri/clam_visual3d
+ 1201  git log
+ 1202  cd -
+ 1203  git log
+ 1204  cd -
+ 1205  git log
+ 1206  git branch
+ 1207  git checkout master
+ 1208  git fetch origin
+ 1209  git pull
+ 1210  git branch
+ 1211  git reset --hard HEAD
+ 1212  git add .
+ 1213  git commit -m "Making MetaMLScorer public so I can access it for visualization"
+ 1214  git push origin main
+ 1215  git branch
+ 1216  git push origin master
+ 1217  git branch
+ 1218  git fetch origin
+ 1219  git pull
+ 1220  git status
+ 1221  git fetch origin
+ 1222  git pull
+ 1223  git branch
+ 1224  git add .
+ 1225  git commit -m "made all chaoda pretrained model functions work"
+ 1226  git push origin main
+ 1227  git push origin master
+ 1228  git push origin dev-graph2
+ 1229  cd ../../
+ 1230  git branch
+ 1231  git checkout visualization-demo
+ 1232  git branch
+ 1233  git add .
+ 1234  git commit -m "saving"
+ 1235  git push origin update_physics_ui
+ 1236  git push origin updating_physics_ui
+ 1237  git checkout visualization-demo
+ 1238  cd clam_ffi/clam
+ 1239  ls
+ 1240  git branch
+ 1241  git checkout feat/scoring-impl
+ 1242  ls
+ 1243  git pull origin feat/scoring-impl
+ 1244  cd ../../
+ 1245  git submodule update --init --recursive
+ 1246  git checkout updating_physics_ui
+ 1247  git stash
+ 1248  git checkout updating_physics_ui
+ 1249  ls
+ 1250  cd clam_ffi
+ 1251  ls
+ 1252  cd clam
+ 1253  ls
+ 1254  git branch
+ 1255  git checkout master
+ 1256  ls
+ 1257  cd ../
+ 1258  git checkout visualization-demo
+ 1259  git tash
+ 1260  git stash
+ 1261  git checkout visualization-demo
+ 1262  cd clam_ffi/clam
+ 1263  ls
+ 1264  git branch
+ 1265  git checkout feat/scoring-impl
+ 1266  cd ../../
+ 1267  git checkout updating_physics_ui
+ 1268  git stash
+ 1269  git checkout updating_physics_ui
+ 1270  cd clam_ffi/clam
+ 1271  ls
+ 1272  git branch
+ 1273  git checkout master
+ 1274  cd ../../
+ 1275  git checkout visualization-demo
+ 1276  git branch
+ 1277  git add .
+ 1278  git commit -m 
+ 1279  git commit -m "added debugging to figure out why some graphs have no edges"
+ 1280  git push origin updating_physics_ui
+ 1281  git checkout visualization-demo
+ 1282  cd clam_ffi/clam
+ 1283  git branch
+ 1284  git checkout feat/scoring-impl
+ 1285  git stash
+ 1286  cd ../../
+ 1287  git stash
+ 1288  git checkout updating_physics_ui
+ 1289  cd clam_ffi/clam
+ 1290  git branch
+ 1291  git checkout master
+ 1292  cd ../../
+ 1293  git status
+ 1294  git branch
+ 1295  git checkout -b graph-bug
+ 1296  git add .
+ 1297  git commit -m "debugging"
+ 1298  git push origin graph-bug
+ 1299  git checkout main
+ 1300  cd clam_ffi/clam
+ 1301  git branch
+ 1302  cd ../../
+ 1303  cd -
+ 1304  git fetch origin
+ 1305  git pull
+ 1306  ls
+ 1307  cd ../../
+ 1308  git fetch origin
+ 1309  git pull
+ 1310  cd clam_ffi/clam
+ 1311  ls
+ 1312  cd crates
+ 1313  ls
+ 1314  cd abd-clam
+ 1315  ls
+ 1316  cd src/core
+ 1317  cd graph
+ 1318  code _graph.rs
+ 1319  code criteria.rs
+ 1320  cd ../../
+ 1321  cd ../
+ 1322  git branch
+ 1323  git reset --hard HEAD
+ 1324  git fetch origin
+ 1325  git branch
+ 1326  git pull 
+ 1327  git reset --hard HEAD
+ 1328  git fetch origin
+ 1329  git pull
+ 1330  cd ../../
+ 1331  git branch
+ 1332  git status
+ 1333  git stash
+ 1334  git branch
+ 1335  git checkout graph-bug
+ 1336  git fetch origin
+ 1337  git status
+ 1338  git restore clam_ffi/clam/*
+ 1339  git restore clam_ffi/clam/
+ 1340  git status
+ 1341  cd clam_ffi/clam
+ 1342  git fetch origin
+ 1343  git pull
+ 1344  git reset --hard HEAD
+ 1345  cd ../
+ 1346  cd ..
+ 1347  git status
+ 1348  git fetch origin
+ 1349  git pull
+ 1350  git pull origin main
+ 1351  git branch
+ 1352  git checkout main
+ 1353  git status
+ 1354  git checkout -b save-bug-fix
+ 1355  git checkout main
+ 1356  git pull origin main
+ 1357  ls
+ 1358  cd clam_ffi/clam
+ 1359  ls
+ 1360  rm -rf SyMaGen
+ 1361  rm -rf distances
+ 1362  rm -rf py-clam
+ 1363  ls
+ 1364  git status
+ 1365  git branch
+ 1366  git status
+ 1367  git fetch origin
+ 1368  git pull
+ 1369  git reset --hard HEAD
+ 1370  ls
+ 1371  git status
+ 1372  git log origin/stage..stage
+ 1373  git log origin/main..main
+ 1374  git log origin/main main
+ 1375  git log origin/main
+ 1376  git reset --soft HEAD~1
+ 1377  git fetch origin
+ 1378  git pull origin master
+ 1379  git restore crates/abd-clam/src/core/graph/criteria.rs
+ 1380  git pull origin master
+ 1381  git pull origin master -f
+ 1382  git stash
+ 1383  git fetch origin
+ 1384  git pull origin master -f
+ 1385  git status
+ 1386  git push
+ 1387  cd ../../
+ 1388  git branch
+ 1389  git status
+ 1390  git add .
+ 1391  git commit -m "updated clam submodule"
+ 1392  git push origin main
+ 1393  git branch
+ 1394  git add .
+ 1395  git commit -m "replaced partition with retain in select_clusters"
+ 1396  git push origin master
+ 1397  git fetch origin
+ 1398  git pull
+ 1399  git reset --hard 9ff01f3
+ 1400  git add .
+ 1401  git push
+ 1402  git fetch upstream
+ 1403  git remote add upstream https://github.com/URI-ABD/clam
+ 1404  git pull upstream master
+ 1405  git push origin master
+ 1406  git fetch upstream
+ 1407  git reset --hard upstream/master
+ 1408  git push
+ 1409  git status
+ 1410  cargo test
+ 1411  cargo fmt
+ 1412  cargo test
+ 1413  earthly +test
+ 1414  cd ../clam
+ 1415  cargo add criterion
+ 1416  cargo add --abd-clam criterion
+ 1417  cargo add --package abd-clam criterion
+ 1418  git status
+ 1419  cargo fmt
+ 1420  earthly +fmt
+ 1421  earthly +test
+ 1422  git branch
+ 1423  git checkout -b cluster-scoring-fix
+ 1424  git add .
+ 1425  git status
+ 1426  git commit -m "added tiebreaker to cluster comparison. Changed partition back to retain after benchmarking"
+ 1427  git push origin cluster-scoring-fix
+ 1428  git branch
+ 1429  git checkout master
+ 1430  git remote add upstream https://github.com/URI-ABD/clam
+ 1431  git fetch remote
+ 1432  git pull upstream master
+ 1433  git reset --hard upstream/master
+ 1434  git status
+ 1435  git push origin master --force
+ 1436  git status
+ 1437  git branch
+ 1438  git fetch origin
+ 1439  git branch
+ 1440  git checkout feat/i-hate-lifetimes
+ 1441  git checkout master
+ 1442  ls
+ 1443  git branch
+ 1444  git fetch origin
+ 1445  git fetch --all
+ 1446  git branch
+ 1447  git branch -av
+ 1448  git branch -a
+ 1449  git set upstream origin
+ 1450  git upsteam
+ 1451  git upstream
+ 1452  git branch
+ 1453  git push -d origin feat/i-hate-lifetimes
+ 1454  gi branch
+ 1455  git branch
+ 1456  git branch -d feat/-hate-lifetimes
+ 1457  git branch -d feat/i-hate-lifetimes
+ 1458  git branch -D feat/i-hate-lifetimes
+ 1459  git push -d origin windows_dev_setup
+ 1460  git branch -D windows_dev_setup
+ 1461  git checkout windows_dev_setup
+ 1462  git push -d origin saving_graph_refactor
+ 1463  git push -d origin feat/refactor-backup
+ 1464  git push -d origin feat/save-load-for-cakes
+ 1465  git push -d origin feat/new-graph-scoring
+ 1466  git push -d origin feat/new-graph-refactor
+ 1467  git push -d origin feat/graph-cluster-selection
+ 1468  git push -d origin feat/scoring-refactor2
+ 1469  git push -d origin feat/scorer-functions
+ 1470  git push -d origin feat/new-scoring
+ 1471  git push -d origin feat/graph-refactor
+ 1472  git push -d origin feat/edge-refactor
+ 1473  git push -d origin feat/anomaly-ratios
+ 1474  git push -d origin clam_ffi
+ 1475  git push -d origin feat/scoring
+ 1476  git push -d origin feat/scoring-refactoring
+ 1477  git push -d origin final-dev-graph-chaoda
+ 1478  git push -d origin dev-graph-chaoda
+ 1479  git push -d origin feat/graph-chaoda-merge
+ 1480  git fetch origin
+ 1481  git pull
+ 1482  git branch
+ 1483  git checkout -b dev/visual
+ 1484  git add .
+ 1485  git commit -m "uncommented scoring functions and added scoring clusters fix"
+ 1486  git push origin dev/visual
+ 1487  git add .
+ 1488  git commit -m "Added min_depth param to graph::from_tree"
+ 1489  git branch
+ 1490  git push origin cluster-scoring-fix
+ 1491  git reset --soft HEAD~3
+ 1492  git commit -m "fix: added tiebreaker to cluster comparison. Changed partition back to retain after benchmarking. feat: Added min_depth param to graph::from_tree"
+ 1493  git status
+ 1494  git push origin cluster-scoring-fix
+ 1495  git push origin cluster-scoring-fix --force
+ 1496  cargo fmt
+ 1497  earthly +fmt
+ 1498  git reset --soft HEAD~3
+ 1499  git commit -m "fix: added tiebreaker to cluster comparison. Changed partition back to retain after benchmarking. feat: Added min_depth param to graph::from_tree"
+ 1500  git push origin cluster-scoring-fix --force
+ 1501  git branch
+ 1502  git fetch origin
+ 1503  git reset --hard HEAD
+ 1504  git reset --hard origin master
+ 1505  git reset --hard origin/master
+ 1506  git branch
+ 1507  git status
+ 1508  earthly +fmt
+ 1509  earthly +test
+ 1510  git status
+ 1511  git add .
+ 1512  git commit -m "reverting weird changes"
+ 1513  git branch
+ 1514  git push origin cluster-scoring-fix
+ 1515  git push origin cluster-scoring-fix --force
+ 1516  git commit --amend -m "fix: added tiebreaker to cluster comparison. Changed partition back to retain after benchmarking. feat: Added min_depth param to graph::from_tree"
+ 1517  git push origin cluster-scoring-fix --force
+ 1518  cd ../../
+ 1519  git branch
+ 1520  git push -d rc-refactor
+ 1521  git push -d origin rc-refactor
+ 1522  git branch -d rc-refactor
+ 1523  git branch -D rc-refactor
+ 1524  git branch
+ 1525  git branch -d test-string
+ 1526  git branch -d teststring
+ 1527  git push -d origin teststring
+ 1528  git branch
+ 1529  git push -d origin string-ffi-wrapper
+ 1530  git branch -d string-ff-wrapper
+ 1531  git branch -d string-ffi-wrapper
+ 1532  git push -d origin smart-wrapper
+ 1533  git branch -d smart-wrapper
+ 1534  git branch
+ 1535  git push -d origin graph-sunday
+ 1536  git branch -d graph-sunday
+ 1537  git push -d origin remove-ffi-submodule
+ 1538  git push -d origin remove_ffi_submodule
+ 1539  git push -d origin file-io
+ 1540  git branch -d file-io
+ 1541  git push -d origin startup
+ 1542  git branch -d startup
+ 1543  git branch -D startup
+ 1544  git branch
+ 1545  git branch -d handle-graph-refactor
+ 1546  git branch
+ 1547  git checkout main
+ 1548  git checkout -b update-unity
+ 1549  cd ../../
+ 1550  git branch
+ 1551  git stash
+ 1552  git checkout update-ui-colors
+ 1553  cd clam_ffi/clam
+ 1554  git branch
+ 1555  cd ../../
+ 1556  cd ../
+ 1557  mkdir test_old_cv
+ 1558  cd test_old_cv
+ 1559  git clone git@github.com:djperrone/clam_visual3d.git
+ 1560  cd clam_visual3d
+ 1561  git submodule update --init --recursive
+ 1562  git checkout update-ui-visual
+ 1563  git branch
+ 1564  git fetch --all
+ 1565  git branch
+ 1566  git checkout updating-ui-colors
+ 1567  git checkout update-ui-colors
+ 1568  git stash
+ 1569  git checkout update-ui-colors
+ 1570  cd ../../
+ 1571  cd uri
+ 1572  git clone git@github.com:djperrone/clam_visual3d.git
+ 1573  cd clam_visual3d
+ 1574  git submodule update --init --recursive
+ 1575  git branch
+ 1576  git checkout update-ui-colors
+ 1577  git stash
+ 1578  git checkout update-ui-colors
+ 1579  cd clam_ffi/clam
+ 1580  git branch
+ 1581  cd ../../
+ 1582  git branch
+ 1583  git add .
+ 1584  git status
+ 1585  git commit -m "added label to show which ui mode user is in, fixed bug with pop up message, added pop up messages informing user which distance metrics are fully supported, removed scoring functions from option list that do not match distance metric used to make tree, probably other stuff idk im tired"
+ 1586  git branch
+ 1587  git push origin update-ui-colors
+ 1588  git add .
+ 1589  git commit -m "added beta label to manual graph"
+ 1590  git branch
+ 1591  git push origin update-ui-colors
+ 1592  git checkout main
+ 1593  git stash
+ 1594  git branch
+ 1595  git checkout update-ui-colors
+ 1596  git branch
+ 1597  git add .
+ 1598  git commit -m "fixed bug with edges not being destroyed when resetting tree/graph. ui bug fixes"
+ 1599  git push origin update-ui-colors
+ 1600  git status
+ 1601  cd ../../
+ 1602  git checkout -b test_umap_style
+ 1603  git add .
+ 1604  git commit -m "added button to select all leaves"
+ 1605  git push origin test_umap_style
+ 1606  git branch
+ 1607  git checkout update-ui-colors
+ 1608  ls
+ 1609  code main.cpp
+ 1610  g++ main.cpp -o m
+ 1611  ./m
+ 1612  g++ main.cpp -o m
+ 1613  ./m
+ 1614  cd ../../
+ 1615  htop
+ 1616  cd ../../
+ 1617  cd ele200
+ 1618  cd csc200
+ 1619  ls
+ 1620  cd uri
+ 1621  cd ele200
+ 1622  cd csc200
+ 1623  ls
+ 1624  code test.cpp
+ 1625  g++ test.cpp
+ 1626  code volt.cpp
+ 1627  g++ volt.cpp -o v
+ 1628  ./v 12.0 5.0
+ 1629  ./v 23.7 8.2
+ 1630  g++ volt.cpp -o v
+ 1631  ./v 23.7 8.2
+ 1632  ./v 12.0 5.0
+ 1633  git branch
+ 1634  git status
+ 1635  cd ../../
+ 1636  git status
+ 1637  git add .
+ 1638  git commit -m "final changes for ui update"
+ 1639  git branch
+ 1640  git push origin update-ui-colors
+ 1641  git fetch origin
+ 1642  git checkout main
+ 1643  git pull origin main
+ 1644  cd clam_ffi/clam
+ 1645  git fetch origin
+ 1646  git status
+ 1647  git branch
+ 1648  git status
+ 1649  git restore 
+ 1650  git restore crates/abd-clam/src/core/graph/_graph.rs
+ 1651  git status
+ 1652  git fetch origin
+ 1653  git checkout master
+ 1654  git fetch origin master
+ 1655  git pull origin master
+ 1656  git branch
+ 1657  git checkout dev/visual
+ 1658  git checkout -b dev/visual-backup
+ 1659  git checkout dev/visual
+ 1660  git rebase origin/master
+ 1661  cd ../../
+ 1662  git branch
+ 1663  git status
+ 1664  git add .
+ 1665  git commit -m "added min depth field to ui for graph building"
+ 1666  git push origin main
+ 1667  code test123.cpp
+ 1668  g++ test123.cpp -o t
+ 1669  ./t 6
+ 1670  ./t 3
+ 1671  cd ../../
+ 1672  git status
+ 1673  git checkout -b feat/cluster-refactor
+ 1674  cdclam_ffi/clam
+ 1675  cd clam_ffi/clam
+ 1676  git remote add nishaq503 https://github.com/nishaq503/clam.git
+ 1677  git checkout -b feat/cluster-refactor nishaq503/feat/cluster-trait
+ 1678  git fetch nishaq503
+ 1679  git checkout -b feat/cluster-refactor nishaq503/feat/cluster-trait
+ 1680  cd ../../
+ 1681  git branchj
+ 1682  git branch
+ 1683  git add .
+ 1684  git commit -m "refactored ffi to work with vertex"
+ 1685  git push origin feat/cluster-refactor
+ 1686  git checkout main
+ 1687  git branch
+ 1688  cd clam_ffi/clam
+ 1689  ls
+ 1690  git branch
+ 1691  git fetch origin
+ 1692  git checkout master
+ 1693  git pull
+ 1694  cd ../../
+ 1695  git add .
+ 1696  git commit -m "removed manual graph creator from side menu"
+ 1697  git push origin main
+ 1698  git branch
+ 1699  git checkout dev/visual
+ 1700  git status
+ 1701  git fetch origin
+ 1702  git status
+ 1703  git checkout -b my-feature-branch-backup
+ 1704  git checkout dev/visual
+ 1705  git fetch origin master
+ 1706  git status
+ 1707  git rebase origin/master
+ 1708  git add .
+ 1709  git commit -m "rebased onto master"
+ 1710  git push origin dev/visual
+ 1711  git push origin dev/visual -f
+ 1712  cargo test ratios
+ 1713  cargo fmt
+ 1714  cd ../../
+ 1715  git branch
+ 1716  git checkout -b feat/color-by-label
+ 1717  git add .
+ 1718  git commit -m "changed coloring to be by dominant label - added support for 10 labels"
+ 1719  git push origin feat/color-by-label
+ 1720  cd ../
+ 1721  code get_mnist.py
+ 1722  python3 get_mnist.py
+ 1723  xxd mnist_features.npy
+ 1724  xxd mnist_features.npy | head
+ 1725  cd clam_visual3d/data
+ 1726  ls
+ 1727  cd anomaly_data
+ 1728  ls
+ 1729  cd preprocessed
+ 1730  ls
+ 1731  xxd anomaly_mnist_features.npy | head
+ 1732  git branch
+ 1733  cd ../../
+ 1734  cd ../
+ 1735  git add .
+ 1736  git commit -m "added ui support for toggling visibility of clusters based on label"
+ 1737  git push origin feat/color-by-label
+ 1738  git reset HEAD~       
+ 1739  git add .
+ 1740  git status
+ 1741  git restore mnist_features.npy
+ 1742  git restore data/anomaly_data/preprocessed/mnist_features.npy
+ 1743  git status
+ 1744  git commit -m "added ui support for toggling visibility of clusters based on label"
+ 1745  git push origin feat/color-by-label
+ 1746  git reset HEAD~       
+ 1747  ls
+ 1748  cd unity
+ 1749  git add .
+ 1750  cd ../
+ 1751  ls
+ 1752  cd clam_ffi
+ 1753  git add .
+ 1754  cd ../
+ 1755  git commit -m "added ui support for toggling visibility of clusters based on label"
+ 1756  git push origin feat/color-by-label
+ 1757  git branch
+ 1758  cd clam_ffi/clam
+ 1759  git branch
+ 1760  git checkout dev/visual
+ 1761  git fetch origin
+ 1762  git reset --hard origin/dev/visual
+ 1763  git fetch origin
+ 1764  git status
+ 1765  git pull origin dev/visual
+ 1766  cd ../../
+ 1767  git branch
+ 1768  git add .
+ 1769  git commit -m "fixed - in quotes... weird bug where resetting label toggles in graph cause reset to incorrectly visualize tree. Used setWithoutNotify and got rid of problem but not sure why necessary in first place..."
+ 1770  git push origin feat/color-by-label
+ 1771  git reset HEAD~       
+ 1772  git add .
+ 1773  git commit -m "fixed - in quotes... weird bug where resetting label toggles in graph cause reset to incorrectly visualize tree. Used setWithoutNotify and got rid of problem but not sure why necessary in first place... also added data folder to gitignore "
+ 1774  git push origin feat/color-by-label
+ 1775  git reset HEAD~       
+ 1776  git add .
+ 1777  git commit -m "fixed - in quotes... weird bug where resetting label toggles in graph cause reset to incorrectly visualize tree. Used setWithoutNotify and got rid of problem but not sure why necessary in first place... also added data folder to gitignore "
+ 1778  git push origin feat/color-by-label
+ 1779  git reset HEAD~       
+ 1780  git add .
+ 1781  git commit -m "fixed - in quotes... weird bug where resetting label toggles in graph cause reset to incorrectly visualize tree. Used setWithoutNotify and got rid of problem but not sure why necessary in first place... also added data folder to gitignore "
+ 1782  git push origin feat/color-by-label
+ 1783  git reset HEAD~       
+ 1784  git add .
+ 1785  git commit -m "fixed - in quotes... weird bug where resetting label toggles in graph cause reset to incorrectly visualize tree. Used setWithoutNotify and got rid of problem but not sure why necessary in first place... also added data folder to gitignore "
+ 1786  git push origin feat/color-by-label
+ 1787  git reset HEAD~       
+ 1788  it rm --cached data/anomaly_data/preprocessed/mnist_features.npy
+ 1789  git rm --cached data/anomaly_data/preprocessed/mnist_features.npy
+ 1790  git add .
+ 1791  git commit -m "fixed - in quotes... weird bug where resetting label toggles in graph cause reset to incorrectly visualize tree. Used setWithoutNotify and got rid of problem but not sure why necessary in first place... also added data folder to gitignore "
+ 1792  git push origin feat/color-by-label
+ 1793  git branch
+ 1794  git checkout feat/cluster-refactor
+ 1795  cd clam_ffi/clam
+ 1796  git branch
+ 1797  git checkout feat/cluster-refactor
+ 1798  git branch
+ 1799  cargo test
+ 1800  cargo update
+ 1801  rustup update
+ 1802  cargo test ratios
+ 1803  git branch
+ 1804  git status
+ 1805  git add .
+ 1806  git commit -m "fixed bug in test_vertex (ratios) where one ratio was calculated incorrectly"
+ 1807  git branch
+ 1808  git push origin feat/cluster-refactor
+ 1809  cargo test save_load
+ 1810  cd ../clam
+ 1811  cargo test save_load
+ 1812  git status
+ 1813  git remote add nishaq503 https://github.com/nishaq503/clam.git
+ 1814  git fetch nishaq
+ 1815  git fetch nishaq503
+ 1816  git checkout feat/cluster-trait
+ 1817  git stash
+ 1818  git checkout feat/cluster-trait
+ 1819  git branch
+ 1820  git add .
+ 1821  git reset
+ 1822  git checkout -b feat/vertex-test
+ 1823  git add .
+ 1824  git commit -m "added test for saving and loading vertex tree"
+ 1825  git push origin feat/vertex-test
+ 1826  git branch
+ 1827  git fetch nishaq503
+ 1828  git reset --hard origin nishaq503/feat/cluster-trait
+ 1829  git reset --hard origin/nishaq503/feat/cluster-trait
+ 1830  git reset --hard nishaq503/feat/cluster-trait
+ 1831  cd ../clam
+ 1832  cargo test save_load
+ 1833  cd ../../
+ 1834  git branch
+ 1835  git status
+ 1836  git stash
+ 1837  git checkout feat/color-by-label
+ 1838  cd clam_ffi/clam
+ 1839  git branch
+ 1840  git status
+ 1841  git stash
+ 1842  git checkout dev/visual
+ 1843  git branch
+ 1844  git checkout master
+ 1845  git stash
+ 1846  git checkout master
+ 1847  git branch -D feat/graph-triangles
+ 1848  git fetch origin
+ 1849  git status
+ 1850  git log
+ 1851  git pull origin master
+ 1852  git status
+ 1853  git branch
+ 1854  git checkout master
+ 1855  git stash
+ 1856  git checkout master
+ 1857  git branch
+ 1858  git status
+ 1859  git branch
+ 1860  git checkout -b feat/triangles
+ 1861  git add .
+ 1862  git commit -m "added triangle search and testing- edge search prob not right"
+ 1863  git push origin feat/triangles
+ 1864  git branch
+ 1865  git checkout -b feat/triangle-search
+ 1866  git add .
+ 1867  git commit -m "added triangle search"
+ 1868  git push origin feat/triangle-search
+ 1869  git branch
+ 1870  git add .
+ 1871  git commit -m "added potential error message bug"
+ 1872  git push origin feat/triangle-search
+ 1873  git status
+ 1874  git branch
+ 1875  git checkout feat/cluster-trait
+ 1876  git fetch origin
+ 1877  git status
+ 1878  git pull origin nishaq503/feat/cluster-trait
+ 1879  git remote add nishaq503        
+ 1880  git remote add nishaq503 https://github.com/nishaq503/clam.git
+ 1881  git fetch nishaq503
+ 1882  git pull
+ 1883  git checkout -b feat/save-load-ratios-test
+ 1884  git add .
+ 1885  git commit -m "added test to check that ratios are properly recovered"
+ 1886  git push origin feat/save-load-ratios-test
+ 1887  git branch
+ 1888  git checkout feat/triangle-search
+ 1889  git add .
+ 1890  git commit -m "slight refactor"
+ 1891  git push origin feat/triangle-search
+ 1892  git branch
+ 1893  git add .
+ 1894  git commit -m "added function that converts triangle clusters to triangle edges that don't reference graph edges directly - time complexity is linear in T instead of O(E * T)"
+ 1895  git branch
+ 1896  git push origin feat/triangle-search
+ 1897  mkdir library
+ 1898  cd library
+ 1899  code edge.py
+ 1900  cd ../
+ 1901  code main.py
+ 1902  python3 main.py
+ 1903  code __init__.py
+ 1904  python3 main.py
+ 1905  cd Library
+ 1906  code __init__.py
+ 1907  python3 main.py
+ 1908  cd ..
+ 1909  python3 main.py
+ 1910  cd ../../
+ 1911  git branch
+ 1912  exit
+ 1913  touch decision.cpp
+ 1914  g++ decision.cpp -o d
+ 1915  ./d
+ 1916  g++ decision.cpp -o d
+ 1917  g++ decision.cpp -o d && ./d
+ 1918  g++ -std=c++17  decision.cpp -o d && ./d
+ 1919  g++ -std=c++17  decision.cpp -o d && ./d 4
+ 1920  cd ../../
+ 1921  git branch
+ 1922  git status
+ 1923  git add .
+ 1924  git commit -m "finished changes. Now support up to 10 labels. All 10 colors are color blind friendly. Label coloring goes by majority label rather than shading channels based on percentage. Added toggles to hide clusters based on label in graph mode only"
+ 1925  git branch
+ 1926  git push origin feat/color-by-label
+ 1927  git checkout main
+ 1928  git checkout feat/color-by-label
+ 1929  git stash
+ 1930  git fetch origin
+ 1931  git pull origin main
+ 1932  git branch
+ 1933  git checkout feat/color-by-label
+ 1934  git checkout main
+ 1935  python
+ 1936  python3 scripts/get_mnist.py
+ 1937  git branch
+ 1938  git add .
+ 1939  git commit -m "added script to fetch mnist dataset"
+ 1940  git push origin main
+ 1941  git checkout -b feat/data-fetch
+ 1942  pip install requests
+ 1943  code scripts/fetch_data.py
+ 1944  python3 scripts/fetch_data.py
+ 1945  cd scripts
+ 1946  ls
+ 1947  mv get_mnist.py fetch_mnist.py
+ 1948  mv fetch_data.py fetch_anomaly_data.py
+ 1949  code fetch_data.py
+ 1950  python3 scripts/fetch_data.py
+ 1951  GIT BRANCH
+ 1952  git branch
+ 1953  git add .
+ 1954  git commit -m "added script to fetch all data"
+ 1955  git push origin feat/fetch-data
+ 1956  git push origin feat/data-fetch
+ 1957  git add .
+ 1958  git status
+ 1959  git reset
+ 1960  git add .
+ 1961  git status
+ 1962  git branch
+ 1963  git commit -m "updated anomaly mnist data name to be different from regular mnist"
+ 1964  git push origin feat/data-fetch
+ 1965  git push origin feat/fetch-data
+ 1966  git push origin feat/data-fetch
+ 1967  git branch
+ 1968  git push origin feat/data-fetch
+ 1969  git branch
+ 1970  cd ../../
+ 1971  python3 scripts/fetch_data.py
+ 1972  pip install bs4
+ 1973  python3 scripts/fetch_data.py
+ 1974  code scripts/test.py
+ 1975  python3 scripts/test.py
+ 1976  pip install aiohttp
+ 1977  python3 scripts/test.py
+ 1978  pip install tqdm
+ 1979  python3 scripts/test.py
+ 1980  python3 scripts/fetch_data.py
+ 1981  git branch
+ 1982  cd ../../
+ 1983  git add .
+ 1984  git stash
+ 1985  git checkout feat/color-by-label
+ 1986  mkdir solution
+ 1987  cd solution
+ 1988  code connections.cpp
+ 1989  cd ..
+ 1990  g++ solution/connections.cpp -o solution/connections
+ 1991  cd /mnt/c/uri/clam_visual3d
+ 1992  git stash
+ 1993  git checkout feat/color-by-label
+ 1994  cd ../../
+ 1995  git branch
+ 1996  git add .
+ 1997  git commit -m "added random forces to graph to ensure all nodes move"
+ 1998  git push origin feat/physics
+ 1999  cd ../../
+ 2000  git branch
+ 2001  git stash
+ 2002  git checkout feat/cluster-refactor
+ 2003  git fetch origin nishaw503
+ 2004  git fetch origin nishaq503
+ 2005  git fetch origin
+ 2006  git status
+ 2007  git remote add nishaq503 https://github.com/nishaq503/clam.git
+ 2008  git fetch origin nishaq503
+ 2009  history
+ 2010  history > his.txt
