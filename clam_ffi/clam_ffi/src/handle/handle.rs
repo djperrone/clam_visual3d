@@ -31,13 +31,10 @@ use spring::Spring;
 
 pub struct Handle<'a> {
     tree: Option<Tree<Vec<f32>, f32, DataSetf32>>,
-    // labels: Option<Vec<usize>>,
-    // graph: Option<HashMap<String, PhysicsNode>>,
     clam_graph: Option<Graph<'a, f32>>,
     edges: Option<Vec<Spring>>,
     current_query: Option<Vec<f32>>,
     force_directed_graph: Option<(JoinHandle<()>, Arc<ForceDirectedGraph>)>,
-    num_edges_in_graph: Option<i32>, // temporary figure out better way later
 }
 impl<'a> Handle<'a> {
     pub fn shutdown(&mut self) {
@@ -89,13 +86,10 @@ impl<'a> Handle<'a> {
                     .with_ratios(false);
                 Ok(Handle {
                     tree: Some(tree),
-                    // labels: Some(labels.to_vec()),
-                    // graph: None,
                     clam_graph: None,
                     edges: None,
                     current_query: None,
                     force_directed_graph: None,
-                    num_edges_in_graph: None,
                 })
             }
             Err(_) => Err(FFIError::HandleInitFailed),
@@ -124,16 +118,12 @@ impl<'a> Handle<'a> {
             data.is_expensive,
         ) {
             let tree = tree.with_ratios(false);
-            // let labels = tree.data().metadata().to_vec();
             Ok(Handle {
                 tree: Some(tree),
-                // labels: Some(labels),
-                // graph: None,
                 clam_graph: None,
                 edges: None,
                 current_query: None,
                 force_directed_graph: None,
-                num_edges_in_graph: None,
             })
         } else {
             Err(FFIError::LoadTreeFailed)
@@ -241,13 +231,9 @@ impl<'a> Handle<'a> {
 
     pub fn set_graph(&mut self, graph: (JoinHandle<()>, Arc<ForceDirectedGraph>)) {
         self.force_directed_graph = Some(graph);
-        if let Some(g) = &self.force_directed_graph {
-            self.num_edges_in_graph = Some(force_directed_graph::get_num_edges(&g.1));
-        }
     }
 
     pub fn get_num_edges_in_graph(&self) -> i32 {
-        // self.num_edges_in_graph.unwrap_or(-1)
         if let Some(g) = self.clam_graph() {
             return g.edge_cardinality() as i32;
         }

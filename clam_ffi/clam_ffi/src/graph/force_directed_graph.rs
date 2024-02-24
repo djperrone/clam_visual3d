@@ -180,13 +180,7 @@ pub unsafe fn force_shutdown(force_directed_graph: &ForceDirectedGraph) -> FFIEr
     force_directed_graph.force_shutdown()
 }
 
-// pub fn get_num_edges(force_directed_graph: &ForceDirectedGraph) -> i32 {
-//     return force_directed_graph
-//         .edges
-//         .iter()
-//         .filter(|&edge| edge.is_detected)
-//         .count() as i32;
-// }
+
 
 pub fn init_unity_edges(force_directed_graph: &ForceDirectedGraph, init_edges: CBFnNodeVisitorMut) {
     for edge in &force_directed_graph.edges {
