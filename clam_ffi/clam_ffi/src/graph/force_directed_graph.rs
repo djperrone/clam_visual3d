@@ -181,7 +181,6 @@ pub unsafe fn force_shutdown(force_directed_graph: &ForceDirectedGraph) -> FFIEr
 }
 
 
-
 pub fn init_unity_edges(force_directed_graph: &ForceDirectedGraph, init_edges: CBFnNodeVisitorMut) {
     for edge in &force_directed_graph.edges {
         let mut data_wrapper = ClusterDataWrapper::default();
