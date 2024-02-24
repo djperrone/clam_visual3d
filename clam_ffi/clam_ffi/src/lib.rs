@@ -294,12 +294,10 @@ pub unsafe extern "C" fn draw_hierarchy_offset_from(
 #[no_mangle]
 pub unsafe extern "C" fn init_force_directed_graph(
     context: InHandlePtr,
-    arr_ptr: *mut ClusterData,
-    len: i32,
     scalar: f32,
     max_iters: i32,
 ) -> FFIError {
-    init_force_directed_graph_impl(context, arr_ptr, len, scalar, max_iters)
+    init_force_directed_graph_impl(context, scalar, max_iters)
 }
 
 #[no_mangle]
@@ -318,10 +316,10 @@ pub unsafe extern "C" fn physics_update_async(
     physics_update_async_impl(context, updater)
 }
 
-#[no_mangle]
-pub extern "C" fn shutdown_physics(ptr: InHandlePtr) -> FFIError {
-    shutdown_physics_impl(ptr)
-}
+// #[no_mangle]
+// pub extern "C" fn shutdown_physics(ptr: InHandlePtr) -> FFIError {
+//     shutdown_physics_impl(ptr)
+// }
 
 #[no_mangle]
 pub extern "C" fn get_num_edges_in_graph(ptr: InHandlePtr) -> i32 {

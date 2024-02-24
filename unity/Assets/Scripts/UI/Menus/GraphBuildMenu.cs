@@ -63,48 +63,50 @@ public class GraphBuildMenu
 
     void CreateGraphCallback(ClickEvent evt)
     {
-        if (MenuEventManager.instance.m_IsPhysicsRunning)
-        {
-            return;
-        }
+        UIHelpers.ShowErrorPopUP("This should never trigger. fix later. sorry future me.");
+        return;
+        //if (MenuEventManager.instance.m_IsPhysicsRunning)
+        //{
+        //    return;
+        //}
 
-        Cakes.BuildGraphWithinParams();
+        //Cakes.BuildGraphWithinParams();
 
-        MenuEventManager.SwitchState(Menu.DestroyGraph);
-        MenuEventManager.SwitchState(Menu.DestroyTree);
+        //MenuEventManager.SwitchState(Menu.DestroyGraph);
+        //MenuEventManager.SwitchState(Menu.DestroyTree);
 
-        Clam.FFI.ClusterData[] nodes = new Clam.FFI.ClusterData[Cakes.Tree.GetTree().Count];
-        int i = 0;
+        //Clam.FFI.ClusterData[] nodes = new Clam.FFI.ClusterData[Cakes.Tree.GetTree().Count];
+        //int i = 0;
 
-        foreach (var (name, node) in Cakes.Tree.GetTree())
-        {
-            var x = Random.Range(0, 100);
-            var y = Random.Range(0, 100);
-            var z = Random.Range(0, 100);
+        //foreach (var (name, node) in Cakes.Tree.GetTree())
+        //{
+        //    var x = Random.Range(0, 100);
+        //    var y = Random.Range(0, 100);
+        //    var z = Random.Range(0, 100);
 
-            node.GetComponent<Transform>().position = new Vector3(x, y, z);
+        //    node.GetComponent<Transform>().position = new Vector3(x, y, z);
 
-            var result = Clam.FFI.NativeMethods.CreateClusterDataMustFree(node.GetComponent<Node>().GetId(), out var clusterData);
-            if (result == FFIError.Ok)
-            {
-                nodes[i++] = clusterData;
-            }
-            else
-            {
-                Debug.LogError("Node could not be found");
-                return;
-            }
-        }
-        MenuEventManager.instance.m_IsPhysicsRunning = true;
-        Debug.LogWarning("finished setting up unity physics sim - passing to rust");
-        GameObject graphBuilderPrefab = Resources.Load("Graph") as GameObject;
-        var graphBuilder = MenuEventManager.Instantiate(graphBuilderPrefab);
-        graphBuilder.GetComponent<GraphBuilder>().Init(nodes, m_EdgeScalar.value, 500);
+        //    var result = Clam.FFI.NativeMethods.CreateClusterDataMustFree(node.GetComponent<Node>().GetId(), out var clusterData);
+        //    if (result == FFIError.Ok)
+        //    {
+        //        nodes[i++] = clusterData;
+        //    }
+        //    else
+        //    {
+        //        Debug.LogError("Node could not be found");
+        //        return;
+        //    }
+        //}
+        //MenuEventManager.instance.m_IsPhysicsRunning = true;
+        //Debug.LogWarning("finished setting up unity physics sim - passing to rust");
+        //GameObject graphBuilderPrefab = Resources.Load("Graph") as GameObject;
+        //var graphBuilder = MenuEventManager.Instantiate(graphBuilderPrefab);
+        //graphBuilder.GetComponent<GraphBuilder>().Init(nodes, m_EdgeScalar.value, 500);
     }
 
     public void DestroyGraphCallback(ClickEvent evt)
     {
-        MenuEventManager.SwitchState(Menu.DestroyTree);
+        MenuEventManager.SwitchState(Menu.DestroyHierarchyEdges);
         MenuEventManager.SwitchState(Menu.DestroyGraph);
     }
 

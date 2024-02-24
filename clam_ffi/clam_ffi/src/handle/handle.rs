@@ -32,7 +32,7 @@ use spring::Spring;
 pub struct Handle<'a> {
     tree: Option<Tree<Vec<f32>, f32, DataSetf32>>,
     // labels: Option<Vec<usize>>,
-    graph: Option<HashMap<String, PhysicsNode>>,
+    // graph: Option<HashMap<String, PhysicsNode>>,
     clam_graph: Option<Graph<'a, f32>>,
     edges: Option<Vec<Spring>>,
     current_query: Option<Vec<f32>>,
@@ -90,7 +90,7 @@ impl<'a> Handle<'a> {
                 Ok(Handle {
                     tree: Some(tree),
                     // labels: Some(labels.to_vec()),
-                    graph: None,
+                    // graph: None,
                     clam_graph: None,
                     edges: None,
                     current_query: None,
@@ -128,7 +128,7 @@ impl<'a> Handle<'a> {
             Ok(Handle {
                 tree: Some(tree),
                 // labels: Some(labels),
-                graph: None,
+                // graph: None,
                 clam_graph: None,
                 edges: None,
                 current_query: None,
@@ -246,6 +246,7 @@ impl<'a> Handle<'a> {
             } else {
                 force_directed_graph::try_update_unity(
                     &force_directed_graph.1,
+                    self.clam_graph().as_ref().unwrap(),
                     self.tree().as_ref().unwrap(),
                     updater,
                 )
@@ -389,17 +390,17 @@ impl<'a> Handle<'a> {
         }
     }
 
-    pub fn shutdown_physics(&mut self) -> FFIError {
-        let should_shutdown = { self.graph.is_some() && self.edges.is_some() };
+    // pub fn shutdown_physics(&mut self) -> FFIError {
+    //     let should_shutdown = { self.graph.is_some() && self.edges.is_some() };
 
-        if should_shutdown {
-            self.graph = None;
-            self.edges = None;
-            FFIError::Ok
-        } else {
-            FFIError::PhysicsAlreadyShutdown
-        }
-    }
+    //     if should_shutdown {
+    //         self.graph = None;
+    //         self.edges = None;
+    //         FFIError::Ok
+    //     } else {
+    //         FFIError::PhysicsAlreadyShutdown
+    //     }
+    // }
 
     pub fn set_current_query(&mut self, _data: &Vec<f32>) {
         todo!()

@@ -20,6 +20,13 @@ impl StringFFI {
         }
     }
 
+    pub fn from_str(str: &str) -> Self {
+        StringFFI {
+            len: str.len() as i32,
+            data: CString::new(str).unwrap().into_raw() as *mut u8,
+        }
+    }
+
     pub fn default() -> Self {
         StringFFI {
             len: 0i32,

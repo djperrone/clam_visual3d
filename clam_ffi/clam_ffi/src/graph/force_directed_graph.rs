@@ -4,7 +4,7 @@ use super::physics_node::PhysicsNode;
 use super::spring::Spring;
 use crate::ffi_impl::cluster_data_wrapper::ClusterDataWrapper;
 use crate::utils::error::FFIError;
-use crate::utils::types::Treef32;
+use crate::utils::types::{Graphf32, Treef32};
 use crate::{debug, utils, CBFnNodeVisitor, CBFnNodeVisitorMut};
 use std::collections::HashMap;
 
@@ -102,35 +102,23 @@ impl ForceDirectedGraph {
         }
     }
 
-    unsafe fn try_update_unity(&self, tree: &Treef32, updater: CBFnNodeVisitor) -> FFIError {
+    unsafe fn try_update_unity(
+        &self,
+        clam_graph: &Graphf32,
+        tree: &Treef32,
+        updater: CBFnNodeVisitor,
+    ) -> FFIError {
         match self.graph.try_lock() {
             Ok(mut g) => {
-                let keys: Vec<String> = g.1.keys().map(|k| k.to_owned()).collect();
+                let mut rng = rand::thread_rng();
+                for cluster1 in clam_graph.clusters() {
+                    for _ in 0..3 {
+                        if let Some(cluster2) = clam_graph.clusters().iter().choose(&mut rng) {
+                            let dist = cluster1.distance_to_other(tree.data(), cluster2);
 
-                for k in &keys {
-                    let mut rng = rand::thread_rng();
-                    if let Some(random_key) = keys.iter().choose(&mut rng) {
-                        if let Ok((o1, c1)) = utils::helpers::parse_cluster_name(random_key) {
-                            if let Ok((o2, c2)) = utils::helpers::parse_cluster_name(k) {
-                                let cluster1 = tree.get_cluster(o1, c1);
-                                let cluster2 = tree.get_cluster(o2, c2);
+                            let spring = Spring::new(dist, cluster1.name(), cluster2.name(), false);
 
-                                if let Some(cluster1) = cluster1 {
-                                    if let Some(cluster2) = cluster2 {
-                                        let dist =
-                                            cluster1.distance_to_other(tree.data(), cluster2);
-
-                                        let spring = Spring::new(
-                                            dist,
-                                            cluster1.name(),
-                                            cluster2.name(),
-                                            false,
-                                        );
-
-                                        spring.move_nodes(&mut g.1, self.max_edge_len, self.scalar);
-                                    }
-                                }
-                            }
+                            spring.move_nodes(&mut g.1, self.max_edge_len, self.scalar);
                         }
                     }
                 }
@@ -138,7 +126,7 @@ impl ForceDirectedGraph {
                     value.update_position();
                     // call to clone ?
                     let baton_data =
-                        ClusterDataWrapper::from_physics(key.clone(), value.get_position());
+                        ClusterDataWrapper::from_physics(key.as_str(), value.get_position());
 
                     updater(Some(baton_data.data()));
                 }
@@ -182,10 +170,11 @@ pub fn produce_computations(force_directed_graph: &ForceDirectedGraph) {
 
 pub unsafe fn try_update_unity(
     force_directed_graph: &ForceDirectedGraph,
+    clam_graph: &Graphf32,
     tree: &Treef32,
     updater: CBFnNodeVisitor,
 ) -> FFIError {
-    force_directed_graph.try_update_unity(tree, updater)
+    force_directed_graph.try_update_unity(clam_graph, tree, updater)
 }
 
 pub unsafe fn force_shutdown(force_directed_graph: &ForceDirectedGraph) -> FFIError {

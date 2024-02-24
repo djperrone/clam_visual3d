@@ -44,9 +44,9 @@ impl ClusterData {
             message: StringFFI::new("".repeat(50)),
         }
     }
-    pub fn from_physics(id: String, position: glam::Vec3) -> Self {
+    pub fn from_physics(id: &str, position: glam::Vec3) -> Self {
         ClusterData {
-            id: StringFFI::new(id),
+            id: StringFFI::from_str(id),
             color: glam::Vec3::new(0., 0., 0.),
             pos: position,
             cardinality: -1,
