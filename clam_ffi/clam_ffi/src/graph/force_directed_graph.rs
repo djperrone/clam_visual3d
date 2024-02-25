@@ -53,6 +53,10 @@ impl ForceDirectedGraph {
         }
     }
 
+    pub fn add_edge(&mut self, edge: Spring) {
+        self.edges.push(edge);
+    }
+    
     fn compute_next_frame(&self) -> bool {
         let mutex_result = self
             .cond_var
@@ -122,6 +126,7 @@ impl ForceDirectedGraph {
                         }
                     }
                 }
+
                 for (key, value) in &mut g.1 {
                     value.update_position();
                     let baton_data =
@@ -179,7 +184,6 @@ pub unsafe fn try_update_unity(
 pub unsafe fn force_shutdown(force_directed_graph: &ForceDirectedGraph) -> FFIError {
     force_directed_graph.force_shutdown()
 }
-
 
 pub fn init_unity_edges(force_directed_graph: &ForceDirectedGraph, init_edges: CBFnNodeVisitorMut) {
     for edge in &force_directed_graph.edges {

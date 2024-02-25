@@ -33,15 +33,7 @@ fn choose_two_random_clusters_exclusive<'a, U: Number>(
     return None;
 }
 
-fn edge_gt<'a, U: Number>(e1: &Edge<'a, U>, e2: &Edge<'a, U>) -> bool {
-    e1.distance() > e2.distance()
-}
-
-fn edge_eq<'a, U: Number>(e1: &Edge<'a, U>, e2: &Edge<'a, U>) -> bool {
-    e1.left() == e2.left() && e1.right() == e2.right()
-}
-
-pub unsafe fn run_triangle_test_impl(
+pub fn run_triangle_test_impl(
     context: InHandlePtr,
     location_getter: CBFnNodeVisitorMut,
 ) -> FFIError {
@@ -53,6 +45,7 @@ pub unsafe fn run_triangle_test_impl(
                     let mut rng: rand::prelude::ThreadRng = rand::thread_rng();
                     let mut total_count = 0;
                     let mut correct_triangle_count = 0;
+                    let clusters: Vec<_> = clam_graph.clusters().into_iter().collect();
                     for a in clam_graph.clusters() {
                         let mut correct_edge_count = 0;
                         if let Some((b, c)) =
@@ -83,27 +76,27 @@ pub unsafe fn run_triangle_test_impl(
                             let mut unity_edges =
                                 vec![("ab", unity_ab), ("ac", unity_ac), ("bc", unity_bc)];
 
-                            let clam_string = format!(
-                                "[{}: {}], [{}: {}], [{}: {}]",
-                                clam_edges[0].0,
-                                clam_edges[0].1.distance(),
-                                clam_edges[1].0,
-                                clam_edges[1].1.distance(),
-                                clam_edges[2].0,
-                                clam_edges[2].1.distance()
-                            );
+                            // let clam_string = format!(
+                            //     "[{}: {}], [{}: {}], [{}: {}]",
+                            //     clam_edges[0].0,
+                            //     clam_edges[0].1.distance(),
+                            //     clam_edges[1].0,
+                            //     clam_edges[1].1.distance(),
+                            //     clam_edges[2].0,
+                            //     clam_edges[2].1.distance()
+                            // );
 
-                            let unity_string = format!(
-                                "[{}: {}], [{}: {}], [{}: {}]",
-                                unity_edges[0].0,
-                                unity_edges[0].1.distance(),
-                                unity_edges[1].0,
-                                unity_edges[1].1.distance(),
-                                unity_edges[2].0,
-                                unity_edges[2].1.distance()
-                            );
-                            debug!("clam: {}", clam_string);
-                            debug!("unity: {}", unity_string);
+                            // let unity_string = format!(
+                            //     "[{}: {}], [{}: {}], [{}: {}]",
+                            //     unity_edges[0].0,
+                            //     unity_edges[0].1.distance(),
+                            //     unity_edges[1].0,
+                            //     unity_edges[1].1.distance(),
+                            //     unity_edges[2].0,
+                            //     unity_edges[2].1.distance()
+                            // );
+                            // debug!("clam: {}", clam_string);
+                            // debug!("unity: {}", unity_string);
                             clam_edges.sort_by(|a, b| {
                                 a.1.distance().partial_cmp(&b.1.distance()).unwrap()
                             });
@@ -112,35 +105,33 @@ pub unsafe fn run_triangle_test_impl(
                                 a.1.distance().partial_cmp(&b.1.distance()).unwrap()
                             });
 
-                            debug!("after sort:");
+                            // debug!("after sort:");
 
-                            let clam_string = format!(
-                                "[{}: {}], [{}: {}], [{}: {}]",
-                                clam_edges[0].0,
-                                clam_edges[0].1.distance(),
-                                clam_edges[1].0,
-                                clam_edges[1].1.distance(),
-                                clam_edges[2].0,
-                                clam_edges[2].1.distance()
-                            );
+                            // let clam_string = format!(
+                            //     "[{}: {}], [{}: {}], [{}: {}]",
+                            //     clam_edges[0].0,
+                            //     clam_edges[0].1.distance(),
+                            //     clam_edges[1].0,
+                            //     clam_edges[1].1.distance(),
+                            //     clam_edges[2].0,
+                            //     clam_edges[2].1.distance()
+                            // );
 
-                            let unity_string = format!(
-                                "[{}: {}], [{}: {}], [{}: {}]",
-                                unity_edges[0].0,
-                                unity_edges[0].1.distance(),
-                                unity_edges[1].0,
-                                unity_edges[1].1.distance(),
-                                unity_edges[2].0,
-                                unity_edges[2].1.distance()
-                            );
-                            debug!("clam: {}", clam_string);
-                            debug!("unity: {}", unity_string);
+                            // let unity_string = format!(
+                            //     "[{}: {}], [{}: {}], [{}: {}]",
+                            //     unity_edges[0].0,
+                            //     unity_edges[0].1.distance(),
+                            //     unity_edges[1].0,
+                            //     unity_edges[1].1.distance(),
+                            //     unity_edges[2].0,
+                            //     unity_edges[2].1.distance()
+                            // );
+                            // debug!("clam: {}", clam_string);
+                            // debug!("unity: {}", unity_string);
 
                             for (e1, e2) in clam_edges.iter().zip(unity_edges.iter()) {
                                 if e1.0 == e2.0 {
                                     correct_edge_count += 1;
-                                } else {
-                                    debug!("wtf: {}, {}", e1.0, e2.0)
                                 }
                             }
 
