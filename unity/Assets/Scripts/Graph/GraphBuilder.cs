@@ -1,4 +1,5 @@
 using Clam;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -9,6 +10,8 @@ public class GraphBuilder : MonoBehaviour
     private int m_VertexCounter;
     private int m_IndexCounter;
     private bool m_IsPhysicsRunning;
+    Dictionary<string, GameObject> m_Graph;
+
     //private float m_EdgeScalar = 25.0f;
 
     // Start is called before the first frame update
@@ -38,10 +41,11 @@ public class GraphBuilder : MonoBehaviour
         }
     }
 
-    public void Init(Clam.FFI.ClusterData[] nodes, float edgeScalar, int numIters)
+    public void Init(System.Collections.Generic.Dictionary<string, GameObject> graph, float edgeScalar, int numIters)
     {
+        m_Graph = graph;
         GetComponent<MeshFilter>().mesh = new Mesh();
-        var buildResult = Clam.FFI.NativeMethods.InitForceDirectedGraph(nodes, edgeScalar, numIters);
+        var buildResult = Clam.FFI.NativeMethods.InitForceDirectedGraph(edgeScalar, numIters);
         if (buildResult != FFIError.Ok)
         {
             UIHelpers.ShowErrorPopUP("Graph build failed");
@@ -51,28 +55,14 @@ public class GraphBuilder : MonoBehaviour
         m_VertexCounter = 0;
         m_IndexCounter = 0;
 
-        int numNodes = Cakes.Tree.GetTree().Count;
+        int numNodes = m_Graph.Count;
         int numEdges = Clam.FFI.NativeMethods.GetNumGraphEdges();
         Debug.Log("num edges in graph : " + numEdges + ", num nodes " + numNodes);
 
-        if (numEdges <2) {
-            UIHelpers.ShowErrorPopUP("less than 2 edges in graph");
-            Debug.LogWarning("less than 2 edges in graph");
-            for (int K = 0; K < nodes.Length; K++)
-            {
-                Clam.FFI.NativeMethods.DeleteClusterData(ref nodes[K]);
-            }
-            return;
-        }
         m_Vertices = new Vector3[numNodes];
         m_Indices = new int[numEdges * 2];
         InitNodeIndices();
         Clam.FFI.NativeMethods.InitGraphVertices(EdgeDrawer);
-
-        for (int K = 0; K < nodes.Length; K++)
-        {
-            Clam.FFI.NativeMethods.DeleteClusterData(ref nodes[K]);
-        }
 
         m_IsPhysicsRunning = true;
         // terrible redesign later*********************************************************
@@ -84,7 +74,7 @@ public class GraphBuilder : MonoBehaviour
     void InitNodeIndices()
     {
         int i = 0;
-        foreach (var (id, node) in Cakes.Tree.GetTree())
+        foreach (var (id, node) in m_Graph)
         {
             node.GetComponent<Node>().IndexBufferID = i;
             m_Vertices[i] = node.GetComponent<Node>().GetPosition();
@@ -99,7 +89,7 @@ public class GraphBuilder : MonoBehaviour
     public void PositionUpdater(ref Clam.FFI.ClusterData nodeData)
     {
         string id = nodeData.id.AsString;
-        if (Cakes.Tree.GetTree().TryGetValue(id, out var node))
+        if (m_Graph.TryGetValue(id, out var node))
         {
             node.GetComponent<Node>().SetPosition(nodeData.pos.AsVector3);
 
@@ -127,9 +117,9 @@ public class GraphBuilder : MonoBehaviour
         string otherID = values[1];
         bool isDetected = values[0][0] == '1';
 
-        if (Cakes.Tree.GetTree().TryGetValue(nodeData.id.AsString, out var node))
+        if (m_Graph.TryGetValue(nodeData.id.AsString, out var node))
         {
-            if (Cakes.Tree.GetTree().TryGetValue(otherID, out var other))
+            if (m_Graph.TryGetValue(otherID, out var other))
             {
                 if (isDetected)
                 {

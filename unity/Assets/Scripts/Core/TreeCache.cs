@@ -74,7 +74,7 @@ namespace Clam
 
 
             Clam.FFI.NativeMethods.ForEachDFT(EdgeDrawer);
-            PopulateEdgeDictionary();
+            //PopulateEdgeDictionary();
 
             if (Clam.FFI.NativeMethods.GetRootData(out var rootData) == FFIError.Ok)
             {
@@ -89,35 +89,35 @@ namespace Clam
             return FFIError.Ok;
         }
 
-        private void PopulateEdgeDictionary()
-        {
-            foreach((var id, var cluster) in m_Tree)
-            {
-                if (!cluster.GetComponent<Node>().IsLeaf())
-                {
+        //private void PopulateEdgeDictionary()
+        //{
+        //    foreach((var id, var cluster) in m_Tree)
+        //    {
+        //        if (!cluster.GetComponent<Node>().IsLeaf())
+        //        {
                    
-                }
+        //        }
                 
-            }
+        //    }
 
-            //Debug.Log("Populting edge keya");
-            //m_EdgeCache = new Dictionary<string, GameObject>();
-            //Edge[] edges = GameObject.FindObjectsOfType<Edge>(true);
-            //foreach (Edge edge in edges)
-            //{
-            //    (var node1, var node2) = edge.GetComponent<Edge>().GetNodes();
-            //    string edgeKey = node1.GetComponent<Node>().GetId() + node2.GetComponent<Node>().GetId();
+        //    //Debug.Log("Populting edge keya");
+        //    //m_EdgeCache = new Dictionary<string, GameObject>();
+        //    //Edge[] edges = GameObject.FindObjectsOfType<Edge>(true);
+        //    //foreach (Edge edge in edges)
+        //    //{
+        //    //    (var node1, var node2) = edge.GetComponent<Edge>().GetNodes();
+        //    //    string edgeKey = node1.GetComponent<Node>().GetId() + node2.GetComponent<Node>().GetId();
 
-            //    if (!m_EdgeCache.ContainsKey(edgeKey))
-            //    {
-            //        m_EdgeCache[edgeKey] = edge.gameObject;
-            //    }
-            //    else
-            //    {
-            //        Debug.LogWarning("Duplicate edge key found: " + edgeKey);
-            //    }
-            //}
-        }
+        //    //    if (!m_EdgeCache.ContainsKey(edgeKey))
+        //    //    {
+        //    //        m_EdgeCache[edgeKey] = edge.gameObject;
+        //    //    }
+        //    //    else
+        //    //    {
+        //    //        Debug.LogWarning("Duplicate edge key found: " + edgeKey);
+        //    //    }
+        //    //}
+        //}
 
         public void ResetTree()
         {
@@ -159,7 +159,7 @@ namespace Clam
 
             //edges = GameObject.FindObjectsOfType<Edge>(true);
             //Debug.Log("after2 num edges" + edges.Length.ToString());
-            m_EdgeCache.Clear();
+            //m_EdgeCache.Clear();
             m_EdgeCache = new Dictionary<string, GameObject>();
         }
 

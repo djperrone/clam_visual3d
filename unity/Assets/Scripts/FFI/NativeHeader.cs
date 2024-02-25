@@ -103,7 +103,7 @@ namespace Clam
             // ------------------------------------- Graph Physics -------------------------------------
             [System.Security.SecurityCritical]
             [DllImport(__DllName, EntryPoint = "init_force_directed_graph", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-            private static unsafe extern FFIError init_force_directed_graph(IntPtr handle, [In, Out] ClusterData[] arr, int len, float scalar, int maxIters);
+            private static unsafe extern FFIError init_force_directed_graph(IntPtr handle, float scalar, int maxIters);
 
             [System.Security.SecurityCritical]
             [DllImport(__DllName, EntryPoint = "init_graph_vertices", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
@@ -113,8 +113,8 @@ namespace Clam
             [DllImport(__DllName, EntryPoint = "physics_update_async", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
             private static unsafe extern FFIError physics_update_async(IntPtr handle, NodeVisitor cb_fn);
 
-            [DllImport(__DllName, EntryPoint = "shutdown_physics", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-            private static extern FFIError shutdown_physics(IntPtr handle);
+            //[DllImport(__DllName, EntryPoint = "shutdown_physics", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+            //private static extern FFIError shutdown_physics(IntPtr handle);
 
             [DllImport(__DllName, EntryPoint = "force_physics_shutdown", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
             private static extern FFIError force_physics_shutdown(IntPtr handle);

@@ -24,10 +24,11 @@ public enum Menu
     ResumePlay,
     IncludeHidden,
     DestroyGraph,
-    DestroyTree,
+    //DestroyTree,
     ResetTree,
     WorldInput,
-    MenuInput
+    MenuInput,
+    DestroyHierarchyEdges,
 }
 
 namespace Clam
@@ -102,7 +103,7 @@ namespace Clam
                 StartListening(Menu.Unlock, UnLockUserInput);
                 StartListening(Menu.Pause, Pause);
                 StartListening(Menu.IncludeHidden, IncludeHiddenInSelection);
-                StartListening(Menu.DestroyTree, DestroyTree);
+                StartListening(Menu.DestroyHierarchyEdges, DestroyHierarchyEdges);
 
             }
         }
@@ -119,7 +120,7 @@ namespace Clam
 #endif
         }
 
-        void DestroyTree()
+        void DestroyHierarchyEdges()
         {
             if (m_IsPhysicsRunning)
             {
@@ -282,7 +283,7 @@ namespace Clam
 
         public void Update()
         {
-            
+
         }
 
         public static void SwitchInputActionMap(string newMapName, PlayerInput input)

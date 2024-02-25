@@ -21,7 +21,7 @@ impl ClusterDataWrapper {
             data: ClusterData::from_clam(cluster),
         }
     }
-    pub fn from_physics(id: String, pos: glam::Vec3) -> Self {
+    pub fn from_physics(id: &str, pos: glam::Vec3) -> Self {
         ClusterDataWrapper {
             data: ClusterData::from_physics(id, pos),
         }

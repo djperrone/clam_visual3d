@@ -71,7 +71,7 @@ class DoubleTextField
 
     bool ValidateMinNumericInput(ChangeEvent<string> changeEvent)
     {
-        if (!ValidateCharacters(changeEvent.newValue, "0123456789."))
+        if (!ValidateFloatString(changeEvent.newValue, "0123456789."))
         {
             return false;
         }
@@ -112,7 +112,7 @@ class DoubleTextField
 
     bool MaxValueValidation(ChangeEvent<string> changeEvent)
     {
-        if (!ValidateCharacters(changeEvent.newValue, "0123456789."))
+        if (!ValidateFloatString(changeEvent.newValue, "0123456789."))
         {
             return false;
         }
@@ -130,7 +130,7 @@ class DoubleTextField
             return true;
         }
     }
-    bool ValidateCharacters(string value, string validCharacters)
+    bool ValidateFloatString(string value, string validCharacters)
     {
         foreach (var c in value)
         {

@@ -1,8 +1,11 @@
+use rand::seq::IteratorRandom;
+
 use super::physics_node::PhysicsNode;
 use super::spring::Spring;
 use crate::ffi_impl::cluster_data_wrapper::ClusterDataWrapper;
 use crate::utils::error::FFIError;
-use crate::{debug, CBFnNodeVisitor, CBFnNodeVisitorMut};
+use crate::utils::types::{Graphf32, Treef32};
+use crate::{debug, utils, CBFnNodeVisitor, CBFnNodeVisitorMut};
 use std::collections::HashMap;
 
 use std::sync::{Condvar, Mutex};
@@ -25,8 +28,8 @@ impl Status {
 pub struct ForceDirectedGraph {
     graph: Mutex<(Status, HashMap<String, PhysicsNode>)>,
     edges: Vec<Spring>,
-    max_edge_len: f32,
-    scalar: f32,
+    pub max_edge_len: f32,
+    pub scalar: f32,
     cond_var: Condvar,
     max_iters: i32,
 }
@@ -99,14 +102,30 @@ impl ForceDirectedGraph {
         }
     }
 
-    unsafe fn try_update_unity(&self, updater: CBFnNodeVisitor) -> FFIError {
+    unsafe fn try_update_unity(
+        &self,
+        clam_graph: &Graphf32,
+        tree: &Treef32,
+        updater: CBFnNodeVisitor,
+    ) -> FFIError {
         match self.graph.try_lock() {
             Ok(mut g) => {
+                let mut rng = rand::thread_rng();
+                for cluster1 in clam_graph.clusters() {
+                    for _ in 0..3 {
+                        if let Some(cluster2) = clam_graph.clusters().iter().choose(&mut rng) {
+                            let dist = cluster1.distance_to_other(tree.data(), cluster2);
+
+                            let spring = Spring::new(dist, cluster1.name(), cluster2.name(), false);
+
+                            spring.move_nodes(&mut g.1, self.max_edge_len, self.scalar);
+                        }
+                    }
+                }
                 for (key, value) in &mut g.1 {
                     value.update_position();
-                    // call to clone ?
                     let baton_data =
-                        ClusterDataWrapper::from_physics(key.clone(), value.get_position());
+                        ClusterDataWrapper::from_physics(key.as_str(), value.get_position());
 
                     updater(Some(baton_data.data()));
                 }
@@ -116,7 +135,7 @@ impl ForceDirectedGraph {
 
                 FFIError::PhysicsRunning
             }
-            Err(e) => {
+            Err(_) => {
                 // debug!("Data not ready...try again later {}", e);
                 FFIError::PhysicsNotReady
             }
@@ -132,7 +151,7 @@ impl ForceDirectedGraph {
             }
         }) {
             Some(spring) => spring.nat_len(),
-            None => -1.,
+            None => 1.0,
         }
 
         // max_edge_len
@@ -150,22 +169,17 @@ pub fn produce_computations(force_directed_graph: &ForceDirectedGraph) {
 
 pub unsafe fn try_update_unity(
     force_directed_graph: &ForceDirectedGraph,
+    clam_graph: &Graphf32,
+    tree: &Treef32,
     updater: CBFnNodeVisitor,
 ) -> FFIError {
-    force_directed_graph.try_update_unity(updater)
+    force_directed_graph.try_update_unity(clam_graph, tree, updater)
 }
 
 pub unsafe fn force_shutdown(force_directed_graph: &ForceDirectedGraph) -> FFIError {
     force_directed_graph.force_shutdown()
 }
 
-pub fn get_num_edges(force_directed_graph: &ForceDirectedGraph) -> i32 {
-    return force_directed_graph
-        .edges
-        .iter()
-        .filter(|&edge| edge.is_detected)
-        .count() as i32;
-}
 
 pub fn init_unity_edges(force_directed_graph: &ForceDirectedGraph, init_edges: CBFnNodeVisitorMut) {
     for edge in &force_directed_graph.edges {

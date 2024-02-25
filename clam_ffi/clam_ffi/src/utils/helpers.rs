@@ -19,14 +19,31 @@ pub fn label_colors() -> Vec<glam::Vec3> {
     ]
 }
 
-fn parse_cluster_id(cluster_id: String) -> Result<(usize, usize), FFIError> {
-    let mut parts = cluster_id.split('-');
+// fn parse_cluster_id(cluster_id: String) -> Result<(usize, usize), FFIError> {
+//     let mut parts = cluster_id.split('-');
 
-    if let (Some(offset_str), Some(cardinality_str)) = (parts.next(), parts.next()) {
-        if let (Ok(offset), Ok(cardinality)) = (
-            offset_str.parse::<usize>(),
-            cardinality_str.parse::<usize>(),
-        ) {
+//     if let (Some(offset_str), Some(cardinality_str)) = (parts.next(), parts.next()) {
+//         if let (Ok(offset), Ok(cardinality)) = (
+//             offset_str.parse::<usize>(),
+//             cardinality_str.parse::<usize>(),
+//         ) {
+//             return Ok((offset, cardinality));
+//         }
+//     }
+//     Err(FFIError::InvalidStringPassed)
+// }
+
+// Function to parse the string returned by the name function into two integers
+pub fn parse_cluster_name(name: &str) -> Result<(usize, usize), FFIError> {
+    // Split the string into substrings based on the hyphen ("-")
+    let parts: Vec<&str> = name.split('-').collect();
+
+    // Ensure we have exactly two parts
+    if parts.len() == 2 {
+        // Parse the substrings into integers and return them as a tuple
+        if let (Ok(offset), Ok(cardinality)) =
+            (parts[0].parse::<usize>(), parts[1].parse::<usize>())
+        {
             return Ok((offset, cardinality));
         }
     }
@@ -35,7 +52,7 @@ fn parse_cluster_id(cluster_id: String) -> Result<(usize, usize), FFIError> {
 
 fn parse_cluster_id_raw(cluster_id: *const c_char) -> Result<(usize, usize), FFIError> {
     let cluster_id = c_char_to_string(cluster_id);
-    parse_cluster_id(cluster_id)
+    parse_cluster_name(cluster_id.as_str())
 }
 #[no_mangle]
 pub fn c_char_to_string(s: *const c_char) -> String {

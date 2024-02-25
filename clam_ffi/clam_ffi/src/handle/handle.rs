@@ -17,7 +17,7 @@ use crate::tree_layout::reingold_tilford;
 use crate::utils::distances::DistanceMetric;
 use crate::utils::error::FFIError;
 use crate::utils::scoring_functions::enum_to_function;
-use crate::utils::types::{Clusterf32, DataSet};
+use crate::utils::types::{Clusterf32, DataSetf32};
 use crate::utils::{self, anomaly_readers};
 
 use crate::{debug, CBFnNodeVisitor, CBFnNodeVisitorMut};
@@ -30,14 +30,11 @@ use crate::utils::scoring_functions::ScoringFunction;
 use spring::Spring;
 
 pub struct Handle<'a> {
-    tree: Option<Tree<Vec<f32>, f32, DataSet>>,
-    // labels: Option<Vec<usize>>,
-    graph: Option<HashMap<String, PhysicsNode>>,
+    tree: Option<Tree<Vec<f32>, f32, DataSetf32>>,
     clam_graph: Option<Graph<'a, f32>>,
     edges: Option<Vec<Spring>>,
     current_query: Option<Vec<f32>>,
     force_directed_graph: Option<(JoinHandle<()>, Arc<ForceDirectedGraph>)>,
-    num_edges_in_graph: Option<i32>, // temporary figure out better way later
 }
 impl<'a> Handle<'a> {
     pub fn shutdown(&mut self) {
@@ -53,7 +50,7 @@ impl<'a> Handle<'a> {
         self.tree.as_ref()
     }
 
-    pub fn data(&self) -> Option<&DataSet> {
+    pub fn data(&self) -> Option<&DataSetf32> {
         return if let Some(tree) = self.tree() {
             Some(tree.data())
         } else {
@@ -89,13 +86,10 @@ impl<'a> Handle<'a> {
                     .with_ratios(false);
                 Ok(Handle {
                     tree: Some(tree),
-                    // labels: Some(labels.to_vec()),
-                    graph: None,
                     clam_graph: None,
                     edges: None,
                     current_query: None,
                     force_directed_graph: None,
-                    num_edges_in_graph: None,
                 })
             }
             Err(_) => Err(FFIError::HandleInitFailed),
@@ -118,20 +112,18 @@ impl<'a> Handle<'a> {
                 return Err(e);
             }
         };
-        if let Ok(tree) =
-            Tree::<Vec<f32>, f32, DataSet>::load(Path::new(&data_name), metric, data.is_expensive)
-        {
+        if let Ok(tree) = Tree::<Vec<f32>, f32, DataSetf32>::load(
+            Path::new(&data_name),
+            metric,
+            data.is_expensive,
+        ) {
             let tree = tree.with_ratios(false);
-            // let labels = tree.data().metadata().to_vec();
             Ok(Handle {
                 tree: Some(tree),
-                // labels: Some(labels),
-                graph: None,
                 clam_graph: None,
                 edges: None,
                 current_query: None,
                 force_directed_graph: None,
-                num_edges_in_graph: None,
             })
         } else {
             Err(FFIError::LoadTreeFailed)
@@ -142,7 +134,7 @@ impl<'a> Handle<'a> {
         data_name: &str,
         distance_metric: DistanceMetric,
         is_expensive: bool,
-    ) -> Result<DataSet, FFIError> {
+    ) -> Result<DataSetf32, FFIError> {
         let metric = match utils::distances::from_enum(distance_metric) {
             Ok(metric) => metric,
             Err(e) => {
@@ -185,23 +177,6 @@ impl<'a> Handle<'a> {
                             cluster_selector(Some(baton.data()));
                         }
 
-                        debug!(
-                            "num components {}",
-                            self.clam_graph
-                                .as_ref()
-                                .unwrap()
-                                .find_component_clusters()
-                                .len()
-                        );
-                        debug!(
-                            "num edges {}",
-                            self.clam_graph.as_ref().unwrap().edge_cardinality()
-                        );
-                        debug!(
-                            "num clusters {}",
-                            self.clam_graph.as_ref().unwrap().clusters().len()
-                        );
-
                         return FFIError::Ok;
                     }
                 }
@@ -242,7 +217,12 @@ impl<'a> Handle<'a> {
                 debug!("shutting down physics");
                 FFIError::PhysicsFinished
             } else {
-                force_directed_graph::try_update_unity(&force_directed_graph.1, updater)
+                force_directed_graph::try_update_unity(
+                    &force_directed_graph.1,
+                    self.clam_graph().as_ref().unwrap(),
+                    self.tree().as_ref().unwrap(),
+                    updater,
+                )
             };
         }
 
@@ -251,13 +231,9 @@ impl<'a> Handle<'a> {
 
     pub fn set_graph(&mut self, graph: (JoinHandle<()>, Arc<ForceDirectedGraph>)) {
         self.force_directed_graph = Some(graph);
-        if let Some(g) = &self.force_directed_graph {
-            self.num_edges_in_graph = Some(force_directed_graph::get_num_edges(&g.1));
-        }
     }
 
     pub fn get_num_edges_in_graph(&self) -> i32 {
-        // self.num_edges_in_graph.unwrap_or(-1)
         if let Some(g) = self.clam_graph() {
             return g.edge_cardinality() as i32;
         }
@@ -383,17 +359,17 @@ impl<'a> Handle<'a> {
         }
     }
 
-    pub fn shutdown_physics(&mut self) -> FFIError {
-        let should_shutdown = { self.graph.is_some() && self.edges.is_some() };
+    // pub fn shutdown_physics(&mut self) -> FFIError {
+    //     let should_shutdown = { self.graph.is_some() && self.edges.is_some() };
 
-        if should_shutdown {
-            self.graph = None;
-            self.edges = None;
-            FFIError::Ok
-        } else {
-            FFIError::PhysicsAlreadyShutdown
-        }
-    }
+    //     if should_shutdown {
+    //         self.graph = None;
+    //         self.edges = None;
+    //         FFIError::Ok
+    //     } else {
+    //         FFIError::PhysicsAlreadyShutdown
+    //     }
+    // }
 
     pub fn set_current_query(&mut self, _data: &Vec<f32>) {
         todo!()

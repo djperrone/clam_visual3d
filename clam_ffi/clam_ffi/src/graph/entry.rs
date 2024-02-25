@@ -20,17 +20,11 @@ pub unsafe fn physics_update_async_impl(
 
 pub unsafe fn init_force_directed_graph_impl(
     context: InHandlePtr,
-    arr_ptr: *mut ClusterData,
-    len: i32,
     scalar: f32,
     max_iters: i32,
 ) -> FFIError {
     if let Some(handle) = context {
-        if arr_ptr.is_null() {
-            return FFIError::NullPointerPassed;
-        }
-        let arr = std::slice::from_raw_parts_mut(arr_ptr, len as usize);
-        match graph_builder::build_force_directed_graph(arr, handle, scalar, max_iters) {
+        match graph_builder::build_force_directed_graph(handle, scalar, max_iters) {
             Ok(g) => {
                 handle.set_graph(g);
                 FFIError::Ok
@@ -54,17 +48,19 @@ pub unsafe fn init_graph_vertices_impl(
     FFIError::Ok
 }
 
-pub fn shutdown_physics_impl(ptr: InHandlePtr) -> FFIError {
-    if let Some(handle) = ptr {
-        return handle.shutdown_physics();
-    }
-    FFIError::NullPointerPassed
-}
+// pub fn shutdown_physics_impl(ptr: InHandlePtr) -> FFIError {
+//     if let Some(handle) = ptr {
+//         return handle.shutdown_physics();
+//     }
+//     FFIError::NullPointerPassed
+// }
 
 pub fn get_num_edges_in_graph_impl(ptr: InHandlePtr) -> i32 {
     if let Some(handle) = ptr {
         debug!("num edges {}", handle.get_num_edges_in_graph());
-        return handle.get_num_edges_in_graph();
+        if let Some(graph) = handle.clam_graph() {
+            return graph.edge_cardinality() as i32;
+        }
     }
     -1
 }

@@ -1,6 +1,5 @@
 use crate::graph;
 use crate::utils::types::Clusterf32;
-use crate::ClusterData;
 
 // pub struct NodeNDim<const N: usize> {
 //     position: [f32; N],
@@ -21,9 +20,9 @@ pub struct PhysicsNode {
 }
 
 impl PhysicsNode {
-    pub fn new(node_data: &ClusterData, cluster: &Clusterf32) -> Self {
+    pub fn new(pos: glam::Vec3, cluster: &Clusterf32) -> Self {
         PhysicsNode {
-            position: node_data.pos,
+            position: pos,
             friction: 0.98,
             max_speed: 5.,
             velocity: glam::Vec3::new(0., 0., 0.),
