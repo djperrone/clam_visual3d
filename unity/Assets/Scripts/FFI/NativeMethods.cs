@@ -18,7 +18,7 @@ namespace Clam
 
         public static partial class NativeMethods
         {
-	public const string __DllName = "clam_ffi_2024-02-2511-58-50";
+	public const string __DllName = "clam_ffi_2024-02-2514-14-18";
             private static IntPtr m_Handle;
 
             private static bool m_Initialized = false;
@@ -264,6 +264,11 @@ namespace Clam
             public static void InitGraphVertices(NodeVisitorMut edgeCB)
             {
                 init_graph_vertices(m_Handle, edgeCB);
+            }
+
+            public static void RunTriangleTest(NodeVisitorMut clusterGetter)
+            {
+                run_triangle_test(m_Handle, clusterGetter);
             }
 
             public static FFIError PhysicsUpdateAsync(NodeVisitor cb_fn)

@@ -221,7 +221,7 @@ public class ClamGraphBuildMenu
         MenuEventManager.SwitchState(Menu.DestroyGraph);
         MenuEventManager.SwitchState(Menu.DestroyHierarchyEdges);
 
-        m_GraphBuilder.GetComponent<GraphBuilder>().Init(m_Graph, float.Parse(m_EdgeScalar.value), 500);
+        m_GraphBuilder.GetComponent<GraphBuilder>().Init(m_Graph, float.Parse(m_EdgeScalar.value), 1000);
     }
 
     void ResetCallback(ClickEvent evt)

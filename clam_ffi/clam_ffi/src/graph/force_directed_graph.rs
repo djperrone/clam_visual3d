@@ -110,7 +110,7 @@ impl ForceDirectedGraph {
     ) -> FFIError {
         match self.graph.try_lock() {
             Ok(mut g) => {
-                let mut rng = rand::thread_rng();
+                let mut rng: rand::prelude::ThreadRng = rand::thread_rng();
                 for cluster1 in clam_graph.clusters() {
                     for _ in 0..3 {
                         if let Some(cluster2) = clam_graph.clusters().iter().choose(&mut rng) {

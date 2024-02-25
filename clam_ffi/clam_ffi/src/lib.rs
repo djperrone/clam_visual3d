@@ -16,6 +16,7 @@ use ffi_impl::{
     cluster_data::ClusterData, cluster_ids::ClusterIDs, lib_impl::*, string_ffi::StringFFI,
 };
 use graph::entry::*;
+use tests::test::run_triangle_test_impl;
 use tree_layout::entry_point::{draw_hierarchy_impl, draw_hierarchy_offset_from_impl};
 use utils::{
     debug,
@@ -314,6 +315,14 @@ pub unsafe extern "C" fn physics_update_async(
     updater: CBFnNodeVisitor,
 ) -> FFIError {
     physics_update_async_impl(context, updater)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn run_triangle_test(
+    context: InHandlePtr,
+    updater: CBFnNodeVisitorMut,
+) -> FFIError {
+    run_triangle_test_impl(context, updater)
 }
 
 // #[no_mangle]

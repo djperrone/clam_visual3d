@@ -1,234 +1,189 @@
-// #![allow(dead_code)]
-// #![allow(unused_variables)]
+use std::{
+    cmp::Ordering,
+    collections::HashSet,
+    error::Error,
+    fs::OpenOptions,
+    io::{self, Write},
+    ops::Add,
+};
 
-// use std::ffi::{c_char, CStr};
+use abd_clam::{Cluster, Dataset, Edge};
+use distances::Number;
+use rand::seq::IteratorRandom;
 
-// use crate::ffi_impl::handle::Handle;
-// use crate::{debug, CBFnNodeVistor};
-// use crate::{
-//     ffi_impl::node::{NodeData, StringFFI},
-//     utils::helpers,
-// };
+use crate::{
+    debug,
+    ffi_impl::cluster_data_wrapper::ClusterDataWrapper,
+    utils::{error::FFIError, types::InHandlePtr},
+    CBFnNodeVisitorMut,
+};
 
-// #[repr(C)]
-// #[derive(Copy, Clone, Debug)]
-// pub struct ComplexStruct {
-//     my_str: StringStruct1,
-// }
+fn choose_two_random_clusters_exclusive<'a, U: Number>(
+    clusters: &HashSet<&'a Cluster<U>>,
+    cluster: &'a Cluster<U>,
+    mut rng: &mut rand::prelude::ThreadRng,
+) -> Option<(&'a Cluster<U>, &'a Cluster<U>)> {
+    if let Some(cluster1) = clusters.iter().choose(&mut rng) {
+        if let Some(cluster2) = clusters.iter().choose(&mut rng) {
+            if &cluster != cluster1 && &cluster != cluster2 && cluster1 != cluster2 {
+                return Some((cluster1, cluster2));
+            }
+        }
+    }
+    return None;
+}
 
-// #[repr(C)]
-// #[derive(Copy, Clone, Debug)]
-// pub struct StringStruct1 {
-//     pub utf8_str: *mut u8,
-//     pub utf8_len: i32,
-// }
+fn edge_gt<'a, U: Number>(e1: &Edge<'a, U>, e2: &Edge<'a, U>) -> bool {
+    e1.distance() > e2.distance()
+}
 
-// impl StringStruct1 {
-//     pub fn new(data: String) -> Self {
-//         StringStruct1 {
-//             utf8_str: helpers::alloc_to_c_char(data.clone()) as *mut u8,
-//             utf8_len: data.len() as i32,
-//         }
-//     }
-// }
+fn edge_eq<'a, U: Number>(e1: &Edge<'a, U>, e2: &Edge<'a, U>) -> bool {
+    e1.left() == e2.left() && e1.right() == e2.right()
+}
 
-// #[repr(C)]
-// #[derive(Clone, Debug)]
-// pub struct StringStruct2 {
-//     pub s: String,
-// }
+pub unsafe fn run_triangle_test_impl(
+    context: InHandlePtr,
+    location_getter: CBFnNodeVisitorMut,
+) -> FFIError {
+    if let Some(handle) = context {
+        // handle.physics_update_async(location_getter)
+        if let Some(tree) = handle.tree() {
+            if let Some(data) = handle.data() {
+                if let Some(clam_graph) = handle.clam_graph() {
+                    let mut rng: rand::prelude::ThreadRng = rand::thread_rng();
+                    let mut total_count = 0;
+                    let mut correct_triangle_count = 0;
+                    for a in clam_graph.clusters() {
+                        let mut correct_edge_count = 0;
+                        if let Some((b, c)) =
+                            choose_two_random_clusters_exclusive(clam_graph.clusters(), a, &mut rng)
+                        {
+                            total_count += 1;
 
-// impl StringStruct2 {
-//     pub unsafe fn new(other: &StringStruct1) -> Self {
-//         StringStruct2 {
-//             s: helpers::csharp_to_rust_utf8(other.utf8_str, other.utf8_len)
-//                 .unwrap_or("failed to do stuff".to_string()),
-//         }
-//     }
-// }
+                            let ab = Edge::new(a, b, a.distance_to_other(data, b));
+                            let ac = Edge::new(a, c, a.distance_to_other(data, c));
+                            let bc = Edge::new(b, c, b.distance_to_other(data, c));
 
-// #[no_mangle]
-// pub unsafe extern "C" fn test_node_rust_alloc(
-//     incoming: Option<&NodeData>,
-//     outgoing: Option<&mut NodeData>,
-// ) {
-//     // let mystr = helpers::alloc_to_c_char("hello123".to_string());
-//     // let ffi_string = StringStruct1::new("hello123".to_string());
-//     if let Some(in_data) = incoming {
-//         if let Some(out_data) = outgoing {
-//             *out_data = *in_data;
-//             out_data.id = StringFFI::new("hello123".to_string());
-//             // out_data.my_str.utf8_str = helpers::alloc_to_c_char("hello123".to_string()) as *mut u8;
+                            let mut unity_a = ClusterDataWrapper::from_cluster(a);
+                            let mut unity_b = ClusterDataWrapper::from_cluster(b);
+                            let mut unity_c = ClusterDataWrapper::from_cluster(c);
 
-//             debug!("string struct test 123 {:?}", out_data.id.as_string());
-//             // helpers::free_c_char(out_data.my_str.utf8_str as *mut i8);
-//             // std::mem::forget(out_data.my_str);
-//         }
-//     }
-// }
+                            location_getter(Some(unity_a.data_mut()));
+                            location_getter(Some(unity_b.data_mut()));
+                            location_getter(Some(unity_c.data_mut()));
 
-// #[no_mangle]
-// pub unsafe extern "C" fn test_string_struct_complex(
-//     incoming: Option<&NodeData>,
-//     outgoing: Option<&mut NodeData>,
-// ) {
-//     // let mystr = helpers::alloc_to_c_char("hello123".to_string());
-//     // let ffi_string = StringStruct1::new("hello123".to_string());
-//     if let Some(in_data) = incoming {
-//         if let Some(out_data) = outgoing {
-//             *out_data = *in_data;
-//             // out_data.id = StringFFI::new("hello123".to_string());
-//             // out_data.my_str.utf8_str = helpers::alloc_to_c_char("hello123".to_string()) as *mut u8;
-//             let some_str = helpers::csharp_to_rust_utf8(in_data.id.data, in_data.id.len);
-//             debug!("string struct test 123 {:?}", *out_data.id.data);
-//             debug!("string struct test 1234 {:?}", out_data.id.as_string());
-//             debug!("string struct test 123 x {:?}", out_data.pos.x);
-//             debug!("string struct test 123 str {:?}", some_str);
-//             // helpers::free_c_char(out_data.my_str.utf8_str as *mut i8);
-//             // std::mem::forget(out_data.my_str);
-//         }
-//     }
-// }
+                            let unity_ab =
+                                Edge::new(a, b, unity_a.data().pos.distance(unity_b.data().pos));
+                            let unity_ac =
+                                Edge::new(a, c, unity_a.data().pos.distance(unity_c.data().pos));
+                            let unity_bc =
+                                Edge::new(b, c, unity_b.data().pos.distance(unity_c.data().pos));
 
-// #[no_mangle]
-// pub unsafe extern "C" fn test_string_struct2(
-//     incoming: Option<&ComplexStruct>,
-//     outgoing: Option<&mut ComplexStruct>,
-// ) -> () {
-//     if let Some(in_struct) = incoming {
-//         // let some_str =
-//         //     helpers::csharp_to_rust_utf8(in_struct.my_str.utf8_str, in_struct.my_str.utf8_len);
+                            let mut clam_edges = vec![("ab", ab), ("ac", ac), ("bc", bc)];
+                            let mut unity_edges =
+                                vec![("ab", unity_ab), ("ac", unity_ac), ("bc", unity_bc)];
 
-//         // debug!("start string struct test ");
+                            let clam_string = format!(
+                                "[{}: {}], [{}: {}], [{}: {}]",
+                                clam_edges[0].0,
+                                clam_edges[0].1.distance(),
+                                clam_edges[1].0,
+                                clam_edges[1].1.distance(),
+                                clam_edges[2].0,
+                                clam_edges[2].1.distance()
+                            );
 
-//         // let ss = StringStruct2::new(in_struct);
-//         let tests = "test".to_string();
-//         let test = *in_struct.my_str.utf8_str;
-//         *(in_struct.my_str.utf8_str.add(1)) = 107;
-//         let mut i = 0 as usize;
-//         for ch in tests.chars() {
-//             *(in_struct.my_str.utf8_str.add(i as usize)) = ch as u8;
-//             i += 1;
-//         }
-//         // debug!("string struct test {:?}", some_str);
-//         debug!("string struct test {:?}", *in_struct.my_str.utf8_str)
-//     }
-// }
+                            let unity_string = format!(
+                                "[{}: {}], [{}: {}], [{}: {}]",
+                                unity_edges[0].0,
+                                unity_edges[0].1.distance(),
+                                unity_edges[1].0,
+                                unity_edges[1].1.distance(),
+                                unity_edges[2].0,
+                                unity_edges[2].1.distance()
+                            );
+                            debug!("clam: {}", clam_string);
+                            debug!("unity: {}", unity_string);
+                            clam_edges.sort_by(|a, b| {
+                                a.1.distance().partial_cmp(&b.1.distance()).unwrap()
+                            });
 
-// #[no_mangle]
-// pub unsafe extern "C" fn test_node_rust_alloc2(
-//     context: Option<&mut Handle>,
-//     visitor: CBFnNodeVistor,
-// ) {
-//     // let mystr = helpers::alloc_to_c_char("hello123".to_string());
-//     // let ffi_string = StringStruct1::new("hello123".to_string());
-//     if let Some(handle) = context {
-//         // if let Some(out_data) = outgoing {
-//         //     *out_data = *in_data;
-//         //     out_data.id = StringFFI::new("hello123".to_string());
-//         //     // out_data.my_str.utf8_str = helpers::alloc_to_c_char("hello123".to_string()) as *mut u8;
+                            unity_edges.sort_by(|a, b| {
+                                a.1.distance().partial_cmp(&b.1.distance()).unwrap()
+                            });
 
-//         //     debug!("string struct test 123 {:?}", out_data.id.as_string());
-//         //     // helpers::free_c_char(out_data.my_str.utf8_str as *mut i8);
-//         //     // std::mem::forget(out_data.my_str);
-//         // }
+                            debug!("after sort:");
 
-//         let data = NodeData::from_clam(&handle.get_root().as_ref().unwrap().as_ref().borrow());
-//         visitor(Some(&data));
-//     }
-// }
+                            let clam_string = format!(
+                                "[{}: {}], [{}: {}], [{}: {}]",
+                                clam_edges[0].0,
+                                clam_edges[0].1.distance(),
+                                clam_edges[1].0,
+                                clam_edges[1].1.distance(),
+                                clam_edges[2].0,
+                                clam_edges[2].1.distance()
+                            );
 
-// #[no_mangle]
-// pub unsafe extern "C" fn test_string_struct_rust_alloc(
-//     incoming: Option<&ComplexStruct>,
-//     outgoing: Option<&mut ComplexStruct>,
-// ) {
-//     // let mystr = helpers::alloc_to_c_char("hello123".to_string());
-//     // let ffi_string = StringStruct1::new("hello123".to_string());
-//     if let Some(in_data) = incoming {
-//         if let Some(out_data) = outgoing {
-//             *out_data = *in_data;
-//             out_data.my_str = StringStruct1::new("hello123".to_string());
-//             // out_data.my_str.utf8_str = helpers::alloc_to_c_char("hello123".to_string()) as *mut u8;
+                            let unity_string = format!(
+                                "[{}: {}], [{}: {}], [{}: {}]",
+                                unity_edges[0].0,
+                                unity_edges[0].1.distance(),
+                                unity_edges[1].0,
+                                unity_edges[1].1.distance(),
+                                unity_edges[2].0,
+                                unity_edges[2].1.distance()
+                            );
+                            debug!("clam: {}", clam_string);
+                            debug!("unity: {}", unity_string);
 
-//             debug!("string struct test 123 {:?}", out_data.my_str.utf8_str);
-//             // helpers::free_c_char(out_data.my_str.utf8_str as *mut i8);
-//             // std::mem::forget(out_data.my_str);
-//         }
-//     }
-// }
-// #[no_mangle]
-// pub extern "C" fn free_string2(
-//     incoming: Option<&ComplexStruct>,
-//     outgoing: Option<&mut ComplexStruct>,
-// ) {
-//     debug!("freeing string");
-//     if let Some(in_data) = incoming {
-//         if let Some(out_data) = outgoing {
-//             *out_data = *in_data;
-//             // out_data.my_str = StringStruct1::new("hello123".to_string());
-//             // out_data.my_str.utf8_str = helpers::alloc_to_c_char("hello123".to_string()) as *mut u8;
+                            for (e1, e2) in clam_edges.iter().zip(unity_edges.iter()) {
+                                if e1.0 == e2.0 {
+                                    correct_edge_count += 1;
+                                } else {
+                                    debug!("wtf: {}, {}", e1.0, e2.0)
+                                }
+                            }
 
-//             debug!("string struct test 123 {:?}", out_data.my_str.utf8_str);
-//             helpers::free_c_char(out_data.my_str.utf8_str as *mut i8);
-//         }
-//     }
-// }
+                            if correct_edge_count == 3 {
+                                correct_triangle_count += 1;
+                            }
+                        }
+                    }
 
-// #[no_mangle]
-// pub unsafe extern "C" fn test_string_struct(
-//     incoming: Option<&StringStruct1>,
-//     outgoing: Option<&mut StringStruct1>,
-// ) -> () {
-//     if let Some(in_struct) = incoming {
-//         let some_str = helpers::csharp_to_rust_utf8(in_struct.utf8_str, in_struct.utf8_len);
+                    let output = format!(
+                        "{}/{} = {}. Total Attempts = {}\n",
+                        correct_triangle_count.to_string(),
+                        total_count,
+                        String::from(
+                            (correct_triangle_count.as_f64() / total_count.as_f64()).to_string()
+                        ),
+                        clam_graph.clusters().len().to_string()
+                    );
 
-//         // debug!("start string struct test ");
+                    let fname = format!("{}/{}", "triangle_test_results", tree.data().name());
+                    append_to_file(fname.as_str(), &output);
+                }
+            }
+        }
+    } else {
+        return FFIError::NullPointerPassed;
+    }
 
-//         // let ss = StringStruct2::new(in_struct);
-//         let test = *in_struct.utf8_str;
-//         *in_struct.utf8_str = 109;
-//         debug!("string struct test {:?}", some_str);
-//         debug!("string struct test {:?}", *in_struct.utf8_str)
-//     }
-// }
+    return FFIError::LoadTreeFailed;
+}
 
-// #[no_mangle]
-// pub extern "C" fn test_string_fn(s: *const c_char) -> u32 {
-//     let c_str = unsafe {
-//         assert!(!s.is_null());
+fn append_to_file(filename: &str, content: &str) -> Result<(), io::Error> {
+    // Open the file in append mode or create it if it doesn't exist
+    let mut file = OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(filename)?;
 
-//         CStr::from_ptr(s)
-//     };
-//     debug!("cstr testing {:?}", c_str);
-//     let r_str = c_str.to_str().unwrap();
-//     r_str.chars().count() as u32
-// }
+    // Write the content to the file
+    file.write_all(content.as_bytes())?;
 
-// #[no_mangle]
-// pub unsafe extern "C" fn test_struct_array(context: InHandlePtr, arr: *mut NodeData, len: i32) {
-//     let test_arr = std::slice::from_raw_parts_mut(arr, len as usize);
-//     if let Some(_) = context {
-//         if arr.is_null() {
-//             return;
-//         }
-//         let val = *arr;
-//         let val1 = test_arr[1];
-//         let val2 = test_arr[2];
-//         debug!(
-//             "array at {}: {}",
-//             val.id.as_string().unwrap(),
-//             val.cardinality
-//         );
-//         debug!(
-//             "array at {}: {}",
-//             val1.id.as_string().unwrap(),
-//             val1.cardinality
-//         );
-//         debug!(
-//             "array at {}: {}",
-//             val2.id.as_string().unwrap(),
-//             val2.cardinality
-//         );
-//     }
-// }
+    // Ensure all data is written to disk
+    file.sync_all()?;
+
+    Ok(())
+}

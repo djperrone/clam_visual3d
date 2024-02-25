@@ -37,6 +37,8 @@ public class GraphBuilder : MonoBehaviour
             {
                 m_IsPhysicsRunning = false;
                 MenuEventManager.instance.m_IsPhysicsRunning = false;
+
+                Clam.FFI.NativeMethods.RunTriangleTest(clusterGetter);
             }
         }
     }
@@ -92,6 +94,7 @@ public class GraphBuilder : MonoBehaviour
         if (m_Graph.TryGetValue(id, out var node))
         {
             node.GetComponent<Node>().SetPosition(nodeData.pos.AsVector3);
+            Debug.Log(id + ": " + node.GetComponent<Node>().GetPosition().ToString());
 
             m_Vertices[node.GetComponent<Node>().IndexBufferID] = node.GetComponent<Node>().GetPosition();
             m_VertexCounter++;
@@ -103,6 +106,21 @@ public class GraphBuilder : MonoBehaviour
                 mesh.RecalculateBounds();
                 m_VertexCounter = 0;
             }
+        }
+        else
+        {
+            Debug.Log("physics upodate key not found - " + id);
+        }
+    }
+
+    public void clusterGetter(ref Clam.FFI.ClusterData nodeData)
+    {
+        string id = nodeData.id.AsString;
+        if (m_Graph.TryGetValue(id, out var node))
+        {
+            nodeData.SetPos(node.GetComponent<Node>().GetPosition());
+
+            Debug.Log(id + ": " + node.GetComponent<Node>().GetPosition().ToString());
         }
         else
         {
