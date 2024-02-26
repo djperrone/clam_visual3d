@@ -182,7 +182,7 @@ pub unsafe extern "C" fn shutdown_clam(context_ptr: OutHandlePtr) -> FFIError {
 
 // ------------------------------------- Graph Clam Init -------------------------------------
 #[no_mangle]
-pub unsafe extern "C" fn init_clam_graph(
+pub extern "C" fn init_clam_graph(
     context: InHandlePtr,
     scoring_function: ScoringFunction,
     min_depth: i32,
@@ -293,7 +293,7 @@ pub unsafe extern "C" fn draw_hierarchy_offset_from(
 // ------------------------------------- Graph Physics -------------------------------------
 
 #[no_mangle]
-pub unsafe extern "C" fn init_force_directed_graph(
+pub extern "C" fn init_force_directed_graph(
     context: InHandlePtr,
     scalar: f32,
     max_iters: i32,

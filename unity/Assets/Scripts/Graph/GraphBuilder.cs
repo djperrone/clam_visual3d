@@ -37,12 +37,12 @@ public class GraphBuilder : MonoBehaviour
             {
                 m_IsPhysicsRunning = false;
                 MenuEventManager.instance.m_IsPhysicsRunning = false;
-                Clam.FFI.NativeMethods.RunTriangleTest(true, m_OutTestFilePath, clusterGetter);
+                //Clam.FFI.NativeMethods.RunTriangleTest(true, m_OutTestFilePath, clusterGetter);
 
             }
             else
             {
-                Clam.FFI.NativeMethods.RunTriangleTest(false, m_OutTestFilePath, clusterGetter);
+                //Clam.FFI.NativeMethods.RunTriangleTest(false, m_OutTestFilePath, clusterGetter);
             }
         }
     }

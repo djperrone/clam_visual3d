@@ -23,7 +23,7 @@ public class ClamGraphBuildMenu
     GameObject m_GraphBuilder = null;
     Dictionary<string, GameObject> m_Graph;
     UIDocument m_Document;
-    int m_NumIters = 500;
+    int m_NumIters = 5000;
 
     string m_OutTestFilePath;
 

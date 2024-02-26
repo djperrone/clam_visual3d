@@ -18,7 +18,7 @@ pub unsafe fn physics_update_async_impl(
     }
 }
 
-pub unsafe fn init_force_directed_graph_impl(
+pub fn init_force_directed_graph_impl(
     context: InHandlePtr,
     scalar: f32,
     max_iters: i32,

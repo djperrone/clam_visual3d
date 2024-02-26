@@ -56,7 +56,7 @@ impl ForceDirectedGraph {
     pub fn add_edge(&mut self, edge: Spring) {
         self.edges.push(edge);
     }
-    
+
     fn compute_next_frame(&self) -> bool {
         let mutex_result = self
             .cond_var
@@ -116,15 +116,15 @@ impl ForceDirectedGraph {
             Ok(mut g) => {
                 let mut rng: rand::prelude::ThreadRng = rand::thread_rng();
                 for cluster1 in clam_graph.clusters() {
-                    for _ in 0..3 {
-                        if let Some(cluster2) = clam_graph.clusters().iter().choose(&mut rng) {
-                            let dist = cluster1.distance_to_other(tree.data(), cluster2);
+                    // for _ in 0..3 {
+                    //     if let Some(cluster2) = clam_graph.clusters().iter().choose(&mut rng) {
+                    //         let dist = cluster1.distance_to_other(tree.data(), cluster2);
 
-                            let spring = Spring::new(dist, cluster1.name(), cluster2.name(), false);
+                    //         let spring = Spring::new(dist, cluster1.name(), cluster2.name(), false);
 
-                            spring.move_nodes(&mut g.1, self.max_edge_len, self.scalar);
-                        }
-                    }
+                    //         spring.move_nodes(&mut g.1, self.max_edge_len, self.scalar);
+                    //     }
+                    // }
                 }
 
                 for (key, value) in &mut g.1 {
