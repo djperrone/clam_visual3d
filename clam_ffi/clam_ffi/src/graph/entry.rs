@@ -12,7 +12,7 @@ pub unsafe fn physics_update_async_impl(
     updater: CBFnNodeVisitor,
 ) -> FFIError {
     if let Some(handle) = context {
-        handle.physics_update_async(updater)
+        handle.physics_update_async(Some(updater))
     } else {
         FFIError::NullPointerPassed
     }

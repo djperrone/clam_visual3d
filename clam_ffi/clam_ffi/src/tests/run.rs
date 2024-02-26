@@ -44,7 +44,7 @@ fn main<'a>() -> Result<Handle<'a>, String> {
                         .with_ratios(false);
 
                     let min_depth = tree.depth() / 2;
-                    
+
                     if let Ok(graph) = Graph::from_tree(
                         &tree,
                         &enum_to_function(&ScoringFunction::LrEuclideanCc).unwrap(),
@@ -52,6 +52,12 @@ fn main<'a>() -> Result<Handle<'a>, String> {
                     ) {
                         let fdg =
                             build_force_directed_graph_no_handle(&tree, &graph, scalar, max_iters);
+
+                        // let mut handle = Handle::from(tree, graph, fdg);
+
+                        // let e = handle.physics_update_async(None);
+
+                        
                     }
                 }
 

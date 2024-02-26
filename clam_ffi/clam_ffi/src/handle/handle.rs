@@ -14,7 +14,8 @@ use abd_clam::{Graph, PartitionCriteria};
 
 use crate::ffi_impl::cluster_ids_wrapper::ClusterIDsWrapper;
 use crate::graph;
-use crate::graph::force_directed_graph::{self, ForceDirectedGraph};
+// use crate::graph::force_directed_graph_async::ForceDirectedGraphAsync;
+use crate::graph::force_directed_graph_save::{self, ForceDirectedGraph};
 use crate::graph::spring;
 use crate::tree_layout::reingold_tilford;
 use crate::utils::distances::DistanceMetric;
@@ -36,28 +37,28 @@ use spring::Spring;
 pub struct Handle<'a> {
     tree: Option<Tree<Vec<f32>, f32, DataSetf32>>,
     clam_graph: Option<Graph<'a, f32>>,
-    edges: Option<Vec<Spring>>,
-    current_query: Option<Vec<f32>>,
+    // edges: Option<Vec<Spring>>,
+    // current_query: Option<Vec<f32>>,
     force_directed_graph: Option<(JoinHandle<()>, Arc<ForceDirectedGraph>)>,
 }
 impl<'a> Handle<'a> {
-    // pub fn from(
-    //     tree: Tree<Vec<f32>, f32, DataSetf32>,
-    //     clam_graph: Graphf32,
-    //     force_directed_graph: ForceDirectedGraph,
-    // ) {
-    //     let force_directed_graph = Arc::new(force_directed_graph);
+    pub fn from(
+        tree: Tree<Vec<f32>, f32, DataSetf32>,
+        clam_graph: Graphf32<'a>,
+        force_directed_graph: ForceDirectedGraph,
+    ) -> Self {
+        let force_directed_graph = Arc::new(force_directed_graph);
 
-    //     let b = force_directed_graph.clone();
-    //     let p = thread::spawn(move || {
-    //         graph::force_directed_graph::produce_computations(&b);
-    //     });
-    //     Handle {
-    //         tree: Some(tree),
-    //         clam_graph: Some(clam_graph),
-    //         force_directed_graph: Some(p),
-    //     }
-    // }
+        let b = force_directed_graph.clone();
+        let p = thread::spawn(move || {
+            graph::force_directed_graph_save::produce_computations(&b);
+        });
+        Handle {
+            tree: Some(tree),
+            clam_graph: Some(clam_graph),
+            force_directed_graph: Some((p, force_directed_graph.clone())),
+        }
+    }
 
     pub fn shutdown(&mut self) {
         self.tree = None;
@@ -109,8 +110,8 @@ impl<'a> Handle<'a> {
                 Ok(Handle {
                     tree: Some(tree),
                     clam_graph: None,
-                    edges: None,
-                    current_query: None,
+                    // edges: None,
+                    // current_query: None,
                     force_directed_graph: None,
                 })
             }
@@ -143,8 +144,8 @@ impl<'a> Handle<'a> {
             Ok(Handle {
                 tree: Some(tree),
                 clam_graph: None,
-                edges: None,
-                current_query: None,
+                // edges: None,
+                // current_query: None,
                 force_directed_graph: None,
             })
         } else {
@@ -234,7 +235,7 @@ impl<'a> Handle<'a> {
 
     pub unsafe fn force_physics_shutdown(&mut self) -> FFIError {
         if let Some(force_directed_graph) = &self.force_directed_graph {
-            force_directed_graph::force_shutdown(&force_directed_graph.1);
+            force_directed_graph_save::force_shutdown(&force_directed_graph.1);
             let _ = self.force_directed_graph.take().unwrap().0.join();
 
             self.force_directed_graph = None;
@@ -246,12 +247,12 @@ impl<'a> Handle<'a> {
 
     pub unsafe fn init_unity_edges(&mut self, edge_detect_cb: CBFnNodeVisitorMut) -> FFIError {
         if let Some(force_directed_graph) = &self.force_directed_graph {
-            force_directed_graph::init_unity_edges(&force_directed_graph.1, edge_detect_cb);
+            force_directed_graph_save::init_unity_edges(&force_directed_graph.1, edge_detect_cb);
         }
         FFIError::PhysicsAlreadyShutdown
     }
 
-    pub unsafe fn physics_update_async(&mut self, updater: CBFnNodeVisitor) -> FFIError {
+    pub fn physics_update_async(&mut self, updater: Option<CBFnNodeVisitor>) -> FFIError {
         if let Some(force_directed_graph) = &self.force_directed_graph {
             let is_finished = force_directed_graph.0.is_finished();
 
@@ -262,7 +263,7 @@ impl<'a> Handle<'a> {
 
                 FFIError::PhysicsFinished
             } else {
-                force_directed_graph::try_update_unity(
+                force_directed_graph_save::try_update_unity(
                     &force_directed_graph.1,
                     self.clam_graph().as_ref().unwrap(),
                     self.tree().as_ref().unwrap(),
@@ -285,32 +286,32 @@ impl<'a> Handle<'a> {
         return -1;
     }
 
-    pub unsafe fn color_by_dist_to_query(
-        &self,
-        id_arr: &[String],
-        node_visitor: CBFnNodeVisitor,
-    ) -> FFIError {
-        for id in id_arr {
-            match self.get_cluster_from_string(id.clone()) {
-                Ok(cluster) => {
-                    if let Some(query) = &self.current_query {
-                        let mut baton_data = ClusterDataWrapper::from_cluster(cluster);
+    // pub unsafe fn color_by_dist_to_query(
+    //     &self,
+    //     id_arr: &[String],
+    //     node_visitor: CBFnNodeVisitor,
+    // ) -> FFIError {
+    //     for id in id_arr {
+    //         match self.get_cluster_from_string(id.clone()) {
+    //             Ok(cluster) => {
+    //                 if let Some(query) = &self.current_query {
+    //                     let mut baton_data = ClusterDataWrapper::from_cluster(cluster);
 
-                        baton_data.data_mut().dist_to_query =
-                            cluster.distance_to_instance(self.data().unwrap(), query);
+    //                     baton_data.data_mut().dist_to_query =
+    //                         cluster.distance_to_instance(self.data().unwrap(), query);
 
-                        node_visitor(Some(baton_data.data()));
-                    } else {
-                        return FFIError::QueryIsNull;
-                    }
-                }
-                Err(e) => {
-                    return e;
-                }
-            }
-        }
-        FFIError::Ok
-    }
+    //                     node_visitor(Some(baton_data.data()));
+    //                 } else {
+    //                     return FFIError::QueryIsNull;
+    //                 }
+    //             }
+    //             Err(e) => {
+    //                 return e;
+    //             }
+    //         }
+    //     }
+    //     FFIError::Ok
+    // }
 
     pub unsafe fn for_each_dft(
         &self,
@@ -421,9 +422,9 @@ impl<'a> Handle<'a> {
         // self.current_query = Some(data.clone());
     }
 
-    pub fn get_current_query(&self) -> &Option<Vec<f32>> {
-        &self.current_query
-    }
+    // pub fn get_current_query(&self) -> &Option<Vec<f32>> {
+    //     &self.current_query
+    // }
 
     // pub fn rnn_search(
     //     &self,

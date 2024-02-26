@@ -1,32 +1,17 @@
-use rand::seq::IteratorRandom;
+use rand::seq::{IteratorRandom, SliceRandom};
+use rand::Rng;
 
 use super::physics_node::PhysicsNode;
 use super::spring::Spring;
 use crate::ffi_impl::cluster_data_wrapper::ClusterDataWrapper;
-use crate::utils::error::FFIError;
-use crate::utils::types::{Graphf32, Treef32};
+use crate::utils::types::{Clusterf32, DataSetf32, Graphf32, Treef32};
 use crate::{debug, utils, CBFnNodeVisitor, CBFnNodeVisitorMut};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use std::sync::{Condvar, Mutex};
 
-pub struct Status {
-    pub data_ready: bool,
-    pub force_shutdown: bool,
-}
-
-impl Status {
-    pub fn new() -> Self {
-        Status {
-            // this prevents thread from beginning work immediately - true
-            data_ready: true,
-            force_shutdown: false,
-        }
-    }
-}
-
 pub struct ForceDirectedGraph {
-    graph: Mutex<(Status, HashMap<String, PhysicsNode>)>,
+    graph: HashMap<String, PhysicsNode>,
     edges: Vec<Spring>,
     pub max_edge_len: f32,
     pub scalar: f32,
@@ -35,114 +20,166 @@ pub struct ForceDirectedGraph {
 }
 
 impl ForceDirectedGraph {
-    pub fn new(
-        graph: HashMap<String, PhysicsNode>,
-        edges: Vec<Spring>,
-        scalar: f32,
-        max_iters: i32,
-    ) -> Self {
-        let max_edge_len = Self::calc_max_edge_len(&edges);
+    pub fn new(tree: &Treef32, clam_graph: &Graphf32, scalar: f32, max_iters: i32) -> Self {
+        let mut graph: HashMap<String, PhysicsNode> = HashMap::new();
+        let mut rng = rand::thread_rng();
+
+        for c in clam_graph.clusters().iter() {
+            let x: f32 = rng.gen_range(0.0..=100.0);
+            let y: f32 = rng.gen_range(0.0..=100.0);
+            let z: f32 = rng.gen_range(0.0..=100.0);
+            graph.insert(c.name(), PhysicsNode::new(glam::Vec3::new(x, y, z), c));
+        }
+        let mut springs = Vec::new();
+        for e in clam_graph.edges() {
+            springs.push(Spring::new(
+                e.distance(),
+                e.left().name(),
+                e.right().name(),
+                true,
+            ));
+        }
+
+        Self::create_intercomponent_edges(tree.data(), clam_graph, &mut springs, 3);
 
         ForceDirectedGraph {
-            graph: Mutex::new((Status::new(), graph)),
-            edges,
-            max_edge_len,
+            graph: graph,
+            max_edge_len: Self::calc_max_edge_len(&springs),
+            edges: springs,
+
             scalar,
             cond_var: Condvar::new(),
             max_iters,
         }
     }
 
+    // pub fn new(
+    //     graph: HashMap<String, PhysicsNode>,
+    //     edges: Vec<Spring>,
+    //     scalar: f32,
+    //     max_iters: i32,
+    // ) -> Self {
+    //     let max_edge_len = Self::calc_max_edge_len(&edges);
+
+    //     ForceDirectedGraph {
+    //         graph: graph,
+    //         edges,
+    //         max_edge_len,
+    //         scalar,
+    //         cond_var: Condvar::new(),
+    //         max_iters,
+    //     }
+    // }
+
     pub fn add_edge(&mut self, edge: Spring) {
         self.edges.push(edge);
     }
 
-    fn compute_next_frame(&self) -> bool {
-        let mutex_result = self
-            .cond_var
-            .wait_while(self.graph.lock().unwrap(), |(status, _)| {
-                status.data_ready && !status.force_shutdown
-            });
+    pub fn accumulate_forces(&mut self) {
+        for spring in self.edges.iter() {
+            spring.move_nodes(&mut self.graph, self.max_edge_len, self.scalar);
+        }
+    }
 
-        match mutex_result {
-            Ok(mut g) => {
-                if g.0.force_shutdown {
-                    g.0.data_ready = false;
-                    return false;
-                } else {
-                    // if self.edges.is_empty() {
-                    //     debug!("no edges in produce comp");
-                    //     g.0.data_ready = false;
-                    //     return false;
-                    // }
-                    for spring in self.edges.iter() {
-                        spring.move_nodes(&mut g.1, self.max_edge_len, self.scalar);
+    fn get_k_key_clusters<'a>(
+        clam_graph: &'a Graphf32,
+        component: &'a HashSet<&'a Clusterf32>,
+        k: usize,
+    ) -> Option<Vec<&'a Clusterf32>> {
+        let mut key_clusters: Vec<&Clusterf32> = Vec::new();
+        let key_cluster = component.iter().max_by(|x, y| {
+            clam_graph
+                .vertex_degree(x)
+                .cmp(&clam_graph.vertex_degree(y))
+        });
+
+        if let Some(kc) = key_cluster {
+            key_clusters.push(kc);
+
+            let mut comp: Vec<&Clusterf32> = component.iter().map(|x| *x).collect();
+
+            let mut rng = rand::thread_rng();
+            let (shuffled, _) = comp.partial_shuffle(&mut rng, k + 1);
+
+            for c in shuffled {
+                if key_clusters.len() < k {
+                    if c != kc {
+                        key_clusters.push(c);
                     }
-
-                    g.0.data_ready = true;
+                } else {
+                    return Some(key_clusters);
                 }
             }
-            Err(e) => {
-                debug!("graph mutex error? {}", e);
-            }
         }
 
-        true
+        return None;
     }
 
-    unsafe fn force_shutdown(&self) -> FFIError {
-        debug!("trying to end sim early - force shutdown lock");
-
-        match self.graph.lock() {
-            Ok(mut g) => {
-                g.0.force_shutdown = true;
-                self.cond_var.notify_all();
-                FFIError::PhysicsRunning
-            }
-            Err(e) => {
-                debug!("Mutex poisoned with error: {}", e);
-                FFIError::PhysicsNotReady
+    fn cross_pollinate_components<'a>(
+        key_clusters1: &Vec<&'a Clusterf32>,
+        key_clusters2: &Vec<&'a Clusterf32>,
+        data: &DataSetf32,
+        edges: &mut Vec<Spring>,
+    ) {
+        for c1 in key_clusters1.iter() {
+            for c2 in key_clusters2.iter() {
+                let spring =
+                    Spring::new(c1.distance_to_other(data, c2), c1.name(), c2.name(), false);
+                edges.push(spring);
             }
         }
     }
 
-    unsafe fn try_update_unity(
-        &self,
+    fn create_intercomponent_edges(
+        data: &DataSetf32,
+        clam_graph: &Graphf32,
+        edges: &mut Vec<Spring>,
+        k: usize,
+    ) {
+        let component_clusters = clam_graph.find_component_clusters();
+
+        for (i, component) in component_clusters.iter().enumerate() {
+            if let Some(key_clusters) = Self::get_k_key_clusters(clam_graph, component, k) {
+                for component2 in component_clusters.iter().skip(i + 1) {
+                    if let Some(key_clusters2) = Self::get_k_key_clusters(clam_graph, component2, k)
+                    {
+                        Self::cross_pollinate_components(&key_clusters, &key_clusters2, data, edges)
+                    }
+                }
+            }
+        }
+    }
+
+    pub fn apply_forces(
+        &mut self,
         clam_graph: &Graphf32,
         tree: &Treef32,
-        updater: CBFnNodeVisitor,
-    ) -> FFIError {
-        match self.graph.try_lock() {
-            Ok(mut g) => {
-                let mut rng: rand::prelude::ThreadRng = rand::thread_rng();
-                for cluster1 in clam_graph.clusters() {
-                    // for _ in 0..3 {
-                    //     if let Some(cluster2) = clam_graph.clusters().iter().choose(&mut rng) {
-                    //         let dist = cluster1.distance_to_other(tree.data(), cluster2);
+        updater: Option<CBFnNodeVisitor>,
+    ) {
+        let mut rng: rand::prelude::ThreadRng = rand::thread_rng();
+        for cluster1 in clam_graph.clusters() {
+            for _ in 0..3 {
+                if let Some(cluster2) = clam_graph.clusters().iter().choose(&mut rng) {
+                    let dist = cluster1.distance_to_other(tree.data(), cluster2);
 
-                    //         let spring = Spring::new(dist, cluster1.name(), cluster2.name(), false);
+                    let spring = Spring::new(dist, cluster1.name(), cluster2.name(), false);
 
-                    //         spring.move_nodes(&mut g.1, self.max_edge_len, self.scalar);
-                    //     }
-                    // }
+                    spring.move_nodes(&mut self.graph, self.max_edge_len, self.scalar);
                 }
+            }
+        }
 
-                for (key, value) in &mut g.1 {
+        for (key, value) in &mut self.graph {
+            value.update_position();
+
+            if let Some(updater) = updater {
+                for (key, value) in &mut self.graph {
                     value.update_position();
                     let baton_data =
                         ClusterDataWrapper::from_physics(key.as_str(), value.get_position());
 
                     updater(Some(baton_data.data()));
                 }
-
-                g.0.data_ready = false;
-                self.cond_var.notify_one();
-
-                FFIError::PhysicsRunning
-            }
-            Err(_) => {
-                // debug!("Data not ready...try again later {}", e);
-                FFIError::PhysicsNotReady
             }
         }
     }
@@ -160,41 +197,5 @@ impl ForceDirectedGraph {
         }
 
         // max_edge_len
-    }
-}
-
-pub fn produce_computations(force_directed_graph: &ForceDirectedGraph) {
-    for _ in 0..force_directed_graph.max_iters {
-        // returns false if being forced to terminate mid - simulation
-        if !force_directed_graph.compute_next_frame() {
-            return;
-        };
-    }
-}
-
-pub unsafe fn try_update_unity(
-    force_directed_graph: &ForceDirectedGraph,
-    clam_graph: &Graphf32,
-    tree: &Treef32,
-    updater: CBFnNodeVisitor,
-) -> FFIError {
-    force_directed_graph.try_update_unity(clam_graph, tree, updater)
-}
-
-pub unsafe fn force_shutdown(force_directed_graph: &ForceDirectedGraph) -> FFIError {
-    force_directed_graph.force_shutdown()
-}
-
-pub fn init_unity_edges(force_directed_graph: &ForceDirectedGraph, init_edges: CBFnNodeVisitorMut) {
-    for edge in &force_directed_graph.edges {
-        let mut data_wrapper = ClusterDataWrapper::default();
-        let (id1, id2) = edge.get_node_ids();
-        data_wrapper.data_mut().set_id(id1.clone());
-        let mut msg = (edge.is_detected as i32).to_string();
-        msg.push(' ');
-        msg.push_str(id2.clone().as_str());
-        data_wrapper.data_mut().set_message(msg);
-
-        init_edges(Some(&mut data_wrapper.data_mut()));
     }
 }
