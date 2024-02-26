@@ -8,7 +8,7 @@ use crate::utils::types::{Graphf32, Treef32};
 use crate::{debug, utils, CBFnNodeVisitor, CBFnNodeVisitorMut};
 use std::collections::HashMap;
 
-use std::sync::{Condvar, Mutex};
+use std::sync::{Condvar, LockResult, Mutex};
 
 pub struct Status {
     pub data_ready: bool,
@@ -53,6 +53,53 @@ impl ForceDirectedGraph {
         }
     }
 
+    pub fn update(&mut self, clam_graph: &Graphf32, tree: &Treef32) {
+        match self.graph.get_mut() {
+            Ok(g) => {
+                for spring in self.edges.iter() {
+                    spring.move_nodes(&mut g.1, self.max_edge_len, self.scalar);
+                }
+
+                Self::accumulate_random_forces(
+                    &mut g.1,
+                    clam_graph,
+                    tree,
+                    self.max_edge_len,
+                    self.scalar,
+                );
+
+                Self::apply_forces(&mut g.1);
+            }
+            Err(e) => {}
+        }
+    }
+
+    pub fn graph_mut(&mut self) -> Result<&mut HashMap<String, PhysicsNode>, String> {
+        match self.graph.get_mut() {
+            Ok(graph) => Ok(&mut graph.1),
+            Err(e) => Err(e.to_string()),
+        }
+    }
+
+    pub fn get_cluster_position(&self, id: &String) -> Result<glam::Vec3, String> {
+        match self.graph.try_lock() {
+            Ok(g) => {
+                if let Some(c) = g.1.get(id) {
+                    return Ok(c.get_position());
+                } else {
+                    return Err("Cluster not found".to_string());
+                }
+            }
+            Err(e) => {
+                return Err(e.to_string());
+            }
+        }
+    }
+
+    pub fn edges_mut(&mut self) -> &mut Vec<Spring> {
+        &mut self.edges
+    }
+
     pub fn add_edge(&mut self, edge: Spring) {
         self.edges.push(edge);
     }
@@ -70,14 +117,12 @@ impl ForceDirectedGraph {
                     g.0.data_ready = false;
                     return false;
                 } else {
-                    // if self.edges.is_empty() {
-                    //     debug!("no edges in produce comp");
-                    //     g.0.data_ready = false;
-                    //     return false;
-                    // }
-                    for spring in self.edges.iter() {
-                        spring.move_nodes(&mut g.1, self.max_edge_len, self.scalar);
-                    }
+                    Self::accumulate_edge_forces(
+                        &mut g.1,
+                        &self.edges,
+                        self.max_edge_len,
+                        self.scalar,
+                    );
 
                     g.0.data_ready = true;
                 }
@@ -88,6 +133,38 @@ impl ForceDirectedGraph {
         }
 
         true
+    }
+
+    pub fn accumulate_edge_forces(
+        graph: &mut HashMap<String, PhysicsNode>,
+        edges: &Vec<Spring>,
+        max_edge_len: f32,
+        scalar: f32,
+    ) {
+        for spring in edges.iter() {
+            spring.move_nodes(graph, max_edge_len, scalar);
+        }
+    }
+
+    pub fn accumulate_random_forces(
+        graph: &mut HashMap<String, PhysicsNode>,
+        clam_graph: &Graphf32,
+        tree: &Treef32,
+        max_edge_len: f32,
+        scalar: f32,
+    ) {
+        let mut rng: rand::prelude::ThreadRng = rand::thread_rng();
+        for cluster1 in clam_graph.clusters() {
+            for _ in 0..3 {
+                if let Some(cluster2) = clam_graph.clusters().iter().choose(&mut rng) {
+                    let dist = cluster1.distance_to_other(tree.data(), cluster2);
+
+                    let spring = Spring::new(dist, cluster1.name(), cluster2.name(), false);
+
+                    spring.move_nodes(graph, max_edge_len, scalar);
+                }
+            }
+        }
     }
 
     unsafe fn force_shutdown(&self) -> FFIError {
@@ -106,6 +183,24 @@ impl ForceDirectedGraph {
         }
     }
 
+    pub fn apply_forces(graph: &mut HashMap<String, PhysicsNode>) {
+        for (_, value) in graph {
+            value.update_position();
+        }
+    }
+
+    pub fn apply_forces_and_update_unity(
+        graph: &mut HashMap<String, PhysicsNode>,
+        updater: CBFnNodeVisitor,
+    ) {
+        for (key, value) in graph {
+            value.update_position();
+            let baton_data = ClusterDataWrapper::from_physics(key.as_str(), value.get_position());
+
+            updater(Some(baton_data.data()));
+        }
+    }
+
     unsafe fn try_update_unity(
         &self,
         clam_graph: &Graphf32,
@@ -114,26 +209,15 @@ impl ForceDirectedGraph {
     ) -> FFIError {
         match self.graph.try_lock() {
             Ok(mut g) => {
-                let mut rng: rand::prelude::ThreadRng = rand::thread_rng();
-                for cluster1 in clam_graph.clusters() {
-                    // for _ in 0..3 {
-                    //     if let Some(cluster2) = clam_graph.clusters().iter().choose(&mut rng) {
-                    //         let dist = cluster1.distance_to_other(tree.data(), cluster2);
+                Self::accumulate_random_forces(
+                    &mut g.1,
+                    clam_graph,
+                    tree,
+                    self.max_edge_len,
+                    self.scalar,
+                );
 
-                    //         let spring = Spring::new(dist, cluster1.name(), cluster2.name(), false);
-
-                    //         spring.move_nodes(&mut g.1, self.max_edge_len, self.scalar);
-                    //     }
-                    // }
-                }
-
-                for (key, value) in &mut g.1 {
-                    value.update_position();
-                    let baton_data =
-                        ClusterDataWrapper::from_physics(key.as_str(), value.get_position());
-
-                    updater(Some(baton_data.data()));
-                }
+                Self::apply_forces_and_update_unity(&mut g.1, updater);
 
                 g.0.data_ready = false;
                 self.cond_var.notify_one();

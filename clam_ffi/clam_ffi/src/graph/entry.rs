@@ -24,7 +24,7 @@ pub fn init_force_directed_graph_impl(
     max_iters: i32,
 ) -> FFIError {
     if let Some(handle) = context {
-        match graph_builder::build_force_directed_graph(handle, scalar, max_iters) {
+        match graph_builder::build_force_directed_graph_async(handle, scalar, max_iters) {
             Ok(g) => {
                 handle.set_graph(g);
                 FFIError::Ok

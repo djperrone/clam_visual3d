@@ -1,7 +1,9 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
 
-use crate::utils::error::FFIError;
+use std::path::PathBuf;
+
+use crate::{debug, utils::error::FFIError};
 use ndarray::prelude::*;
 
 pub static ANOMALY_DATASETS: &[&str] = &[
@@ -33,18 +35,22 @@ pub static ANOMALY_DATASETS: &[&str] = &[
 
 pub fn read_anomaly_data(
     name: &str,
+    data_dir: &PathBuf,
     normalized: bool,
 ) -> Result<(Vec<Vec<f32>>, Vec<u8>), FFIError> {
-    let mut data_dir = std::env::current_dir().unwrap();
-    data_dir.pop();
-    data_dir.push("data");
-    data_dir.push("anomaly_data");
-    data_dir.push("preprocessed");
+    // let mut data_dir = std::env::current_dir().unwrap();
+
+    // data_dir.pop();
+    // data_dir.push("data");
+    // data_dir.push("anomaly_data");
+    // data_dir.push("preprocessed");
     if !data_dir.exists() {
         let p = data_dir.to_str().unwrap_or("path is empty");
+
         return Err(FFIError::PathNotFound);
     }
-
+    println!("here");
+    println!("data dir here 456 {}", data_dir.to_str().unwrap());
     let features = {
         let mut path = data_dir.clone();
         path.push(if normalized {
@@ -54,7 +60,7 @@ pub fn read_anomaly_data(
         });
 
         if !path.exists() {
-            // debug!("path {:?} - {}", path, path.exists());
+            println!("path {:?} - {}", path, path.exists());
             let p = path.to_str().unwrap_or("path is empty");
             return Err(FFIError::PathNotFound);
         }
@@ -70,6 +76,8 @@ pub fn read_anomaly_data(
         path.push(format!("{name}_scores.npy"));
 
         if !path.exists() {
+            println!("path {:?} - {}", path, path.exists());
+
             return Err(FFIError::PathNotFound);
         }
 

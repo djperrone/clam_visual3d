@@ -87,7 +87,7 @@ fn create_intercomponent_edges(
     }
 }
 
-pub fn build_force_directed_graph(
+pub fn build_force_directed_graph_async(
     // cluster_data_arr: &[ClusterData],
     handle: &Handle,
     scalar: f32,
@@ -95,29 +95,30 @@ pub fn build_force_directed_graph(
 ) -> Result<(JoinHandle<()>, Arc<ForceDirectedGraph>), FFIError> {
     if let Some(tree) = handle.get_tree() {
         if let Some(clam_graph) = handle.clam_graph() {
-            let mut graph: HashMap<String, PhysicsNode> = HashMap::new();
-            let mut rng = rand::thread_rng();
+            // let mut graph: HashMap<String, PhysicsNode> = HashMap::new();
+            // let mut rng = rand::thread_rng();
 
-            for c in clam_graph.clusters().iter() {
-                let x: f32 = rng.gen_range(0.0..=100.0);
-                let y: f32 = rng.gen_range(0.0..=100.0);
-                let z: f32 = rng.gen_range(0.0..=100.0);
-                graph.insert(c.name(), PhysicsNode::new(glam::Vec3::new(x, y, z), c));
-            }
-            let mut springs = Vec::new();
-            for e in clam_graph.edges() {
-                springs.push(Spring::new(
-                    e.distance(),
-                    e.left().name(),
-                    e.right().name(),
-                    true,
-                ));
-            }
+            // for c in clam_graph.clusters().iter() {
+            //     let x: f32 = rng.gen_range(0.0..=100.0);
+            //     let y: f32 = rng.gen_range(0.0..=100.0);
+            //     let z: f32 = rng.gen_range(0.0..=100.0);
+            //     graph.insert(c.name(), PhysicsNode::new(glam::Vec3::new(x, y, z), c));
+            // }
+            // let mut springs = Vec::new();
+            // for e in clam_graph.edges() {
+            //     springs.push(Spring::new(
+            //         e.distance(),
+            //         e.left().name(),
+            //         e.right().name(),
+            //         true,
+            //     ));
+            // }
 
             // create_intercomponent_edges(tree.data(), clam_graph, &mut springs, 3);
 
-            let force_directed_graph =
-                Arc::new(ForceDirectedGraph::new(graph, springs, scalar, max_iters));
+            let force_directed_graph = Arc::new(build_force_directed_graph(
+                tree, clam_graph, scalar, max_iters,
+            ));
 
             let b = force_directed_graph.clone();
             let p = thread::spawn(move || {
@@ -130,7 +131,7 @@ pub fn build_force_directed_graph(
     Err(FFIError::GraphBuildFailed)
 }
 
-pub fn build_force_directed_graph_no_handle<'a>(
+pub fn build_force_directed_graph<'a>(
     // cluster_data_arr: &[ClusterData],
     tree: &'a Treef32,
     clam_graph: &'a Graphf32,
@@ -156,7 +157,7 @@ pub fn build_force_directed_graph_no_handle<'a>(
         ));
     }
 
-    // create_intercomponent_edges(tree.data(), clam_graph, &mut springs, 3);
+    create_intercomponent_edges(tree.data(), clam_graph, &mut springs, 3);
 
     ForceDirectedGraph::new(graph, springs, scalar, max_iters)
 }

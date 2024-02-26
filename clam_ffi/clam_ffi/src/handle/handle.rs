@@ -2,6 +2,7 @@ extern crate nalgebra as na;
 
 use std::collections::HashMap;
 use std::path::Path;
+use std::path::PathBuf;
 use std::sync::Arc;
 use std::thread;
 use std::thread::JoinHandle;
@@ -100,8 +101,17 @@ impl<'a> Handle<'a> {
         distance_metric: DistanceMetric,
         is_expensive: bool,
     ) -> Result<Self, FFIError> {
+        let mut data_dir = std::env::current_dir().unwrap();
+        // println!(
+        //     "data dir here 123 {}",
+        //     data_dir.file_name().unwrap().to_str().unwrap()
+        // );
+        data_dir.pop();
+        data_dir.push("data");
+        data_dir.push("anomaly_data");
+        data_dir.push("preprocessed");
         let criteria = PartitionCriteria::new(true).with_min_cardinality(cardinality);
-        match Self::create_dataset(data_name, distance_metric, is_expensive) {
+        match Self::create_dataset(data_name, &data_dir, distance_metric, is_expensive) {
             Ok(dataset) => {
                 let tree = Tree::new(dataset, Some(1))
                     .partition(&criteria)
@@ -154,6 +164,7 @@ impl<'a> Handle<'a> {
 
     pub fn create_dataset(
         data_name: &str,
+        data_dir: &PathBuf,
         distance_metric: DistanceMetric,
         is_expensive: bool,
     ) -> Result<DataSetf32, FFIError> {
@@ -164,7 +175,8 @@ impl<'a> Handle<'a> {
                 return Err(e);
             }
         };
-        match anomaly_readers::read_anomaly_data(data_name, false) {
+
+        match anomaly_readers::read_anomaly_data(data_name, data_dir, false) {
             Ok((first_data, labels)) => {
                 // let labels = labels.iter().map(|x| *x == 1).collect::<Vec<bool>>();
                 let dataset =
