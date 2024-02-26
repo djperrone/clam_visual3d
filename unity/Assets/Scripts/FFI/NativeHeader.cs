@@ -110,7 +110,7 @@ namespace Clam
             private static unsafe extern void init_graph_vertices(IntPtr handle, NodeVisitorMut edge_cb);
 
             [DllImport(__DllName, EntryPoint = "run_triangle_test", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-            private static unsafe extern void run_triangle_test(IntPtr handle, NodeVisitorMut edge_cb);
+            private static unsafe extern void run_triangle_test(IntPtr handle, bool last_run,string outPath, NodeVisitorMut edge_cb);
 
             [System.Security.SecurityCritical]
             [DllImport(__DllName, EntryPoint = "physics_update_async", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]

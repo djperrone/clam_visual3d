@@ -5,6 +5,7 @@ use std::path::Path;
 use std::sync::Arc;
 use std::thread::JoinHandle;
 
+use abd_clam::Dataset;
 // use abd_clam::criteria::detect_edges;
 use abd_clam::Tree;
 use abd_clam::VecDataset;
@@ -215,6 +216,7 @@ impl<'a> Handle<'a> {
                 let _ = self.force_directed_graph.take().unwrap().0.join();
                 self.force_directed_graph = None;
                 debug!("shutting down physics");
+               
                 FFIError::PhysicsFinished
             } else {
                 force_directed_graph::try_update_unity(

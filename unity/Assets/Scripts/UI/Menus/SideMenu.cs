@@ -32,7 +32,7 @@ public class SideMenu : MonoBehaviour
 
         m_DropdownField.choices = new List<string>()
         {
-            "TreeMenu", "ClusterMenu", "CHAODA Graph"
+            "TreeMenu", "ClusterMenu", "CHAODA Graph", "PhysicsTest"
         };
         m_DropdownField.value = m_CurrentMenuName;
 

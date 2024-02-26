@@ -320,9 +320,11 @@ pub unsafe extern "C" fn physics_update_async(
 #[no_mangle]
 pub unsafe extern "C" fn run_triangle_test(
     context: InHandlePtr,
+    last_run: bool,
+    out_path: *const c_char,
     updater: CBFnNodeVisitorMut,
 ) -> FFIError {
-    run_triangle_test_impl(context, updater)
+    run_triangle_test_impl(context, 3, last_run, out_path, updater)
 }
 
 // #[no_mangle]
