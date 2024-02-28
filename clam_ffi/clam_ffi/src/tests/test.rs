@@ -49,6 +49,9 @@ fn choose_two_random_clusters_exclusive<'a, U: Number>(
     return None;
 }
 
+// fn test_condition(Fn((i32)->i32)>,
+// unity_edges: &mut Vec<(&str, f32)>)
+
 fn are_triangles_equivalent(
     clam_edges: &mut Vec<(&str, f32)>,
     unity_edges: &mut Vec<(&str, f32)>,
@@ -66,6 +69,32 @@ fn are_triangles_equivalent(
         return true;
     }
     return false;
+}
+fn calc_triangle_distortion(
+    clam_edges: &mut Vec<(&str, f32)>,
+    unity_edges: &mut Vec<(&str, f32)>,
+) -> f32 {
+    // clam_edges.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
+    // unity_edges.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
+    let perimeter_ref: f32 = clam_edges.iter().map(|&(_, value)| value).sum();
+    let perimeter_test: f32 = unity_edges.iter().map(|&(_, value)| value).sum();
+
+    let ref_percentages: Vec<f32> = clam_edges
+        .iter()
+        .map(|&(_, val)| val / perimeter_ref)
+        .collect();
+
+    let test_percentages: Vec<f32> = unity_edges
+        .iter()
+        .map(|&(_, val)| val / perimeter_test)
+        .collect();
+
+    let distortion: f32 = ref_percentages
+        .iter()
+        .zip(test_percentages.iter())
+        .map(|(&x, &y)| (y - x).abs())
+        .sum();
+    return distortion;
 }
 
 fn get_unity_triangle<'a>(
@@ -163,15 +192,18 @@ pub fn run_triangle_test_impl_no_handle(
     clam_graph: &Graphf32,
     fdg: &ForceDirectedGraph,
     num_test_iters: i32,
-    last_run: bool,
-    out_path: &str,
-) -> Result<(), String> {
+    // last_run: bool,
+    // out_path: &str,
+) -> Result<f64, String> {
     if clam_graph.clusters().len() < 3 {
         return Err("less than 3 clusters in graph".to_string());
     }
     let mut clusters: Vec<_> = clam_graph.clusters().into_iter().map(|c| *c).collect();
     let mut rng: rand::prelude::ThreadRng = rand::thread_rng();
     let mut correct_triangle_count = 0;
+
+    // let mut results: Vec<f64> =
+    //     Vec::with_capacity(clam_graph.clusters().len() * num_test_iters as usize);
 
     for _ in 0..num_test_iters {
         for a in clam_graph.clusters() {
@@ -210,22 +242,77 @@ pub fn run_triangle_test_impl_no_handle(
                 }
             }
         }
-
-        let perc_correct = correct_triangle_count as f64
-            / (num_test_iters as f64 * clam_graph.vertex_cardinality() as f64) as f64;
-
-        let output = if last_run {
-            format!("{}\n", perc_correct)
-        } else {
-            format!("{},", perc_correct)
-        };
-
-        // let fname = format!("{}/{}.csv", "triangle_test_results", tree.data().name());
-        //  let fname = unsafe { CStr::from_ptr(out_path) };
-        // if let Ok(fname) = fname.to_str() {
-        utils::helpers::append_to_file(out_path, &output);
-        // }
     }
 
-    return Ok(());
+    let perc_correct = correct_triangle_count as f64
+        / (num_test_iters as f64 * clam_graph.vertex_cardinality() as f64) as f64;
+
+    // results.push(perc_correct);
+    return Ok(perc_correct);
+    // return Err("shouldn''t reach this".to_string());
+}
+
+pub fn run_triangle_test(
+    tree: &Treef32,
+    clam_graph: &Graphf32,
+    fdg: &ForceDirectedGraph,
+    num_test_iters: i32,
+) -> Result<f64, String> {
+    if clam_graph.clusters().len() < 3 {
+        return Err("less than 3 clusters in graph".to_string());
+    }
+    let mut clusters: Vec<_> = clam_graph.clusters().into_iter().map(|c| *c).collect();
+    let mut rng: rand::prelude::ThreadRng = rand::thread_rng();
+    let mut distortion_sum: f32 = 0.;
+
+    // let mut results: Vec<f64> =
+    //     Vec::with_capacity(clam_graph.clusters().len() * num_test_iters as usize);
+
+    for _ in 0..num_test_iters {
+        for a in clam_graph.clusters() {
+            clusters.shuffle(&mut rng);
+            if let Some(triangle) = choose_two_random_clusters_exclusive(&clusters, a) {
+                // let mut unity_a = ClusterDataWrapper::from_cluster(triangle[0]);
+                let unity_a = fdg.get_cluster_position(&triangle[0].name())?;
+                let unity_b = fdg.get_cluster_position(&triangle[1].name())?;
+                let unity_c = fdg.get_cluster_position(&triangle[2].name())?;
+                let mut unity_edges = vec![
+                    ("ab", unity_a.distance(unity_b)),
+                    ("ac", unity_a.distance(unity_c)),
+                    ("bc", unity_b.distance(unity_c)),
+                ];
+
+                // let mut unity_b = ClusterDataWrapper::from_cluster(triangle[1]);
+                // let mut unity_c = ClusterDataWrapper::from_cluster(triangle[2]);
+
+                let mut clam_edges = vec![
+                    (
+                        "ab",
+                        triangle[0].distance_to_other(tree.data(), triangle[1]),
+                    ),
+                    (
+                        "ac",
+                        triangle[0].distance_to_other(tree.data(), triangle[2]),
+                    ),
+                    (
+                        "bc",
+                        triangle[1].distance_to_other(tree.data(), triangle[2]),
+                    ),
+                ];
+
+                distortion_sum += calc_triangle_distortion(&mut clam_edges, &mut unity_edges);
+
+                // if are_triangles_equivalent(&mut clam_edges, &mut unity_edges) {
+                //     correct_triangle_count += 1;
+                // }
+            }
+        }
+    }
+
+    let average_distortion = distortion_sum as f64
+        / (num_test_iters as f64 * clam_graph.vertex_cardinality() as f64) as f64;
+
+    // results.push(perc_correct);
+    return Ok(average_distortion);
+    // return Err("shouldn''t reach this".to_string());
 }

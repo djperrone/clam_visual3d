@@ -1,8 +1,10 @@
 import sys
 import csv
 import matplotlib.pyplot as plt
+import matplotlib.ticker as mtick
 import os
 import pandas as pd
+import pathlib
 
 def read_csv_file(filename):
     data = []
@@ -47,31 +49,41 @@ def plot_line_graph(outfile, column_averages):
     plt.close()  # Close the plot to release memory
 
 
-def plot_line_graph_pd(outfile, df):
+def plot_line_graph_pd(outfile,outpath, df):
     # plt.scatter(range(1, len(df['Column_Averages']) + 1), df['Column_Averages'], marker='o')
     # # plt.plot(df['rolling_sales_5'], label='Rolling Mean')
     # # plt.plot(df['Column_Averages'], label='Raw Data')
     # plt.plot(df['Column_Averages_rolling_10'], label='Rolling Mean')
 
     fig, ax = plt.subplots(figsize = (16,10))
-    plt.scatter(range(1, len(df['Column_Averages']) + 1), df['Column_Averages'], marker='o', label='Raw Data', s = 0.5)
-    plt.plot(df['Column_Averages_rolling_10'], label='Rolling Mean', color='red', linestyle='-', linewidth=1.0)  # Adjust color and style as needed
+    plt.scatter(range(1, len(df['Column_Averages']) + 1), df['Column_Averages'] * 100, marker='o', label='Raw Data', s = 0.5)
+    plt.plot(df['Column_Averages_rolling_10'] * 100, label='Rolling Mean', color='red', linestyle='-', linewidth=1.0)  # Adjust color and style as needed
     plt.xlabel('Time Step')
     plt.ylabel('Triangle Accuracy')
     plt.title(f'{filename_without_extension}')
+    plt.gca().yaxis.set_major_formatter(mtick.PercentFormatter(xmax=100.0))
+    plt.ylim(0, 100)
+
+    # # Set y-axis limits and formatter
+    # plt.ylim(0, 100)
+    # plt.gca().yaxis.set_major_formatter(FuncFormatter(percent_formatter))
+    # ax.yaxis.set_major_formatter(mtick.PercentFormatter())
     plt.legend()
     plt.grid(True)
     plt.show()
-    print("saving plot to ", outfile)
-    plt.savefig(outfile, dpi=300, bbox_inches="tight")  # Save the plot to the specified file
+    outpath = pathlib.Path(outfolder)
+    outpath = outpath / outfile
+    print("saving plot to ", outpath)
+    plt.savefig(outpath, dpi=300, bbox_inches="tight")  # Save the plot to the specified file
     plt.close()  # Close the plot to release memory
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: python script.py filename.csv")
+    if len(sys.argv) != 3:
+        print("Usage: python script.py in_file.csv out_folder")
     else:
         print("running")
         filename = sys.argv[1]
+        outfolder = sys.argv[2]
         try:
             data = read_csv_file(filename)
             if not data:
@@ -94,6 +106,6 @@ if __name__ == "__main__":
                 # rolling_means = df.rolling(window=10).mean()
                 # print("Average value of each column:", column_averages)
                 filename_without_extension = os.path.splitext(os.path.basename(filename))[0]
-                plot_line_graph_pd(filename_without_extension, df)
+                plot_line_graph_pd(filename_without_extension, outfolder, df)
         except FileNotFoundError:
             print("File not found:", filename)

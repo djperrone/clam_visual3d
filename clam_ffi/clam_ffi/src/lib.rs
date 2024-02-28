@@ -1,8 +1,8 @@
 use std::ffi::c_char;
 mod ffi_impl;
 mod file_io;
-mod graph;
-mod handle;
+pub mod graph;
+pub mod handle;
 mod tests;
 mod tree_layout;
 mod utils;
