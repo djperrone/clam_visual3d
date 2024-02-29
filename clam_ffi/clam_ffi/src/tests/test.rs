@@ -39,13 +39,6 @@ fn choose_two_random_clusters_exclusive<'a, U: Number>(
             return Some(triangle);
         }
     }
-    // if let Some(cluster1) = clusters.iter().choose(&mut rng) {
-    //     if let Some(cluster2) = clusters.iter().choose(&mut rng) {
-    //         if &cluster != cluster1 && &cluster != cluster2 && cluster1 != cluster2 {
-    //             return Some((cluster1, cluster2));
-    //         }
-    //     }
-    // }
     return None;
 }
 

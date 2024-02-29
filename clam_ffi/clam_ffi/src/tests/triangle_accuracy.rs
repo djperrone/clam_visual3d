@@ -196,17 +196,7 @@ fn run_physics_sim(
 }
 
 fn write_results(outpath: &PathBuf, results: &Vec<String>) {
-    // let mut file_path = PathBuf::new();
-    // file_path.push("triangle_acc_results");
-    // file_path.push(outfolder);
-    // match fs::create_dir_all(&file_path) {
-    //     Ok(_) => {
-    //         println!("Folder created successfully or already exists.")
-    //     }
-    //     Err(e) => eprintln!("Error creating folder: {}", e),
-    // }
-    // file_path.push(file_name);
-    // file_path.push("triangle_accuracy.csv");
+   
 
     let file = OpenOptions::new().create(true).append(true).open(outpath);
     if let Ok(file) = file {

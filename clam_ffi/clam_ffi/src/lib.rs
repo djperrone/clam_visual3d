@@ -1,4 +1,5 @@
 use std::ffi::c_char;
+mod accuracy_benchmarks;
 mod ffi_impl;
 mod file_io;
 pub mod graph;
