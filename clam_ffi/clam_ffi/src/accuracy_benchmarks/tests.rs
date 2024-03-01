@@ -22,7 +22,9 @@ use crate::{
 
 use super::utils;
 
-fn test_params() -> (
+fn test_params(
+    single_target: Option<String>,
+) -> (
     ReadDir,
     usize,
     usize,
@@ -30,14 +32,15 @@ fn test_params() -> (
     f32,
     i32,
     PathBuf,
+    String,
     Option<String>,
 ) {
     let dir_path = Path::new("../../data/anomaly_data/preprocessed");
 
     // Open the directory
     let data_folder = fs::read_dir(dir_path).unwrap();
-    let min_cardinality = 50;
-    let min_depth = 8;
+    let min_cardinality = 1;
+    let min_depth = 6;
     let distance_metric = DistanceMetric::Euclidean;
     let scalar = 100.0;
     let max_iters = 1000;
@@ -51,7 +54,8 @@ fn test_params() -> (
         scalar,
         max_iters,
         data_folder_name,
-        Some("smtp".to_string()),
+        String::from("accuracy_results"),
+        single_target,
     )
 }
 
@@ -64,7 +68,7 @@ fn run_test_on_file(
     min_depth: usize,
     max_iters: i32,
     scalar: f32,
-    test_cb: fn(&mut Vec<(&str, f32)>, &mut Vec<(&str, f32)>) -> f64,
+    test_cb: fn(&mut [(&str, f32); 3], &mut [(&str, f32); 3]) -> f64,
 ) {
     match Handle::create_dataset(filename, &src_folder, distance_metric, false) {
         Ok(data) => {
@@ -86,8 +90,16 @@ fn run_test_on_file(
                     tree.data().name(),
                     min_cardinality.to_string(),
                     distance_metric,
-                    min_depth
+                    min_depth,
                 );
+                let descriptor_file = format!(
+                    "{}_{}_{:?}_{}.txt",
+                    tree.data().name(),
+                    min_cardinality.to_string(),
+                    distance_metric,
+                    min_depth,
+                );
+
                 if let Ok(results) = run_physics_sim(&tree, &graph, scalar, max_iters, test_cb) {
                     let mut file_path = PathBuf::new();
                     // file_path.push("triangle_acc_results");
@@ -101,7 +113,26 @@ fn run_test_on_file(
                     }
                     file_path.push(outfile_name);
                     println!("writing to {:?}", file_path.to_str().unwrap());
-                    utils::write_results(&file_path, &results)
+                    utils::write_results(&file_path, &results);
+
+                    file_path.pop();
+                    file_path.push(descriptor_file);
+                    let descriptors = vec![
+                        "data_cardinality".to_string(),
+                        "graph_vertex_cardinality".to_string(),
+                        "graph_edge_cardinality".to_string(),
+                        "tree_height".to_string(),
+                    ];
+                    let descriptor_data = vec![
+                        tree.data().cardinality().to_string(),
+                        graph.vertex_cardinality().to_string(),
+                        graph.edge_cardinality().to_string(),
+                        tree.depth().to_string(),
+                    ];
+                    utils::write_results(&file_path, &descriptors);
+                    utils::write_results(&file_path, &descriptor_data);
+                } else {
+                    panic!("collecting data for this graph failed");
                 }
             }
         }
@@ -116,7 +147,7 @@ fn run_physics_sim(
     graph: &Graphf32,
     scalar: f32,
     max_iters: i32,
-    metric_cb: fn(&mut Vec<(&str, f32)>, &mut Vec<(&str, f32)>) -> f64,
+    metric_cb: fn(&mut [(&str, f32); 3], &mut [(&str, f32); 3]) -> f64,
 ) -> Result<Vec<String>, String> {
     let mut fdg = build_force_directed_graph(&tree, &graph, scalar, max_iters);
     println!("created fdg");
@@ -147,7 +178,7 @@ pub fn run_triangle_test(
     clam_graph: &Graphf32,
     fdg: &ForceDirectedGraph,
     num_test_iters: i32,
-    metric_cb: fn(&mut Vec<(&str, f32)>, &mut Vec<(&str, f32)>) -> f64,
+    metric_cb: fn(&mut [(&str, f32); 3], &mut [(&str, f32); 3]) -> f64,
 ) -> Result<f64, String> {
     if clam_graph.clusters().len() < 3 {
         return Err("less than 3 clusters in graph".to_string());
@@ -158,43 +189,26 @@ pub fn run_triangle_test(
 
     // let mut results: Vec<f64> =
     //     Vec::with_capacity(clam_graph.clusters().len() * num_test_iters as usize);
-
+    let mut valid_count = 0;
     for _ in 0..num_test_iters {
         for a in clam_graph.clusters() {
-            clusters.shuffle(&mut rng);
-            if let Some(triangle) = utils::choose_two_random_clusters_exclusive(&clusters, a) {
-                // let mut unity_a = ClusterDataWrapper::from_cluster(triangle[0]);
-                let unity_a = fdg.get_cluster_position(&triangle[0].name())?;
-                let unity_b = fdg.get_cluster_position(&triangle[1].name())?;
-                let unity_c = fdg.get_cluster_position(&triangle[2].name())?;
-                let mut unity_edges = vec![
-                    ("ab", unity_a.distance(unity_b)),
-                    ("ac", unity_a.distance(unity_c)),
-                    ("bc", unity_b.distance(unity_c)),
-                ];
-
-                let mut clam_edges = vec![
-                    (
-                        "ab",
-                        triangle[0].distance_to_other(tree.data(), triangle[1]),
-                    ),
-                    (
-                        "ac",
-                        triangle[0].distance_to_other(tree.data(), triangle[2]),
-                    ),
-                    (
-                        "bc",
-                        triangle[1].distance_to_other(tree.data(), triangle[2]),
-                    ),
-                ];
-
-                metric_sum += metric_cb(&mut clam_edges, &mut unity_edges);
+            // clusters.shuffle(&mut rng);
+            clusters.partial_shuffle(&mut rng, 5);
+            if let Some(chosen_clusters) = utils::choose_two_random_clusters_exclusive(&clusters, a)
+            {
+                if let Ok(mut clam_edges) = utils::triangle_from_clusters(tree, &chosen_clusters) {
+                    if let Ok(mut unity_edges) = utils::get_unity_triangle(&chosen_clusters, &fdg) {
+                        metric_sum += metric_cb(&mut clam_edges, &mut unity_edges);
+                        valid_count += 1;
+                    }
+                }
             }
         }
     }
-
-    let average_distortion =
-        metric_sum as f64 / (num_test_iters as f64 * clam_graph.vertex_cardinality() as f64) as f64;
+    if valid_count == 0 {
+        return Err("no valid triangles found".to_string());
+    }
+    let average_distortion = metric_sum as f64 / (valid_count as f64) as f64;
 
     // results.push(perc_correct);
     return Ok(average_distortion);
@@ -202,11 +216,23 @@ pub fn run_triangle_test(
 }
 
 #[test]
-fn run_triangle_equivalency() {
-    let (dir, min_cardinality, min_depth, distance_metric, scalar, max_iters, src_folder, target) =
-        test_params();
+fn triangle_equivalency() {
+    let (
+        dir,
+        min_cardinality,
+        min_depth,
+        distance_metric,
+        scalar,
+        max_iters,
+        src_folder,
+        out_folder_root,
+        target,
+    ) = test_params(None);
 
-    let outfolder = "edge_equivalence";
+    // let outfolder = "edge_equivalence";
+    let mut out_folder = PathBuf::new();
+    out_folder.push(out_folder_root);
+    out_folder.push("edge_equivalence");
     let metric_cb = utils::are_triangles_equivalent;
 
     run_for_each(
@@ -217,18 +243,31 @@ fn run_triangle_equivalency() {
         scalar,
         max_iters,
         &src_folder,
-        outfolder,
+        out_folder.to_str().unwrap(),
+        target,
         metric_cb,
     );
 }
 
 #[test]
-fn run_edge_distortion() {
-    let (dir, min_cardinality, min_depth, distance_metric, scalar, max_iters, src_folder, target) =
-        test_params();
+fn edge_distortion() {
+    let (
+        dir,
+        min_cardinality,
+        min_depth,
+        distance_metric,
+        scalar,
+        max_iters,
+        src_folder,
+        out_folder_root,
+        target,
+    ) = test_params(Some("vertebral".to_string()));
+    // test_params(None);
 
-    let outfolder = "edge_distortion";
-    let metric_cb = utils::calc_triangle_distortion;
+    let mut out_folder = PathBuf::new();
+    out_folder.push(out_folder_root);
+    out_folder.push("edge_distortion");
+    let metric_cb = utils::calc_edge_distortion;
 
     run_for_each(
         dir,
@@ -238,7 +277,43 @@ fn run_edge_distortion() {
         scalar,
         max_iters,
         &src_folder,
-        outfolder,
+        out_folder.to_str().unwrap(),
+        target,
+        metric_cb,
+    );
+}
+
+#[test]
+fn angle_distortion() {
+    let (
+        dir,
+        min_cardinality,
+        min_depth,
+        distance_metric,
+        scalar,
+        max_iters,
+        src_folder,
+        out_folder_root,
+        target,
+    ) = test_params(None);
+    // test_params(Some("http".to_string()));
+
+    // let outfolder = "angle_distortion";
+    let mut out_folder = PathBuf::new();
+    out_folder.push(out_folder_root);
+    out_folder.push("angle_distortion");
+    let metric_cb = utils::calc_angle_distortion;
+
+    run_for_each(
+        dir,
+        min_cardinality,
+        min_depth,
+        distance_metric,
+        scalar,
+        max_iters,
+        &src_folder,
+        out_folder.to_str().unwrap(),
+        target,
         metric_cb,
     );
 }
@@ -252,7 +327,8 @@ fn run_for_each(
     max_iters: i32,
     src_folder: &PathBuf,
     outfolder: &str,
-    metric_cb: fn(&mut Vec<(&str, f32)>, &mut Vec<(&str, f32)>) -> f64,
+    single_target: Option<String>,
+    metric_cb: fn(&mut [(&str, f32); 3], &mut [(&str, f32); 3]) -> f64,
 ) {
     if let Ok(current_dir) = env::current_dir() {
         // If successful, print the current working directory
@@ -275,17 +351,35 @@ fn run_for_each(
                     if !finished.contains(&filename.to_string()) {
                         println!("filename: {}", filename);
                         // if *filename == "smtp" {
-                        run_test_on_file(
-                            filename,
-                            &src_folder,
-                            outfolder,
-                            distance_metric,
-                            min_cardinality,
-                            min_depth,
-                            max_iters,
-                            scalar,
-                            metric_cb,
-                        );
+                        if let Some(target) = &single_target {
+                            if target == *filename {
+                                run_test_on_file(
+                                    filename,
+                                    &src_folder,
+                                    outfolder,
+                                    distance_metric,
+                                    min_cardinality,
+                                    min_depth,
+                                    max_iters,
+                                    scalar,
+                                    metric_cb,
+                                );
+                                break;
+                            }
+                        } else {
+                            run_test_on_file(
+                                filename,
+                                &src_folder,
+                                outfolder,
+                                distance_metric,
+                                min_cardinality,
+                                min_depth,
+                                max_iters,
+                                scalar,
+                                metric_cb,
+                            );
+                        }
+
                         // }
                         finished.insert(filename.to_string());
                     }

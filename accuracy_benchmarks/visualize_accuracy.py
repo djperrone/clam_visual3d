@@ -122,7 +122,7 @@ def plot_for_each_in_dir(in_folder, out_folder):
     print(out_folder)
     for file_path in in_folder.iterdir() :
         if file_path.is_file() and file_path.suffix == ".csv":
-            print("parsing ", file_path)
+            print(file_path)
             data = read_csv_file(file_path)
             if not data:
                 print("No data found in the file.")
@@ -254,7 +254,7 @@ if __name__ == "__main__":
             plot_for_each_in_dir(data_path, out_folder)
            
         except FileNotFoundError:
-            print("File not found:", data_path)
+            # print("File not found:", filename)
             print()
 
     elif len(sys.argv) < 5:
