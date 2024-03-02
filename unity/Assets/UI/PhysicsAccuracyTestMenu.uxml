@@ -1,0 +1,5 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:VisualElement name="PhysicsAccuracyTestMenu">
+        <ui:Button text="Run" display-tooltip-when-elided="true" name="RunPhysicsAccuracyTest" />
+    </ui:VisualElement>
+</ui:UXML>

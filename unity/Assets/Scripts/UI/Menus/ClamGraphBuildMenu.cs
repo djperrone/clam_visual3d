@@ -7,6 +7,7 @@ using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
+using System.IO;
 
 public class ClamGraphBuildMenu
 {
@@ -22,8 +23,9 @@ public class ClamGraphBuildMenu
     GameObject m_GraphBuilder = null;
     Dictionary<string, GameObject> m_Graph;
     UIDocument m_Document;
+    int m_NumIters = 1000;
 
-
+    string m_OutTestFilePath;
 
     public ClamGraphBuildMenu(UIDocument document, string name)
     {
@@ -35,6 +37,7 @@ public class ClamGraphBuildMenu
         m_ScoringSelector = document.rootVisualElement.Q<DropdownField>("ScoringFunctionSelector");
         m_ShowEdges = document.rootVisualElement.Q<Toggle>("ShowEdgesToggle");
         m_MinDepth = document.rootVisualElement.Q<TextField>("GraphMinDepth");
+        string m_TestOutputPath;
 
         m_DestroyGraph.RegisterCallback<ClickEvent>(ResetCallback);
 
@@ -221,7 +224,17 @@ public class ClamGraphBuildMenu
         MenuEventManager.SwitchState(Menu.DestroyGraph);
         MenuEventManager.SwitchState(Menu.DestroyHierarchyEdges);
 
-        m_GraphBuilder.GetComponent<GraphBuilder>().Init(m_Graph, float.Parse(m_EdgeScalar.value), 500);
+        m_OutTestFilePath = "triangle_test_results/" + Cakes.Tree.m_TreeData.dataName + "_" + Cakes.Tree.m_TreeData.cardinality + "_" + Cakes.Tree.m_TreeData.distanceMetric.ToString() + "_" + m_MinDepth.value.ToString() + ".csv";
+
+        if (!File.Exists(m_OutTestFilePath))
+        {
+            // Create the file
+            using (FileStream fs = File.Create(m_OutTestFilePath))
+            {
+                Console.WriteLine("File created successfully.");
+            }
+        }
+        m_GraphBuilder.GetComponent<GraphBuilder>().Init(m_Graph, float.Parse(m_EdgeScalar.value), m_NumIters, m_OutTestFilePath);
     }
 
     void ResetCallback(ClickEvent evt)

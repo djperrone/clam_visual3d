@@ -11,7 +11,7 @@ public class GraphBuilder : MonoBehaviour
     private int m_IndexCounter;
     private bool m_IsPhysicsRunning;
     Dictionary<string, GameObject> m_Graph;
-
+    string m_OutTestFilePath;
     //private float m_EdgeScalar = 25.0f;
 
     // Start is called before the first frame update
@@ -37,13 +37,21 @@ public class GraphBuilder : MonoBehaviour
             {
                 m_IsPhysicsRunning = false;
                 MenuEventManager.instance.m_IsPhysicsRunning = false;
+                //Clam.FFI.NativeMethods.RunTriangleTest(true, m_OutTestFilePath, clusterGetter);
+
+            }
+            else
+            {
+                //Clam.FFI.NativeMethods.RunTriangleTest(false, m_OutTestFilePath, clusterGetter);
             }
         }
     }
 
-    public void Init(System.Collections.Generic.Dictionary<string, GameObject> graph, float edgeScalar, int numIters)
+    public void Init(System.Collections.Generic.Dictionary<string, GameObject> graph, float edgeScalar, int numIters, string outTestFilePath)
     {
         m_Graph = graph;
+        
+        m_OutTestFilePath = outTestFilePath;
         GetComponent<MeshFilter>().mesh = new Mesh();
         var buildResult = Clam.FFI.NativeMethods.InitForceDirectedGraph(edgeScalar, numIters);
         if (buildResult != FFIError.Ok)
@@ -92,6 +100,7 @@ public class GraphBuilder : MonoBehaviour
         if (m_Graph.TryGetValue(id, out var node))
         {
             node.GetComponent<Node>().SetPosition(nodeData.pos.AsVector3);
+            //Debug.Log(id + ": " + node.GetComponent<Node>().GetPosition().ToString());
 
             m_Vertices[node.GetComponent<Node>().IndexBufferID] = node.GetComponent<Node>().GetPosition();
             m_VertexCounter++;
@@ -103,6 +112,21 @@ public class GraphBuilder : MonoBehaviour
                 mesh.RecalculateBounds();
                 m_VertexCounter = 0;
             }
+        }
+        else
+        {
+            Debug.Log("physics upodate key not found - " + id);
+        }
+    }
+
+    public void clusterGetter(ref Clam.FFI.ClusterData nodeData)
+    {
+        string id = nodeData.id.AsString;
+        if (m_Graph.TryGetValue(id, out var node))
+        {
+            nodeData.SetPos(node.GetComponent<Node>().GetPosition());
+
+            //Debug.Log(id + ": " + node.GetComponent<Node>().GetPosition().ToString());
         }
         else
         {

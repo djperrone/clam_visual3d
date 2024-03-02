@@ -1,234 +1,311 @@
-// #![allow(dead_code)]
-// #![allow(unused_variables)]
+use std::{
+    cmp::Ordering,
+    collections::HashSet,
+    error::Error,
+    ffi::{c_char, CStr},
+    fs::OpenOptions,
+    io::{self, Write},
+    ops::Add,
+};
 
-// use std::ffi::{c_char, CStr};
+use abd_clam::{Cluster, Dataset, Edge};
+use distances::Number;
+use rand::seq::{IteratorRandom, SliceRandom};
 
-// use crate::ffi_impl::handle::Handle;
-// use crate::{debug, CBFnNodeVistor};
-// use crate::{
-//     ffi_impl::node::{NodeData, StringFFI},
-//     utils::helpers,
-// };
+use crate::{
+    debug,
+    ffi_impl::cluster_data_wrapper::ClusterDataWrapper,
+    graph::force_directed_graph::ForceDirectedGraph,
+    utils::{
+        self,
+        error::FFIError,
+        types::{Clusterf32, Graphf32, InHandlePtr, Treef32},
+    },
+    CBFnNodeVisitorMut,
+};
 
-// #[repr(C)]
-// #[derive(Copy, Clone, Debug)]
-// pub struct ComplexStruct {
-//     my_str: StringStruct1,
-// }
+fn choose_two_random_clusters_exclusive<'a, U: Number>(
+    clusters: &Vec<&'a Cluster<U>>,
+    cluster: &'a Cluster<U>,
+) -> Option<Vec<&'a Cluster<U>>> {
+    let mut triangle: Vec<&'a Cluster<U>> = Vec::new();
+    triangle.push(cluster);
+    for c in clusters {
+        if triangle.len() < 3 {
+            if c != &cluster {
+                triangle.push(c);
+            }
+        } else {
+            return Some(triangle);
+        }
+    }
+    return None;
+}
 
-// #[repr(C)]
-// #[derive(Copy, Clone, Debug)]
-// pub struct StringStruct1 {
-//     pub utf8_str: *mut u8,
-//     pub utf8_len: i32,
-// }
+// fn test_condition(Fn((i32)->i32)>,
+// unity_edges: &mut Vec<(&str, f32)>)
 
-// impl StringStruct1 {
-//     pub fn new(data: String) -> Self {
-//         StringStruct1 {
-//             utf8_str: helpers::alloc_to_c_char(data.clone()) as *mut u8,
-//             utf8_len: data.len() as i32,
-//         }
-//     }
-// }
+fn are_triangles_equivalent(
+    clam_edges: &mut Vec<(&str, f32)>,
+    unity_edges: &mut Vec<(&str, f32)>,
+) -> bool {
+    clam_edges.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap());
+    unity_edges.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap());
+    let mut correct_edge_count = 0;
+    for (e1, e2) in clam_edges.iter().zip(unity_edges.iter()) {
+        if e1.0 == e2.0 {
+            correct_edge_count += 1;
+        }
+    }
 
-// #[repr(C)]
-// #[derive(Clone, Debug)]
-// pub struct StringStruct2 {
-//     pub s: String,
-// }
+    if correct_edge_count == 3 {
+        return true;
+    }
+    return false;
+}
+fn calc_triangle_distortion(
+    clam_edges: &mut Vec<(&str, f32)>,
+    unity_edges: &mut Vec<(&str, f32)>,
+) -> f32 {
+    // clam_edges.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
+    // unity_edges.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
+    let perimeter_ref: f32 = clam_edges.iter().map(|&(_, value)| value).sum();
+    let perimeter_test: f32 = unity_edges.iter().map(|&(_, value)| value).sum();
 
-// impl StringStruct2 {
-//     pub unsafe fn new(other: &StringStruct1) -> Self {
-//         StringStruct2 {
-//             s: helpers::csharp_to_rust_utf8(other.utf8_str, other.utf8_len)
-//                 .unwrap_or("failed to do stuff".to_string()),
-//         }
-//     }
-// }
+    let ref_percentages: Vec<f32> = clam_edges
+        .iter()
+        .map(|&(_, val)| val / perimeter_ref)
+        .collect();
 
-// #[no_mangle]
-// pub unsafe extern "C" fn test_node_rust_alloc(
-//     incoming: Option<&NodeData>,
-//     outgoing: Option<&mut NodeData>,
-// ) {
-//     // let mystr = helpers::alloc_to_c_char("hello123".to_string());
-//     // let ffi_string = StringStruct1::new("hello123".to_string());
-//     if let Some(in_data) = incoming {
-//         if let Some(out_data) = outgoing {
-//             *out_data = *in_data;
-//             out_data.id = StringFFI::new("hello123".to_string());
-//             // out_data.my_str.utf8_str = helpers::alloc_to_c_char("hello123".to_string()) as *mut u8;
+    let test_percentages: Vec<f32> = unity_edges
+        .iter()
+        .map(|&(_, val)| val / perimeter_test)
+        .collect();
 
-//             debug!("string struct test 123 {:?}", out_data.id.as_string());
-//             // helpers::free_c_char(out_data.my_str.utf8_str as *mut i8);
-//             // std::mem::forget(out_data.my_str);
-//         }
-//     }
-// }
+    let distortion: f32 = ref_percentages
+        .iter()
+        .zip(test_percentages.iter())
+        .map(|(&x, &y)| (y - x).abs())
+        .sum();
+    return distortion;
+}
 
-// #[no_mangle]
-// pub unsafe extern "C" fn test_string_struct_complex(
-//     incoming: Option<&NodeData>,
-//     outgoing: Option<&mut NodeData>,
-// ) {
-//     // let mystr = helpers::alloc_to_c_char("hello123".to_string());
-//     // let ffi_string = StringStruct1::new("hello123".to_string());
-//     if let Some(in_data) = incoming {
-//         if let Some(out_data) = outgoing {
-//             *out_data = *in_data;
-//             // out_data.id = StringFFI::new("hello123".to_string());
-//             // out_data.my_str.utf8_str = helpers::alloc_to_c_char("hello123".to_string()) as *mut u8;
-//             let some_str = helpers::csharp_to_rust_utf8(in_data.id.data, in_data.id.len);
-//             debug!("string struct test 123 {:?}", *out_data.id.data);
-//             debug!("string struct test 1234 {:?}", out_data.id.as_string());
-//             debug!("string struct test 123 x {:?}", out_data.pos.x);
-//             debug!("string struct test 123 str {:?}", some_str);
-//             // helpers::free_c_char(out_data.my_str.utf8_str as *mut i8);
-//             // std::mem::forget(out_data.my_str);
-//         }
-//     }
-// }
+fn get_unity_triangle<'a>(
+    a: &Clusterf32,
+    b: &Clusterf32,
+    c: &Clusterf32,
+    location_getter: CBFnNodeVisitorMut,
+) -> Vec<(&'a str, f32)> {
+    let mut unity_a = ClusterDataWrapper::from_cluster(a);
+    let mut unity_b = ClusterDataWrapper::from_cluster(b);
+    let mut unity_c = ClusterDataWrapper::from_cluster(c);
 
-// #[no_mangle]
-// pub unsafe extern "C" fn test_string_struct2(
-//     incoming: Option<&ComplexStruct>,
-//     outgoing: Option<&mut ComplexStruct>,
-// ) -> () {
-//     if let Some(in_struct) = incoming {
-//         // let some_str =
-//         //     helpers::csharp_to_rust_utf8(in_struct.my_str.utf8_str, in_struct.my_str.utf8_len);
+    location_getter(Some(unity_a.data_mut()));
+    location_getter(Some(unity_b.data_mut()));
+    location_getter(Some(unity_c.data_mut()));
 
-//         // debug!("start string struct test ");
+    vec![
+        ("ab", unity_a.data().pos.distance(unity_b.data().pos)),
+        ("ac", unity_a.data().pos.distance(unity_c.data().pos)),
+        ("bc", unity_b.data().pos.distance(unity_c.data().pos)),
+    ]
+}
+pub fn run_triangle_test_impl(
+    context: InHandlePtr,
+    num_test_iters: i32,
+    last_run: bool,
+    out_path: *const c_char,
+    location_getter: CBFnNodeVisitorMut,
+) -> FFIError {
+    if let Some(handle) = context {
+        // handle.physics_update_async(location_getter)
+        if let Some(tree) = handle.tree() {
+            if let Some(data) = handle.data() {
+                if let Some(clam_graph) = handle.clam_graph() {
+                    if clam_graph.clusters().len() < 3 {
+                        return FFIError::GraphBuildFailed;
+                    }
+                    let mut clusters: Vec<_> =
+                        clam_graph.clusters().into_iter().map(|c| *c).collect();
+                    let mut rng: rand::prelude::ThreadRng = rand::thread_rng();
+                    let mut correct_triangle_count = 0;
 
-//         // let ss = StringStruct2::new(in_struct);
-//         let tests = "test".to_string();
-//         let test = *in_struct.my_str.utf8_str;
-//         *(in_struct.my_str.utf8_str.add(1)) = 107;
-//         let mut i = 0 as usize;
-//         for ch in tests.chars() {
-//             *(in_struct.my_str.utf8_str.add(i as usize)) = ch as u8;
-//             i += 1;
-//         }
-//         // debug!("string struct test {:?}", some_str);
-//         debug!("string struct test {:?}", *in_struct.my_str.utf8_str)
-//     }
-// }
+                    for _ in 0..num_test_iters {
+                        for a in clam_graph.clusters() {
+                            clusters.shuffle(&mut rng);
+                            if let Some(triangle) =
+                                choose_two_random_clusters_exclusive(&clusters, a)
+                            {
+                                let mut clam_edges = vec![
+                                    ("ab", triangle[0].distance_to_other(data, triangle[1])),
+                                    ("ac", triangle[0].distance_to_other(data, triangle[2])),
+                                    ("bc", triangle[1].distance_to_other(data, triangle[2])),
+                                ];
 
-// #[no_mangle]
-// pub unsafe extern "C" fn test_node_rust_alloc2(
-//     context: Option<&mut Handle>,
-//     visitor: CBFnNodeVistor,
-// ) {
-//     // let mystr = helpers::alloc_to_c_char("hello123".to_string());
-//     // let ffi_string = StringStruct1::new("hello123".to_string());
-//     if let Some(handle) = context {
-//         // if let Some(out_data) = outgoing {
-//         //     *out_data = *in_data;
-//         //     out_data.id = StringFFI::new("hello123".to_string());
-//         //     // out_data.my_str.utf8_str = helpers::alloc_to_c_char("hello123".to_string()) as *mut u8;
+                                let mut unity_edges = get_unity_triangle(
+                                    triangle[0],
+                                    triangle[1],
+                                    triangle[2],
+                                    location_getter,
+                                );
 
-//         //     debug!("string struct test 123 {:?}", out_data.id.as_string());
-//         //     // helpers::free_c_char(out_data.my_str.utf8_str as *mut i8);
-//         //     // std::mem::forget(out_data.my_str);
-//         // }
+                                if are_triangles_equivalent(&mut clam_edges, &mut unity_edges) {
+                                    correct_triangle_count += 1;
+                                }
+                            }
+                        }
+                    }
 
-//         let data = NodeData::from_clam(&handle.get_root().as_ref().unwrap().as_ref().borrow());
-//         visitor(Some(&data));
-//     }
-// }
+                    let perc_correct = correct_triangle_count as f64
+                        / (num_test_iters as f64 * clam_graph.vertex_cardinality() as f64) as f64;
 
-// #[no_mangle]
-// pub unsafe extern "C" fn test_string_struct_rust_alloc(
-//     incoming: Option<&ComplexStruct>,
-//     outgoing: Option<&mut ComplexStruct>,
-// ) {
-//     // let mystr = helpers::alloc_to_c_char("hello123".to_string());
-//     // let ffi_string = StringStruct1::new("hello123".to_string());
-//     if let Some(in_data) = incoming {
-//         if let Some(out_data) = outgoing {
-//             *out_data = *in_data;
-//             out_data.my_str = StringStruct1::new("hello123".to_string());
-//             // out_data.my_str.utf8_str = helpers::alloc_to_c_char("hello123".to_string()) as *mut u8;
+                    let output = if last_run {
+                        format!("{}\n", perc_correct)
+                    } else {
+                        format!("{},", perc_correct)
+                    };
 
-//             debug!("string struct test 123 {:?}", out_data.my_str.utf8_str);
-//             // helpers::free_c_char(out_data.my_str.utf8_str as *mut i8);
-//             // std::mem::forget(out_data.my_str);
-//         }
-//     }
-// }
-// #[no_mangle]
-// pub extern "C" fn free_string2(
-//     incoming: Option<&ComplexStruct>,
-//     outgoing: Option<&mut ComplexStruct>,
-// ) {
-//     debug!("freeing string");
-//     if let Some(in_data) = incoming {
-//         if let Some(out_data) = outgoing {
-//             *out_data = *in_data;
-//             // out_data.my_str = StringStruct1::new("hello123".to_string());
-//             // out_data.my_str.utf8_str = helpers::alloc_to_c_char("hello123".to_string()) as *mut u8;
+                    // let fname = format!("{}/{}.csv", "triangle_test_results", tree.data().name());
+                    let fname = unsafe { CStr::from_ptr(out_path) };
+                    if let Ok(fname) = fname.to_str() {
+                        utils::helpers::append_to_file(fname, &output);
+                    }
+                }
+            }
+        }
+    } else {
+        return FFIError::NullPointerPassed;
+    }
 
-//             debug!("string struct test 123 {:?}", out_data.my_str.utf8_str);
-//             helpers::free_c_char(out_data.my_str.utf8_str as *mut i8);
-//         }
-//     }
-// }
+    return FFIError::LoadTreeFailed;
+}
 
-// #[no_mangle]
-// pub unsafe extern "C" fn test_string_struct(
-//     incoming: Option<&StringStruct1>,
-//     outgoing: Option<&mut StringStruct1>,
-// ) -> () {
-//     if let Some(in_struct) = incoming {
-//         let some_str = helpers::csharp_to_rust_utf8(in_struct.utf8_str, in_struct.utf8_len);
+pub fn run_triangle_test_impl_no_handle(
+    tree: &Treef32,
+    clam_graph: &Graphf32,
+    fdg: &ForceDirectedGraph,
+    num_test_iters: i32,
+    // last_run: bool,
+    // out_path: &str,
+) -> Result<f64, String> {
+    if clam_graph.clusters().len() < 3 {
+        return Err("less than 3 clusters in graph".to_string());
+    }
+    let mut clusters: Vec<_> = clam_graph.clusters().into_iter().map(|c| *c).collect();
+    let mut rng: rand::prelude::ThreadRng = rand::thread_rng();
+    let mut correct_triangle_count = 0;
 
-//         // debug!("start string struct test ");
+    // let mut results: Vec<f64> =
+    //     Vec::with_capacity(clam_graph.clusters().len() * num_test_iters as usize);
 
-//         // let ss = StringStruct2::new(in_struct);
-//         let test = *in_struct.utf8_str;
-//         *in_struct.utf8_str = 109;
-//         debug!("string struct test {:?}", some_str);
-//         debug!("string struct test {:?}", *in_struct.utf8_str)
-//     }
-// }
+    for _ in 0..num_test_iters {
+        for a in clam_graph.clusters() {
+            clusters.shuffle(&mut rng);
+            if let Some(triangle) = choose_two_random_clusters_exclusive(&clusters, a) {
+                // let mut unity_a = ClusterDataWrapper::from_cluster(triangle[0]);
+                let unity_a = fdg.get_cluster_position(&triangle[0].name())?;
+                let unity_b = fdg.get_cluster_position(&triangle[1].name())?;
+                let unity_c = fdg.get_cluster_position(&triangle[2].name())?;
+                let mut unity_edges = vec![
+                    ("ab", unity_a.distance(unity_b)),
+                    ("ac", unity_a.distance(unity_c)),
+                    ("bc", unity_b.distance(unity_c)),
+                ];
 
-// #[no_mangle]
-// pub extern "C" fn test_string_fn(s: *const c_char) -> u32 {
-//     let c_str = unsafe {
-//         assert!(!s.is_null());
+                // let mut unity_b = ClusterDataWrapper::from_cluster(triangle[1]);
+                // let mut unity_c = ClusterDataWrapper::from_cluster(triangle[2]);
 
-//         CStr::from_ptr(s)
-//     };
-//     debug!("cstr testing {:?}", c_str);
-//     let r_str = c_str.to_str().unwrap();
-//     r_str.chars().count() as u32
-// }
+                let mut clam_edges = vec![
+                    (
+                        "ab",
+                        triangle[0].distance_to_other(tree.data(), triangle[1]),
+                    ),
+                    (
+                        "ac",
+                        triangle[0].distance_to_other(tree.data(), triangle[2]),
+                    ),
+                    (
+                        "bc",
+                        triangle[1].distance_to_other(tree.data(), triangle[2]),
+                    ),
+                ];
 
-// #[no_mangle]
-// pub unsafe extern "C" fn test_struct_array(context: InHandlePtr, arr: *mut NodeData, len: i32) {
-//     let test_arr = std::slice::from_raw_parts_mut(arr, len as usize);
-//     if let Some(_) = context {
-//         if arr.is_null() {
-//             return;
-//         }
-//         let val = *arr;
-//         let val1 = test_arr[1];
-//         let val2 = test_arr[2];
-//         debug!(
-//             "array at {}: {}",
-//             val.id.as_string().unwrap(),
-//             val.cardinality
-//         );
-//         debug!(
-//             "array at {}: {}",
-//             val1.id.as_string().unwrap(),
-//             val1.cardinality
-//         );
-//         debug!(
-//             "array at {}: {}",
-//             val2.id.as_string().unwrap(),
-//             val2.cardinality
-//         );
-//     }
-// }
+                if are_triangles_equivalent(&mut clam_edges, &mut unity_edges) {
+                    correct_triangle_count += 1;
+                }
+            }
+        }
+    }
+
+    let perc_correct = correct_triangle_count as f64
+        / (num_test_iters as f64 * clam_graph.vertex_cardinality() as f64) as f64;
+
+    // results.push(perc_correct);
+    return Ok(perc_correct);
+    // return Err("shouldn''t reach this".to_string());
+}
+
+pub fn run_triangle_test(
+    tree: &Treef32,
+    clam_graph: &Graphf32,
+    fdg: &ForceDirectedGraph,
+    num_test_iters: i32,
+) -> Result<f64, String> {
+    if clam_graph.clusters().len() < 3 {
+        return Err("less than 3 clusters in graph".to_string());
+    }
+    let mut clusters: Vec<_> = clam_graph.clusters().into_iter().map(|c| *c).collect();
+    let mut rng: rand::prelude::ThreadRng = rand::thread_rng();
+    let mut distortion_sum: f32 = 0.;
+
+    // let mut results: Vec<f64> =
+    //     Vec::with_capacity(clam_graph.clusters().len() * num_test_iters as usize);
+
+    for _ in 0..num_test_iters {
+        for a in clam_graph.clusters() {
+            clusters.shuffle(&mut rng);
+            if let Some(triangle) = choose_two_random_clusters_exclusive(&clusters, a) {
+                // let mut unity_a = ClusterDataWrapper::from_cluster(triangle[0]);
+                let unity_a = fdg.get_cluster_position(&triangle[0].name())?;
+                let unity_b = fdg.get_cluster_position(&triangle[1].name())?;
+                let unity_c = fdg.get_cluster_position(&triangle[2].name())?;
+                let mut unity_edges = vec![
+                    ("ab", unity_a.distance(unity_b)),
+                    ("ac", unity_a.distance(unity_c)),
+                    ("bc", unity_b.distance(unity_c)),
+                ];
+
+                // let mut unity_b = ClusterDataWrapper::from_cluster(triangle[1]);
+                // let mut unity_c = ClusterDataWrapper::from_cluster(triangle[2]);
+
+                let mut clam_edges = vec![
+                    (
+                        "ab",
+                        triangle[0].distance_to_other(tree.data(), triangle[1]),
+                    ),
+                    (
+                        "ac",
+                        triangle[0].distance_to_other(tree.data(), triangle[2]),
+                    ),
+                    (
+                        "bc",
+                        triangle[1].distance_to_other(tree.data(), triangle[2]),
+                    ),
+                ];
+
+                distortion_sum += calc_triangle_distortion(&mut clam_edges, &mut unity_edges);
+
+                // if are_triangles_equivalent(&mut clam_edges, &mut unity_edges) {
+                //     correct_triangle_count += 1;
+                // }
+            }
+        }
+    }
+
+    let average_distortion = distortion_sum as f64
+        / (num_test_iters as f64 * clam_graph.vertex_cardinality() as f64) as f64;
+
+    // results.push(perc_correct);
+    return Ok(average_distortion);
+    // return Err("shouldn''t reach this".to_string());
+}
