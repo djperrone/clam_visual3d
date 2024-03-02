@@ -2,21 +2,26 @@ extern crate nalgebra as na;
 
 use std::collections::HashMap;
 use std::path::Path;
+use std::path::PathBuf;
 use std::sync::Arc;
+use std::thread;
 use std::thread::JoinHandle;
 
+use abd_clam::Dataset;
 // use abd_clam::criteria::detect_edges;
 use abd_clam::Tree;
 use abd_clam::VecDataset;
 use abd_clam::{Graph, PartitionCriteria};
 
 use crate::ffi_impl::cluster_ids_wrapper::ClusterIDsWrapper;
+use crate::graph;
 use crate::graph::force_directed_graph::{self, ForceDirectedGraph};
 use crate::graph::spring;
 use crate::tree_layout::reingold_tilford;
 use crate::utils::distances::DistanceMetric;
 use crate::utils::error::FFIError;
 use crate::utils::scoring_functions::enum_to_function;
+use crate::utils::types::Graphf32;
 use crate::utils::types::{Clusterf32, DataSetf32};
 use crate::utils::{self, anomaly_readers};
 
@@ -37,6 +42,24 @@ pub struct Handle<'a> {
     force_directed_graph: Option<(JoinHandle<()>, Arc<ForceDirectedGraph>)>,
 }
 impl<'a> Handle<'a> {
+    // pub fn from(
+    //     tree: Tree<Vec<f32>, f32, DataSetf32>,
+    //     clam_graph: Graphf32,
+    //     force_directed_graph: ForceDirectedGraph,
+    // ) {
+    //     let force_directed_graph = Arc::new(force_directed_graph);
+
+    //     let b = force_directed_graph.clone();
+    //     let p = thread::spawn(move || {
+    //         graph::force_directed_graph::produce_computations(&b);
+    //     });
+    //     Handle {
+    //         tree: Some(tree),
+    //         clam_graph: Some(clam_graph),
+    //         force_directed_graph: Some(p),
+    //     }
+    // }
+
     pub fn shutdown(&mut self) {
         self.tree = None;
         // self.labels = None;
@@ -78,8 +101,17 @@ impl<'a> Handle<'a> {
         distance_metric: DistanceMetric,
         is_expensive: bool,
     ) -> Result<Self, FFIError> {
+        let mut data_dir = std::env::current_dir().unwrap();
+        // println!(
+        //     "data dir here 123 {}",
+        //     data_dir.file_name().unwrap().to_str().unwrap()
+        // );
+        data_dir.pop();
+        data_dir.push("data");
+        data_dir.push("anomaly_data");
+        data_dir.push("preprocessed");
         let criteria = PartitionCriteria::new(true).with_min_cardinality(cardinality);
-        match Self::create_dataset(data_name, distance_metric, is_expensive) {
+        match Self::create_dataset(data_name, &data_dir, distance_metric, is_expensive) {
             Ok(dataset) => {
                 let tree = Tree::new(dataset, Some(1))
                     .partition(&criteria)
@@ -130,8 +162,9 @@ impl<'a> Handle<'a> {
         }
     }
 
-    fn create_dataset(
+    pub fn create_dataset(
         data_name: &str,
+        data_dir: &PathBuf,
         distance_metric: DistanceMetric,
         is_expensive: bool,
     ) -> Result<DataSetf32, FFIError> {
@@ -142,7 +175,8 @@ impl<'a> Handle<'a> {
                 return Err(e);
             }
         };
-        match anomaly_readers::read_anomaly_data(data_name, false) {
+
+        match anomaly_readers::read_anomaly_data(data_name, data_dir, false) {
             Ok((first_data, labels)) => {
                 // let labels = labels.iter().map(|x| *x == 1).collect::<Vec<bool>>();
                 let dataset =
@@ -188,6 +222,28 @@ impl<'a> Handle<'a> {
         FFIError::GraphBuildFailed
     }
 
+    pub fn init_clam_graph_no_visual(
+        &'a mut self,
+        scoring_function: ScoringFunction,
+        min_depth: i32,
+    ) -> FFIError {
+        if let Some(tree) = &self.tree {
+            match enum_to_function(&scoring_function) {
+                Ok(scorer) => {
+                    if let Ok(graph) = Graph::from_tree(tree, &scorer, min_depth as usize) {
+                        self.clam_graph = Some(graph);
+
+                        return FFIError::Ok;
+                    }
+                }
+                Err(e) => {
+                    return e;
+                }
+            }
+        }
+        FFIError::GraphBuildFailed
+    }
+
     pub unsafe fn force_physics_shutdown(&mut self) -> FFIError {
         if let Some(force_directed_graph) = &self.force_directed_graph {
             force_directed_graph::force_shutdown(&force_directed_graph.1);
@@ -215,6 +271,7 @@ impl<'a> Handle<'a> {
                 let _ = self.force_directed_graph.take().unwrap().0.join();
                 self.force_directed_graph = None;
                 debug!("shutting down physics");
+
                 FFIError::PhysicsFinished
             } else {
                 force_directed_graph::try_update_unity(

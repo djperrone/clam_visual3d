@@ -1,8 +1,9 @@
 use std::ffi::c_char;
+mod accuracy_benchmarks;
 mod ffi_impl;
 mod file_io;
-mod graph;
-mod handle;
+pub mod graph;
+pub mod handle;
 mod tests;
 mod tree_layout;
 mod utils;
@@ -181,7 +182,7 @@ pub unsafe extern "C" fn shutdown_clam(context_ptr: OutHandlePtr) -> FFIError {
 
 // ------------------------------------- Graph Clam Init -------------------------------------
 #[no_mangle]
-pub unsafe extern "C" fn init_clam_graph(
+pub extern "C" fn init_clam_graph(
     context: InHandlePtr,
     scoring_function: ScoringFunction,
     min_depth: i32,
@@ -292,7 +293,7 @@ pub unsafe extern "C" fn draw_hierarchy_offset_from(
 // ------------------------------------- Graph Physics -------------------------------------
 
 #[no_mangle]
-pub unsafe extern "C" fn init_force_directed_graph(
+pub extern "C" fn init_force_directed_graph(
     context: InHandlePtr,
     scalar: f32,
     max_iters: i32,
@@ -315,6 +316,16 @@ pub unsafe extern "C" fn physics_update_async(
 ) -> FFIError {
     physics_update_async_impl(context, updater)
 }
+
+// #[no_mangle]
+// pub unsafe extern "C" fn run_triangle_test(
+//     context: InHandlePtr,
+//     last_run: bool,
+//     out_path: *const c_char,
+//     updater: CBFnNodeVisitorMut,
+// ) -> FFIError {
+//     run_triangle_test_impl(context, 3, last_run, out_path, updater)
+// }
 
 // #[no_mangle]
 // pub extern "C" fn shutdown_physics(ptr: InHandlePtr) -> FFIError {
