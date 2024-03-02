@@ -1,6 +1,8 @@
 #![allow(dead_code)]
 #![allow(unused_variables)]
 
+use std::path::PathBuf;
+
 use crate::utils::error::FFIError;
 use ndarray::prelude::*;
 
@@ -33,13 +35,14 @@ pub static ANOMALY_DATASETS: &[&str] = &[
 
 pub fn read_anomaly_data(
     name: &str,
+    data_dir: &PathBuf,
     normalized: bool,
 ) -> Result<(Vec<Vec<f32>>, Vec<u8>), FFIError> {
-    let mut data_dir = std::env::current_dir().unwrap();
-    data_dir.pop();
-    data_dir.push("data");
-    data_dir.push("anomaly_data");
-    data_dir.push("preprocessed");
+    // let mut data_dir = std::env::current_dir().unwrap();
+    // data_dir.pop();
+    // data_dir.push("data");
+    // data_dir.push("anomaly_data");
+    // data_dir.push("preprocessed");
     if !data_dir.exists() {
         let p = data_dir.to_str().unwrap_or("path is empty");
         return Err(FFIError::PathNotFound);

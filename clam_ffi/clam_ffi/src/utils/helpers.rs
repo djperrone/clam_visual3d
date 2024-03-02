@@ -1,6 +1,22 @@
-use std::ffi::{c_char, CStr};
+use std::{ffi::{c_char, CStr}, fs::OpenOptions, io::{self, Write}};
 
 use super::error::FFIError;
+
+pub fn append_to_file(filename: &str, content: &str) -> Result<(), io::Error> {
+    // Open the file in append mode or create it if it doesn't exist
+    let mut file = OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(filename)?;
+
+    // Write the content to the file
+    file.write_all(content.as_bytes())?;
+
+    // Ensure all data is written to disk
+    file.sync_all()?;
+
+    Ok(())
+}
 
 pub fn label_colors() -> Vec<glam::Vec3> {
     let denom: f32 = 255.0;

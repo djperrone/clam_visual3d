@@ -7,6 +7,7 @@ using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
+using System.IO;
 
 public class ClamGraphBuildMenu
 {
@@ -23,6 +24,7 @@ public class ClamGraphBuildMenu
     Dictionary<string, GameObject> m_Graph;
     UIDocument m_Document;
 
+    //string m_TestOutputPath;
 
 
     public ClamGraphBuildMenu(UIDocument document, string name)
@@ -220,6 +222,17 @@ public class ClamGraphBuildMenu
 
         MenuEventManager.SwitchState(Menu.DestroyGraph);
         MenuEventManager.SwitchState(Menu.DestroyHierarchyEdges);
+
+        //m_OutTestFilePath = "triangle_test_results/" + Cakes.Tree.m_TreeData.dataName + "_" + Cakes.Tree.m_TreeData.cardinality + "_" + Cakes.Tree.m_TreeData.distanceMetric.ToString() + "_" + m_MinDepth.value.ToString() + ".csv";
+
+        //if (!File.Exists(m_OutTestFilePath))
+        //{
+        //    // Create the file
+        //    using (FileStream fs = File.Create(m_OutTestFilePath))
+        //    {
+        //        Console.WriteLine("File created successfully.");
+        //    }
+        //}
 
         m_GraphBuilder.GetComponent<GraphBuilder>().Init(m_Graph, float.Parse(m_EdgeScalar.value), 500);
     }
