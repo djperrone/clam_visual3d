@@ -39,8 +39,8 @@ fn test_params(
 
     // Open the directory
     let data_folder = fs::read_dir(dir_path).unwrap();
-    let min_cardinality = 1;
-    let min_depth = 6;
+    let min_cardinality = 10;
+    let min_depth = 14;
     let distance_metric = DistanceMetric::Euclidean;
     let scalar = 100.0;
     let max_iters = 1000;
@@ -227,7 +227,8 @@ fn triangle_equivalency() {
         src_folder,
         out_folder_root,
         target,
-    ) = test_params(None);
+    ) = test_params(Some("http".to_string()));
+    // ) = test_params(None);
 
     // let outfolder = "edge_equivalence";
     let mut out_folder = PathBuf::new();
@@ -261,7 +262,9 @@ fn edge_distortion() {
         src_folder,
         out_folder_root,
         target,
-    ) = test_params(Some("vertebral".to_string()));
+    ) = test_params(Some("http".to_string()));
+
+    // ) = test_params(Some("vertebral".to_string()));
     // test_params(None);
 
     let mut out_folder = PathBuf::new();
@@ -295,8 +298,8 @@ fn angle_distortion() {
         src_folder,
         out_folder_root,
         target,
-    ) = test_params(None);
-    // test_params(Some("http".to_string()));
+        // ) = test_params(None);
+    ) = test_params(Some("http".to_string()));
 
     // let outfolder = "angle_distortion";
     let mut out_folder = PathBuf::new();
