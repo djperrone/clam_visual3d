@@ -26,6 +26,8 @@ X = X.astype(np.float32) / np.float32(255.0)
 # Convert labels to integers
 y = y.astype(np.uint8)
 print("Finished converting. Saving features and scores")
+print("Dimensions of images:", X.shape)
+print("Dimensions of labels:", y.shape)
 
 # Save features and labels into .npy files
 features_path = DATA_PATH / 'mnist_features.npy'

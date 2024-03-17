@@ -3,7 +3,7 @@
 
 use std::path::PathBuf;
 
-use crate::utils::error::FFIError;
+use crate::{debug, utils::error::FFIError};
 use ndarray::prelude::*;
 
 pub static ANOMALY_DATASETS: &[&str] = &[
@@ -47,7 +47,7 @@ pub fn read_anomaly_data(
         let p = data_dir.to_str().unwrap_or("path is empty");
         return Err(FFIError::PathNotFound);
     }
-
+    debug!("herer");
     let features = {
         let mut path = data_dir.clone();
         path.push(if normalized {
@@ -62,11 +62,15 @@ pub fn read_anomaly_data(
             return Err(FFIError::PathNotFound);
         }
 
-        let features: Array2<f32> =
-            ndarray_npy::read_npy(&path).map_err(|error| FFIError::PathNotFound)?;
+        let features: Array2<f32> = ndarray_npy::read_npy(&path).map_err(|error| {
+            debug!("{:?}", error);
+            FFIError::PathNotFound
+        })?;
 
         features.outer_iter().map(|row| row.to_vec()).collect()
     };
+
+    debug!("herer2");
 
     let scores = {
         let mut path = data_dir.clone();
@@ -76,8 +80,12 @@ pub fn read_anomaly_data(
             return Err(FFIError::PathNotFound);
         }
 
-        let features: Array1<u8> =
-            ndarray_npy::read_npy(&path).map_err(|error| FFIError::PathNotFound)?;
+        let features: Array1<u8> = ndarray_npy::read_npy(&path).map_err(|error| {
+            debug!("{:?}", error);
+            FFIError::PathNotFound
+        })?;
+
+        debug!("herer3");
 
         features.to_vec()
     };

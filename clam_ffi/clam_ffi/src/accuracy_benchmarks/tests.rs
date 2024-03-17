@@ -8,7 +8,7 @@ use std::{
 
 use abd_clam::{Dataset, Graph, PartitionCriteria, Tree};
 use distances::Number;
-use rand::seq::SliceRandom;
+use rand::{seq::SliceRandom, thread_rng};
 
 use crate::{
     graph::{force_directed_graph::ForceDirectedGraph, graph_builder::build_force_directed_graph},
@@ -39,11 +39,11 @@ fn test_params(
 
     // Open the directory
     let data_folder = fs::read_dir(dir_path).unwrap();
-    let min_cardinality = 10;
-    let min_depth = 14;
+    let min_cardinality = 1;
+    let min_depth = 10;
     let distance_metric = DistanceMetric::Euclidean;
     let scalar = 100.0;
-    let max_iters = 1000;
+    let max_iters = 2000;
     let data_folder_name = PathBuf::from(dir_path);
 
     (
@@ -55,7 +55,7 @@ fn test_params(
         max_iters,
         data_folder_name,
         String::from("accuracy_results"),
-        single_target,
+        Some("satellite".to_string()),
     )
 }
 
@@ -216,7 +216,7 @@ pub fn run_triangle_test(
 }
 
 #[test]
-fn triangle_equivalency() {
+fn edge_equivalence() {
     let (
         dir,
         min_cardinality,
@@ -388,6 +388,155 @@ fn run_for_each(
                     }
                 }
             }
+        }
+    }
+}
+
+fn run_umap_test_on_file(
+    file_path: &str,
+    tree: &Treef32,
+    metric_cb: fn(&mut [(&str, f32); 3], &mut [(&str, f32); 3]) -> f64,
+) -> Result<f64, String> {
+    let mut valid_count = 0;
+    let mut metric_sum: f64 = 0.;
+
+    if let Ok(positions) = utils::read_umap_positions(file_path) {
+        let range_start: usize = 0;
+        let range_end: usize = positions.len() - 1;
+        let mut range: Vec<usize> = (range_start..=range_end).collect();
+
+        if let Some(max_value) = range.iter().max() {
+            println!("Highest value: {}", max_value);
+        } else {
+            println!("The vector is empty.");
+        }
+
+        let data = tree.data();
+        if let Some(max_value) = data.permuted_indices().unwrap().iter().max() {
+            println!("Highest value perm: {}", max_value);
+        } else {
+            println!("The vector is empty.");
+        }
+
+        let mut rng = thread_rng();
+
+        for _ in 0..range_end * 3 {
+            let selected_indices = utils::randomly_select_three_indices(&mut range, &mut rng);
+            // println!("test1");
+            let actual_indices = (
+                data.original_index(selected_indices.0 as usize),
+                data.original_index(selected_indices.1 as usize),
+                data.original_index(selected_indices.2 as usize),
+            );
+            // println!("test2");
+
+            let selected_positions = [
+                positions[actual_indices.0],
+                positions[actual_indices.1],
+                positions[actual_indices.2],
+            ];
+
+            if let Ok(mut umap_triangle) = utils::positions_to_distances(&selected_positions) {
+                let clusters = [
+                    tree.get_cluster(actual_indices.0, 1).unwrap(),
+                    tree.get_cluster(actual_indices.1, 1).unwrap(),
+                    tree.get_cluster(actual_indices.2, 1).unwrap(),
+                ];
+
+                if let Ok(mut clam_triangle) = utils::triangle_from_clusters(tree, &clusters) {
+                    // let mut results: Vec<f64> =
+                    //     Vec::with_capacity(clam_graph.clusters().len() * num_test_iters as usize);
+                    metric_sum += metric_cb(&mut clam_triangle, &mut umap_triangle);
+                    valid_count += 1;
+                }
+            }
+
+            // results.push(perc_correct);
+        }
+    }
+    if valid_count == 0 {
+        return Err("no valid triangles found".to_string());
+    }
+    let average_distortion = metric_sum as f64 / (valid_count as f64) as f64;
+    return Ok(average_distortion);
+}
+
+#[test]
+fn umap_test_edge_equivalence() {
+    let (
+        search_dir,
+        _min_cardinality,
+        _min_depth,
+        distance_metric,
+        _scalar,
+        _max_iters,
+        data_folder,
+        out_folder_root,
+        target,
+        // ) = test_params(None);
+    ) = test_params(Some("mnist".to_string()));
+
+    let mut out_folder = PathBuf::new();
+    out_folder.push(out_folder_root);
+    out_folder.push("umap_edge_equivalence");
+    let metric_cb = utils::are_triangles_equivalent;
+
+    run_for_each_umap(
+        search_dir,
+        "mnist",
+        &data_folder,
+        out_folder.to_str().unwrap(),
+        distance_metric,
+        metric_cb,
+    );
+}
+
+fn run_for_each_umap(
+    dir: ReadDir,
+    data_name: &str,
+    src_folder: &PathBuf,
+    outfolder: &str,
+    distance_metric: DistanceMetric,
+    metric_cb: fn(&mut [(&str, f32); 3], &mut [(&str, f32); 3]) -> f64,
+) {
+    match Handle::create_dataset(data_name, &src_folder, distance_metric, false) {
+        Ok(data) => {
+            println!("created dataset {}", data_name);
+            let criteria = PartitionCriteria::new(true).with_min_cardinality(1);
+
+            let tree = Tree::new(data, Some(1)).partition(&criteria);
+            println!("tree card :{}", tree.cardinality());
+            println!("tree data name :{}", tree.data().name());
+            let dir_path = "../../umap/mnist";
+
+            // Iterate through the directory entries
+            if let Ok(entries) = fs::read_dir(dir_path) {
+                for entry in entries {
+                    if let Ok(entry) = entry {
+                        // Get the path of the entry
+                        let entry_path = entry.path();
+
+                        // Check if it's a directory
+                        if entry_path.is_dir() {
+                            // Process the directory
+                            println!("Found directory: {}", entry_path.display());
+                        } else {
+                            if let Some(positions_file) = entry_path.to_str() {
+                                let avg = run_umap_test_on_file(positions_file, &tree, metric_cb)
+                                    .unwrap();
+                                println!("avg: {}", avg);
+                            }
+                            // Process the file
+                            println!("Found file: {}", entry_path.display());
+                        }
+                    }
+                }
+            } else {
+                eprintln!("Failed to read directory {}", dir_path);
+            }
+        }
+        Err(e) => {
+            println!("{:?}", e);
         }
     }
 }

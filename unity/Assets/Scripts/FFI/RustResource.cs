@@ -19,6 +19,11 @@ namespace Clam
             T m_Data;
             public FFIError result;
 
+            ~RustResourceWrapper()
+            {
+                m_Data.Free();
+            }
+
             public T Data
             {
                 get { return m_Data; }
@@ -41,10 +46,7 @@ namespace Clam
                 return m_Data;
             }
 
-            ~RustResourceWrapper()
-            {
-                m_Data.Free();
-            }
+            
         }
     }
 }
