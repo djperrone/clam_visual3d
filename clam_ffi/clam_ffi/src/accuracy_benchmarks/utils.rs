@@ -1,4 +1,5 @@
 use std::{
+    collections::HashMap,
     error::Error,
     f32::consts::PI,
     fs::{File, OpenOptions},
@@ -6,7 +7,7 @@ use std::{
 };
 
 use abd_clam::Cluster;
-use csv::WriterBuilder;
+use csv::{Writer, WriterBuilder};
 use distances::Number;
 use rand::{rngs::ThreadRng, seq::SliceRandom, thread_rng};
 
@@ -292,6 +293,50 @@ pub fn randomly_select_three_indices(
     range.partial_shuffle(&mut rng, 3);
 
     return (range[0], range[1], range[2]);
+}
+
+pub fn extract_umap_k(filename: &str) -> Option<u32> {
+    // Find the last occurrence of '_'
+    if let Some(index) = filename.rfind('n') {
+        // Extract the substring from '_' to the end of the string
+        let mut substring = filename[index + 1..].to_string();
+        substring.truncate(substring.len() - 4);
+        println!("subtr {}", substring);
+        // Convert the substring to a number
+        if let Ok(number) = substring.parse::<u32>() {
+            println!("Extracted number: {}", number);
+            return Some(number);
+        } else {
+            println!("Failed to parse the number.");
+        }
+    } else {
+        println!("No '_' found in the string.");
+    }
+    return None;
+}
+
+pub fn write_umap_scores_to_file(
+    outpath: &str,
+    scores: &HashMap<u32, f64>,
+) -> Result<(), Box<dyn Error>> {
+    // Open the CSV file for writing
+    let file = File::create(outpath)?;
+    let mut writer = Writer::from_writer(file);
+
+    // Write keys to the first row
+    let keys: Vec<u32> = scores.keys().cloned().collect();
+    let keys: Vec<String> = keys.iter().map(|val| val.to_string()).collect();
+    writer.write_record(&keys)?;
+
+    // Write values to the second row
+    let values: Vec<f64> = scores.values().cloned().collect();
+    let values: Vec<String> = values.iter().map(|val| val.to_string()).collect();
+
+    writer.write_record(&values)?;
+
+    writer.flush()?;
+
+    Ok(())
 }
 
 #[cfg(test)]

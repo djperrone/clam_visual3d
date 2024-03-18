@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 
 import os
+import matplotlib.ticker as mtick
+
 
 def extract_data_from_filename(filename):
     # Extract the filename from the path
@@ -85,9 +87,10 @@ def process_directory(directory):
 
             # Update the dictionary with depth and max value pairs
             if depthvalue not in depth_max_dict:
-                depth_max_dict[depthvalue] = max(averages)
+                depth_max_dict[depthvalue] = averages[len(averages)-1]
             else:
-                depth_max_dict[depthvalue] = max(depth_max_dict[depthvalue], max(averages))
+                print("test")
+                depth_max_dict[depthvalue] = max(depth_max_dict[depthvalue], averages[len(averages)-1])
 
     return depth_max_dict
 
@@ -99,6 +102,7 @@ def create_scatterplot_from_dict(depth_max_dict, outfile):
 
     print(depths)
     print(max_values)
+    max_values = [val * 100 for val in max_values]
 
     # Create scatter plot
     plt.figure(figsize=(8, 6))
@@ -107,14 +111,21 @@ def create_scatterplot_from_dict(depth_max_dict, outfile):
     plt.xlabel('Depth')
     plt.ylabel('Maximum Value')
     plt.grid(True)
+    plt.gca().yaxis.set_major_formatter(mtick.PercentFormatter(xmax=100.0))
+    plt.ylim(0, 100)
+    # plt.legend(loc='upper right') 
+    # Set the y-axis ticks at intervals of 10%
+    plt.yticks(range(0, 101, 10))
+
     plt.show()
     print("out ", outfile)
     plt.savefig(outfile)  # Save the plot to the specified file
     plt.close()  # Close the plot to release memory
 
-filename = "../unity/triangle_test_results/mnist_1_Euclidean_9.csv"
-dataname, depthvalue = extract_data_from_filename(filename)
-depth_dict = process_directory("../unity/triangle_test_results/")
-create_scatterplot_from_dict(depth_dict, dataname)
+# filename = "../clam_ffi/clam_ffi/mnist/mnist_1_Euclidean_9.csv"
+# dataname, depthvalue = extract_data_from_filename(filename)
+dataname = "arrhythmia"
+depth_dict = process_directory("../clam_ffi/clam_ffi/accuracy_results/edge_equivalence/" + dataname + "/")
+create_scatterplot_from_dict(depth_dict, dataname + "depth_acc1")
 
 print(dataname)
