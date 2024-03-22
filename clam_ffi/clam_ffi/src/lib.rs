@@ -218,7 +218,11 @@ pub unsafe extern "C" fn set_names(
 
 #[no_mangle]
 pub unsafe extern "C" fn tree_height(ptr: InHandlePtr) -> i32 {
-    tree_height_impl(ptr)
+    if let Some(handle) = ptr {
+        return handle.tree_height() + 1;
+    }
+    debug!("handle not created");
+    -1
 }
 
 #[no_mangle]

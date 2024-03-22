@@ -39,7 +39,7 @@ fn test_params(
 
     // Open the directory
     let data_folder = fs::read_dir(dir_path).unwrap();
-    let min_cardinality = 15;
+    let min_cardinality = 1;
     let min_depth = 11;
     let distance_metric = DistanceMetric::Euclidean;
     let scalar = 100.0;
@@ -55,7 +55,8 @@ fn test_params(
         max_iters,
         data_folder_name,
         String::from("accuracy_results"),
-        single_target,
+        Some("satellite".to_string()),
+        // single_target,
     )
 }
 
@@ -228,7 +229,7 @@ fn edge_equivalence() {
             src_folder,
             out_folder_root,
             target,
-        ) = test_params(Some("arrhythmia".to_string()));
+        ) = test_params(None);
         // ) = test_params(None);
 
         // let outfolder = "edge_equivalence";
@@ -254,73 +255,77 @@ fn edge_equivalence() {
 
 #[test]
 fn edge_distortion() {
-    let (
-        dir,
-        min_cardinality,
-        min_depth,
-        distance_metric,
-        scalar,
-        max_iters,
-        src_folder,
-        out_folder_root,
-        target,
-    ) = test_params(Some("http".to_string()));
+    for i in 4..12 {
+        let (
+            dir,
+            min_cardinality,
+            min_depth,
+            distance_metric,
+            scalar,
+            max_iters,
+            src_folder,
+            out_folder_root,
+            target,
+        ) = test_params(None);
 
-    // ) = test_params(Some("vertebral".to_string()));
-    // test_params(None);
+        // ) = test_params(Some("vertebral".to_string()));
+        // test_params(None);
 
-    let mut out_folder = PathBuf::new();
-    out_folder.push(out_folder_root);
-    out_folder.push("edge_distortion");
-    let metric_cb = utils::calc_edge_distortion;
+        let mut out_folder = PathBuf::new();
+        out_folder.push(out_folder_root);
+        out_folder.push("edge_distortion");
+        let metric_cb = utils::calc_edge_distortion;
 
-    run_for_each(
-        dir,
-        min_cardinality,
-        min_depth,
-        distance_metric,
-        scalar,
-        max_iters,
-        &src_folder,
-        out_folder.to_str().unwrap(),
-        target,
-        metric_cb,
-    );
+        run_for_each(
+            dir,
+            min_cardinality,
+            i,
+            distance_metric,
+            scalar,
+            max_iters,
+            &src_folder,
+            out_folder.to_str().unwrap(),
+            target,
+            metric_cb,
+        );
+    }
 }
 
 #[test]
 fn angle_distortion() {
-    let (
-        dir,
-        min_cardinality,
-        min_depth,
-        distance_metric,
-        scalar,
-        max_iters,
-        src_folder,
-        out_folder_root,
-        target,
-        // ) = test_params(None);
-    ) = test_params(Some("http".to_string()));
+    for i in 4..12 {
+        let (
+            dir,
+            min_cardinality,
+            min_depth,
+            distance_metric,
+            scalar,
+            max_iters,
+            src_folder,
+            out_folder_root,
+            target,
+            // ) = test_params(None);
+        ) = test_params(None);
 
-    // let outfolder = "angle_distortion";
-    let mut out_folder = PathBuf::new();
-    out_folder.push(out_folder_root);
-    out_folder.push("angle_distortion");
-    let metric_cb = utils::calc_angle_distortion;
+        // let outfolder = "angle_distortion";
+        let mut out_folder = PathBuf::new();
+        out_folder.push(out_folder_root);
+        out_folder.push("angle_distortion");
+        let metric_cb = utils::calc_angle_distortion;
 
-    run_for_each(
-        dir,
-        min_cardinality,
-        min_depth,
-        distance_metric,
-        scalar,
-        max_iters,
-        &src_folder,
-        out_folder.to_str().unwrap(),
-        target,
-        metric_cb,
-    );
+        run_for_each(
+            dir,
+            min_cardinality,
+            i,
+            distance_metric,
+            scalar,
+            max_iters,
+            &src_folder,
+            out_folder.to_str().unwrap(),
+            target,
+            metric_cb,
+        );
+    }
 }
 
 fn run_for_each(
@@ -464,7 +469,7 @@ fn run_umap_test_on_file(
 }
 
 #[test]
-fn umap_test_edge_equivalence_umap() {
+fn umap_test_edge_e9quivalence_umap() {
     let (
         search_dir,
         _min_cardinality,
@@ -476,7 +481,7 @@ fn umap_test_edge_equivalence_umap() {
         out_folder_root,
         target,
         // ) = test_params(None);
-    ) = test_params(Some("arrhythmia".to_string()));
+    ) = test_params(Some("satellite".to_string()));
 
     let mut out_folder = PathBuf::new();
     out_folder.push(out_folder_root);
@@ -494,7 +499,7 @@ fn umap_test_edge_equivalence_umap() {
 }
 
 #[test]
-fn umap_test_edge_distortion() {
+fn umap_test_edge_1distortion() {
     let (
         search_dir,
         _min_cardinality,
@@ -506,7 +511,7 @@ fn umap_test_edge_distortion() {
         out_folder_root,
         target,
         // ) = test_params(None);
-    ) = test_params(Some("mnist".to_string()));
+    ) = test_params(None);
 
     let mut out_folder = PathBuf::new();
     out_folder.push(out_folder_root);
@@ -515,7 +520,7 @@ fn umap_test_edge_distortion() {
 
     run_for_each_umap(
         search_dir,
-        "mnist",
+        target.unwrap().as_str(),
         &data_folder,
         out_folder.to_str().unwrap(),
         distance_metric,
@@ -524,7 +529,7 @@ fn umap_test_edge_distortion() {
 }
 
 #[test]
-fn umap_test_angle_distortion() {
+fn umap_test_ang1le_distortion() {
     let (
         search_dir,
         _min_cardinality,
@@ -536,7 +541,7 @@ fn umap_test_angle_distortion() {
         out_folder_root,
         target,
         // ) = test_params(None);
-    ) = test_params(Some("mnist".to_string()));
+    ) = test_params(None);
 
     let mut out_folder = PathBuf::new();
     out_folder.push(out_folder_root);
@@ -545,7 +550,7 @@ fn umap_test_angle_distortion() {
 
     run_for_each_umap(
         search_dir,
-        "mnist",
+        target.unwrap().as_str(),
         &data_folder,
         out_folder.to_str().unwrap(),
         distance_metric,
@@ -573,7 +578,7 @@ fn run_for_each_umap(
             // let dir_path = "../../umap/".to_string() + data_name;
 
             let mut scores: HashMap<u32, Vec<f64>> = HashMap::new();
-            for _ in 0..50 {
+            for _ in 0..5 {
                 let dir_path = "../../umap/";
                 let dir_path = dir_path.to_string() + data_name;
                 // Iterate through the directory entries

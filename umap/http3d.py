@@ -15,7 +15,7 @@ import numpy as np
 from sklearn.datasets import fetch_openml
 
 PROJECT_PATH = pathlib.Path(__file__).parent.parent.resolve()
-dataset = "arrhythmia"
+dataset = "satellite"
 
 DATA_PATH = PROJECT_PATH / "data/anomaly_data/preprocessed"
 http_features = DATA_PATH / str(dataset  + "_features.npy")
@@ -56,10 +56,14 @@ for i in range(5, 15):
     ax = fig.add_subplot(111, projection='3d')
 
     # Scatter plot points colored by their true labels
-    for i in range(10):
+    unique_numbers = set(y)
+
+# Find the number of unique elements
+    num_unique_numbers = len(unique_numbers)
+    for i in range(num_unique_numbers):
         ax.scatter(embedding[y == str(i), 0], embedding[y == str(i), 1], embedding[y == str(i), 2], label=str(i), s=5)
 
     ax.set_title('3D UMAP Projection of MNIST Dataset')
     ax.legend(title='Digit')
     # plt.show()
-    plt.savefig('umap_projection.png')
+    plt.savefig(dataset+'-umap_projection.png')

@@ -244,7 +244,7 @@ if __name__ == "__main__":
         root_path = pathlib.Path("../clam_ffi/clam_ffi/accuracy_results/")
         test_path = root_path / str("umap_" + testname)
         data_path = test_path / dataname
-        out_folder = pathlib.Path("umap_plots/" + testname)
+        out_folder = pathlib.Path("umap_plots/" + testname + "/")
 
         # Check if the folder exists
         if not os.path.exists(out_folder):
@@ -276,7 +276,7 @@ if __name__ == "__main__":
 
 
             # Save the plot to an image file
-            plt.savefig("umap_" + dataname + '-' + testname + '.png')
+            plt.savefig(str(out_folder) +"/" + dataname + '.png')
 
         except FileNotFoundError:
             # print("File not found:", filename)

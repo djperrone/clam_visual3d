@@ -11,3 +11,4 @@ pub type DataSetf32 = VecDataset<Vec<f32>, f32, u8>;
 pub type Treef32 = Tree<Vec<f32>, f32, DataSetf32>;
 pub type Graphf32<'a> = Graph<'a, f32>;
 // pub type Cakesf32 = Cakes<f32, f32, DataSet>;
+

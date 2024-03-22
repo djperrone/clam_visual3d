@@ -2,7 +2,16 @@ import matplotlib.pyplot as plt
 
 import os
 import matplotlib.ticker as mtick
-
+import numpy as np
+import matplotlib.pyplot as plt
+import umap
+import csv
+import os
+import sys
+from datetime import datetime
+import pathlib
+import platform
+import numpy as np
 
 def extract_data_from_filename(filename):
     # Extract the filename from the path
@@ -18,37 +27,6 @@ def extract_data_from_filename(filename):
     depthvalue = filename_parts[-1].split(".csv")[0]
 
     return dataname, depthvalue
-
-# Example usage:
-# dataname, depthvalue = extract_data_from_filename(filename)
-# print("Data Name:", dataname)
-# print("Depth Value:", depthvalue)
-
-
-
-# def create_scatter_plot(depth_list, accuracy_list, filename):
-#     # Check if the lengths of the lists match
-#     if len(depth_list) != len(accuracy_list):
-#         print("Error: The length of depth list does not match the length of accuracy list.")
-#         return
-
-#     # Create scatter plot
-#     plt.figure(figsize=(8, 6))
-#     plt.scatter(depth_list, accuracy_list, color='blue', marker='o', label='Accuracy vs Depth')
-#     plt.title('Accuracy vs Depth Scatter Plot')
-#     plt.xlabel('Depth')
-#     plt.ylabel('Accuracy')
-#     plt.grid(True)
-#     plt.legend()
-#     # Save plot as an image with the filename
-#     plt.savefig(f"{filename}.png")
-#     plt.show()
-
-# # Example usage:
-# depth_list = [1, 2, 3, 4, 5]
-# accuracy_list = [0.85, 0.92, 0.95, 0.89, 0.91]
-
-import csv
 
 def read_csv_file(filename):
     data = []
@@ -93,8 +71,7 @@ def process_directory(directory):
                 depth_max_dict[depthvalue] = max(depth_max_dict[depthvalue], averages[len(averages)-1])
 
     return depth_max_dict
-
-def create_scatterplot_from_dict(depth_max_dict, outfile):
+def create_scatterplot_from_dict(dataname,testname, depth_max_dict, outfile):
     # Extract keys and values from the depth dictionary
     depths = list(depth_max_dict.keys())
     depths = [int(depth) for depth in depths]
@@ -107,7 +84,7 @@ def create_scatterplot_from_dict(depth_max_dict, outfile):
     # Create scatter plot
     plt.figure(figsize=(8, 6))
     plt.scatter(depths, max_values, color='blue', marker='o')
-    plt.title('Accuracy vs Depth')
+    plt.title(dataname + ' ' + testname+ ' vs Depth')
     plt.xlabel('Depth')
     plt.ylabel('Accuracy')
     plt.grid(True)
@@ -122,17 +99,23 @@ def create_scatterplot_from_dict(depth_max_dict, outfile):
     plt.savefig(outfile)  # Save the plot to the specified file
     plt.close()  # Close the plot to release memory
 
-# filename = "../clam_ffi/clam_ffi/mnist/mnist_1_Euclidean_9.csv"
-# dataname, depthvalue = extract_data_from_filename(filename)
-directory = "clam"
+if __name__ == "__main__":
+    if len(sys.argv) < 3:
+        print("Usage: python script.py dataname test_name<1..n>")
+    else:    
+        dataname = sys.argv[1]
+        testname = sys.argv[2]
 
-# Check if directory doesn't exist, then create it
-if not os.path.exists(directory):
-    os.makedirs(directory)
 
-dataname = "http"
-depth_dict = process_directory("../clam_ffi/clam_ffi/accuracy_results/edge_equivalence/" + dataname + "/")
-create_scatterplot_from_dict(depth_dict, directory+ "/clam_" + dataname + "depth_acc")
+        root_path = pathlib.Path("../clam_ffi/clam_ffi/accuracy_results/")
+        test_path = root_path / str(testname)
+        data_path = test_path / dataname
+        out_folder = pathlib.Path("plots/" + testname + "/")
+         # Check if the folder exists
+        if not os.path.exists(out_folder):
+            # Create the folder if it doesn't exist
+            os.makedirs(out_folder)
+        depth_dict = process_directory(data_path)
+        create_scatterplot_from_dict(dataname, testname, depth_dict, str(out_folder) + '/' + dataname)
 
-print(dataname)
-
+        
