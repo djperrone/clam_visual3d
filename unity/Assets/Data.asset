@@ -13,4 +13,7 @@ MonoBehaviour:
   m_Name: Data
   m_EditorClassIdentifier: 
   dataName: 
-  cardinality: 0
+  distanceMetric: 1
+  cardinality: 1
+  isExpensive: 0
+  shouldLoad: 0
