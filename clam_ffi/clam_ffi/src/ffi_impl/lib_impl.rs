@@ -149,7 +149,7 @@ pub unsafe fn tree_height_impl(ptr: InHandlePtr) -> i32 {
 /// The tree cardinality as an `i32`
 pub unsafe fn tree_cardinality_impl(ptr: InHandlePtr) -> i32 {
     if let Some(handle) = ptr {
-        if let Some(tree) = handle.get_tree() {
+        if let Some(tree) = handle.tree() {
             return tree.cardinality() as i32;
         }
     }
@@ -254,7 +254,7 @@ pub unsafe fn max_vertex_degree_impl(ptr: InHandlePtr) -> i32 {
     // If the handle exists
     if let Some(handle) = ptr {
         // If the tree exists
-        if handle.get_tree().is_some() {
+        if handle.tree().is_some() {
             // If the clam graph exists
             if let Some(graph) = handle.clam_graph() {
                 // Get the max vertex degree of the graph
