@@ -55,7 +55,7 @@ fn test_params(
         max_iters,
         data_folder_name,
         String::from("accuracy_results"),
-        Some("satellite".to_string()),
+        Some("wine".to_string()),
         // single_target,
     )
 }

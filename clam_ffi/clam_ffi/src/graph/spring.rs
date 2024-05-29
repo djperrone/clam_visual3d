@@ -9,7 +9,7 @@ pub struct Spring {
     k: f32,
     node1: String, //String's reference hash table
     node2: String,
-    pub is_detected: bool,
+    pub is_real: bool,
 }
 
 impl Spring {
@@ -19,7 +19,7 @@ impl Spring {
             k: 0.005,
             node1: hash_code1,
             node2: hash_code2,
-            is_detected: real,
+            is_real: real,
         }
     }
 
@@ -44,6 +44,13 @@ impl Spring {
         // let target_len = (self.nat_len / longest_edge.max(f32::MIN)).max(min_length) * scalar;
         // let target_len = ((self.nat_len / longest_edge.max(f32::MIN)) * scalar).max(min_length);
         let new_magnitude = self.k * (force_magnitude - (target_len));
+
+        // Scale the force magnitude if the spring is not real
+        // let scaled_magnitude = if !self.is_real {
+        //     new_magnitude / 2.0 // Adjust the scaling factor as needed
+        // } else {
+        //     new_magnitude
+        // };
 
         let mut new_force = graph::helpers::set_magnitude(force, new_magnitude);
 

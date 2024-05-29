@@ -73,7 +73,8 @@ def process_directory(directory):
     return depth_max_dict
 def create_scatterplot_from_dict(dataname,testname, depth_max_dict, outfile):
     # Extract keys and values from the depth dictionary
-    depths = list(depth_max_dict.keys())
+    sorted_dict = dict(sorted(depth_max_dict.items()))
+    depths = list(sorted_dict.keys())
     depths = [int(depth) for depth in depths]
     max_values = list(depth_max_dict.values())
 
@@ -99,13 +100,92 @@ def create_scatterplot_from_dict(dataname,testname, depth_max_dict, outfile):
     plt.savefig(outfile)  # Save the plot to the specified file
     plt.close()  # Close the plot to release memory
 
+def create_joint_plot(dataname,testname, test_results_dict, outfile):
+    # Extract keys and values from the depth dictionary
+    # Iterate through the outer dictionary
+
+    # Add title and labels
+    plt.title('graph accuracy of ' +  dataname +  " plot")
+    plt.xlabel('min_depths')
+    plt.ylabel('percentage...')
+    plt.grid(True)
+    plt.gca().yaxis.set_major_formatter(mtick.PercentFormatter(xmax=100.0))
+    plt.ylim(0, 100)
+    # Set x-axis limit
+    # Get the minimum x-value
+    # min_x = min(map(int, inner_dict.keys()) for key, inner_dict in test_results_dict.items())
+    # min_x = min(min(map(int, inner_dict.keys())) for inner_dict in test_results_dict.values())
+    # Get the minimum of the maximum x-values from each inner dictionary
+    # max_x_values = [max(map(int, inner_dict.keys())) for inner_dict in test_results_dict.values()]
+    # min_x_value = min(max_x_values)
+
+    max_x_values = [max(map(int, inner_dict.keys())) for inner_dict in test_results_dict.values()]
+    min_x_values = [min(map(int, inner_dict.keys())) for inner_dict in test_results_dict.values()]
+    min_min_x_ = min(min_x_values)
+
+    min_x = min(max_x_values)
+    print(max_x_values)
+    print(min_x)
+    plt.xlim(min_min_x_, min_x)
+
+    # min_x_value = min(int(key) for inner_dict in test_results_dict.values() for key in inner_dict.keys())
+    # plt.xlim(left=min_x_value)
+    # plt.legend(loc='upper right') 
+    # Set the y-axis ticks at intervals of 10%
+    plt.yticks(range(0, 101, 10))
+
+    labels = {"edge_distortion" : "edge_accuracy", "angle_distortion" : "angle_accuracy", "edge_equivalence" : "triangle_equivalence"}
+
+    # for key, inner_dict in test_results_dict.items():
+    # Sort the inner dictionary by keys and overwrite it
+        # sorted_inner_dict = dict(sorted(inner_dict.items()))
+        # test_results_dict[key] = sorted_inner_dict
+    # Add legend
+    
+    # Save plot to file
+    for key, inner_dict in test_results_dict.items():
+    # Sort the inner dictionary by keys and overwrite it
+        # sorted_inner_dict = dict(sorted(inner_dict.items()))
+        # test_results_dict[key] = sorted_inner_dict
+        sorted_keys = sorted(map(int, inner_dict.keys()))
+        print(sorted_keys)
+        # Extract corresponding values based on sorted keys
+        sorted_values = [inner_dict[str(k)] for k in sorted_keys]
+        if key == "edge_distortion" or key == "angle_distortion":
+            sorted_values = [100 - (val * 100) for val in sorted_values]
+
+        else:
+            sorted_values = [val * 100 for val in sorted_values]
+         # Plot the sorted keys and corresponding values
+        plt.plot(sorted_keys, sorted_values, label=labels.get(key, key))
+
+    plt.legend()
+    plt.savefig('plot.png')
+    
+
+
 if __name__ == "__main__":
-    if len(sys.argv) < 3:
+    if len(sys.argv) < 2:
         print("Usage: python script.py dataname test_name<1..n>")
+    if len(sys.argv) == 2:
+        dataname = sys.argv[1]
+        tests = ["edge_equivalence", "edge_distortion", "angle_distortion"]
+        root_path = pathlib.Path("../clam_ffi/clam_ffi/accuracy_results/")
+
+        # data_paths = [root_path /equivalence_test / dataname, root_path / edge_distortion_test/ dataname, root_path / angle_distortion_test/ dataname ]
+        out_folder = pathlib.Path("plots/" + "all_tests" + "/")
+        if not os.path.exists(out_folder):
+            os.makedirs(out_folder)
+
+        results = {test : process_directory(root_path / test / dataname) for test in tests}
+        create_joint_plot(dataname, "", results, "")
+
+
     else:    
         dataname = sys.argv[1]
         testname = sys.argv[2]
 
+       
 
         root_path = pathlib.Path("../clam_ffi/clam_ffi/accuracy_results/")
         test_path = root_path / str(testname)

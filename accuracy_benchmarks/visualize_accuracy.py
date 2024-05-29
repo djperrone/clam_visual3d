@@ -31,7 +31,7 @@ def calculate_column_averages(data):
 
     for row in data:
         for i, val in enumerate(row):
-            column_sums[i] += val
+            column_sums[i] += val / 3.0
             column_counts[i] += 1
 
     column_averages = [column_sum / column_count for column_sum, column_count in zip(column_sums, column_counts)]

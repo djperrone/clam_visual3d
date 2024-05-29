@@ -110,24 +110,47 @@ pub fn calc_angle_distortion(
     clam_edges: &mut [(&str, f32); 3],
     unity_edges: &mut [(&str, f32); 3],
 ) -> f64 {
-    let angle_sum = 180.;
     // println!("unity edges");
     let unity_angles = compute_angles_from_edge_lengths(unity_edges);
     // println!("clam edges");
 
     let clam_angles = compute_angles_from_edge_lengths(clam_edges);
+    let ref_angle_sum: f32 = clam_angles.iter().sum();
+    let test_angle_sum: f32 = unity_angles.iter().sum();
+    let mut err = false;
+    if ref_angle_sum > 180. {
+        err = true;
+        println!("ref angle sum: {}", ref_angle_sum)
+    }
+
+    if test_angle_sum > 180. {
+        err = true;
+
+        println!("ref angle sum: {}", test_angle_sum)
+    }
 
     // assumes angles sum to 180 - write separate test for this
 
-    let ref_percentages: Vec<f32> = clam_angles.iter().map(|&val| val / angle_sum).collect();
+    let ref_percentages: Vec<f32> = clam_angles.iter().map(|&val| val / ref_angle_sum).collect();
 
-    let test_percentages: Vec<f32> = unity_angles.iter().map(|&val| val / angle_sum).collect();
+    let test_percentages: Vec<f32> = unity_angles
+        .iter()
+        .map(|&val| val / test_angle_sum)
+        .collect();
+
+    if err {
+        println!("ref perc: {:?}", ref_percentages);
+        println!("test perc: {:?}", test_percentages);
+    }
 
     let distortion: f32 = ref_percentages
         .iter()
         .zip(test_percentages.iter())
         .map(|(&x, &y)| (y - x).abs())
         .sum();
+    if err {
+        println!("disortion: {}", distortion);
+    }
     return distortion as f64;
 }
 
@@ -177,6 +200,13 @@ pub fn compute_angles_from_edge_lengths(edges: &[(&str, f32)]) -> [f32; 3] {
     assert!(!angle_a.is_nan());
     assert!(!angle_b.is_nan());
     assert!(!angle_c.is_nan());
+
+    // if angle_a + angle_b + angle_c > 180.0 {
+    //     panic!(
+    //         "angle sums greater than 180 {}",
+    //         angle_a + angle_b + angle_c
+    //     )
+    // }
 
     [angle_a, angle_b, angle_c]
 }
