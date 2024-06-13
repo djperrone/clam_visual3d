@@ -12,6 +12,7 @@ use abd_clam::Dataset;
 use abd_clam::Tree;
 use abd_clam::VecDataset;
 use abd_clam::{Graph, PartitionCriteria};
+use distances::Number;
 
 use crate::ffi_impl::cluster_ids_wrapper::ClusterIDsWrapper;
 use crate::graph;
@@ -37,10 +38,9 @@ use spring::Spring;
 pub struct Handle<'a> {
     tree: Option<Tree<Vec<f32>, f32, DataSetf32>>,
     clam_graph: Option<Graph<'a, f32>>,
-    edges: Option<Vec<Spring>>,
-    current_query: Option<Vec<f32>>,
     force_directed_graph: Option<(JoinHandle<()>, Arc<ForceDirectedGraph>)>,
 }
+
 impl<'a> Handle<'a> {
     // pub fn from(
     //     tree: Tree<Vec<f32>, f32, DataSetf32>,
@@ -119,8 +119,8 @@ impl<'a> Handle<'a> {
                 Ok(Handle {
                     tree: Some(tree),
                     clam_graph: None,
-                    edges: None,
-                    current_query: None,
+                    // edges: None,
+                    // current_query: None,
                     force_directed_graph: None,
                 })
             }
@@ -153,8 +153,8 @@ impl<'a> Handle<'a> {
             Ok(Handle {
                 tree: Some(tree),
                 clam_graph: None,
-                edges: None,
-                current_query: None,
+                // edges: None,
+                // current_query: None,
                 force_directed_graph: None,
             })
         } else {
@@ -297,32 +297,32 @@ impl<'a> Handle<'a> {
         return -1;
     }
 
-    pub unsafe fn color_by_dist_to_query(
-        &self,
-        id_arr: &[String],
-        node_visitor: CBFnNodeVisitor,
-    ) -> FFIError {
-        for id in id_arr {
-            match self.get_cluster_from_string(id.clone()) {
-                Ok(cluster) => {
-                    if let Some(query) = &self.current_query {
-                        let mut baton_data = ClusterDataWrapper::from_cluster(cluster);
+    // pub unsafe fn color_by_dist_to_query(
+    //     &self,
+    //     id_arr: &[String],
+    //     node_visitor: CBFnNodeVisitor,
+    // ) -> FFIError {
+    //     for id in id_arr {
+    //         match self.get_cluster_from_string(id.clone()) {
+    //             Ok(cluster) => {
+    //                 if let Some(query) = &self.current_query {
+    //                     let mut baton_data = ClusterDataWrapper::from_cluster(cluster);
 
-                        baton_data.data_mut().dist_to_query =
-                            cluster.distance_to_instance(self.data().unwrap(), query);
+    //                     baton_data.data_mut().dist_to_query =
+    //                         cluster.distance_to_instance(self.data().unwrap(), query);
 
-                        node_visitor(Some(baton_data.data()));
-                    } else {
-                        return FFIError::QueryIsNull;
-                    }
-                }
-                Err(e) => {
-                    return e;
-                }
-            }
-        }
-        FFIError::Ok
-    }
+    //                     node_visitor(Some(baton_data.data()));
+    //                 } else {
+    //                     return FFIError::QueryIsNull;
+    //                 }
+    //             }
+    //             Err(e) => {
+    //                 return e;
+    //             }
+    //         }
+    //     }
+    //     FFIError::Ok
+    // }
 
     pub unsafe fn for_each_dft(
         &self,
@@ -433,9 +433,9 @@ impl<'a> Handle<'a> {
         // self.current_query = Some(data.clone());
     }
 
-    pub fn get_current_query(&self) -> &Option<Vec<f32>> {
-        &self.current_query
-    }
+    // pub fn get_current_query(&self) -> &Option<Vec<f32>> {
+    //     &self.current_query
+    // }
 
     // pub fn rnn_search(
     //     &self,

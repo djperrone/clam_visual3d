@@ -31,7 +31,7 @@ def calculate_column_averages(data):
 
     for row in data:
         for i, val in enumerate(row):
-            column_sums[i] += val / 3.0
+            column_sums[i] += val
             column_counts[i] += 1
 
     column_averages = [column_sum / column_count for column_sum, column_count in zip(column_sums, column_counts)]
@@ -242,9 +242,9 @@ if __name__ == "__main__":
 
 
         root_path = pathlib.Path("../clam_ffi/clam_ffi/accuracy_results/")
-        test_path = root_path / testname
+        test_path = root_path / str("umap_" + testname)
         data_path = test_path / dataname
-        out_folder = pathlib.Path("plots/" + testname)
+        out_folder = pathlib.Path("umap_plots/" + testname + "/")
 
         # Check if the folder exists
         if not os.path.exists(out_folder):
@@ -253,7 +253,30 @@ if __name__ == "__main__":
 
         print("running 1")
         try:
-            plot_for_each_in_dir(data_path, out_folder, testname)
+            # plot_for_each_in_dir(data_path, out_folder, testname)
+            data_file = test_path/ str(dataname + ".csv")
+            print(data_file )
+            data = read_csv_file(data_file)
+            data[1] = [y * 100 for y in data[1]]
+            print(data)
+
+            # Plot the data
+            plt.scatter(data[0], data[1], marker='o')
+            plt.title(dataname + " " + testname)
+            plt.grid(True)
+
+            plt.xlabel("n_neighbors")
+            plt.ylabel(testname)
+            plt.gca().yaxis.set_major_formatter(mtick.PercentFormatter(xmax=100.0))
+            plt.ylim(0, 100)
+            # plt.legend(loc='upper right') 
+            # Set the y-axis ticks at intervals of 10%
+            plt.yticks(range(0, 101, 10))
+
+
+
+            # Save the plot to an image file
+            plt.savefig(str(out_folder) +"/" + dataname + '.png')
 
         except FileNotFoundError:
             # print("File not found:", filename)
