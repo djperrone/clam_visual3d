@@ -1,126 +1,69 @@
 
-//using UnityEngine;
-
-//public class ConnectedLineDrawer : MonoBehaviour
-//{
-//    public int lineCount = 3000; // Adjust the number of lines as needed
-
-//    private Mesh lineMesh;
-//    private Vector3[] lineVertices;
-
-//    void Start()
-//    {
-//        InitializeLineMesh();
-//        UpdateLineMesh();
-//    }
-
-//    void InitializeLineMesh()
-//    {
-//        lineMesh = new Mesh();
-//        GetComponent<MeshFilter>().mesh = lineMesh;
-
-//        // Initialize line vertices (assuming you have a simple line mesh)
-//        lineVertices = new Vector3[lineCount * 2];
-//        for (int i = 0; i < lineCount; i++)
-//        {
-//            lineVertices[i * 2] = Random.onUnitSphere * 5f; // Example: Random positions
-//            lineVertices[i * 2 + 1] = Random.onUnitSphere * 5f; // Example: Random positions
-//        }
-
-//        lineMesh.vertices = lineVertices;
-
-//        // Assuming you have a simple line mesh (two vertices per line)
-//        int[] lineIndices = new int[lineCount * 2];
-//        for (int i = 0; i < lineCount * 2; i++)
-//        {
-//            lineIndices[i] = i;
-//        }
-
-//        lineMesh.SetIndices(lineIndices, MeshTopology.Lines, 0);
-//    }
-
-//    void UpdateLineMesh()
-//    {
-//        // You can use the Standard Shader for simplicity
-//        Renderer rend = GetComponent<Renderer>();
-//        rend.material = new Material(Shader.Find("Standard"));
-
-//        // Assign the material to the mesh
-//        rend.sharedMaterial = rend.material;
-//    }
-
-//    void Update()
-//    {
-//        // Simulate dynamic movement by updating line positions each frame
-//        for (int i = 0; i < lineCount; i++)
-//        {
-//            Vector3 startPoint = Random.onUnitSphere * 5f;
-//            Vector3 endPoint = startPoint + Random.onUnitSphere * 5f;
-
-//            lineVertices[i * 2] = startPoint;
-//            lineVertices[i * 2 + 1] = endPoint;
-//        }
-
-//        lineMesh.vertices = lineVertices;
-//    }
-//}
-
-
 using UnityEngine;
 
 public class ConnectedLineDrawer : MonoBehaviour
 {
-    public int lineCount = 1000; // Adjust the number of lines as needed
-    public float lineLength = 1.0f; // Adjust the length of each line segment
+    public int lineCount = 3000; // Adjust the number of lines as needed
 
-    private LineRenderer[] lineRenderers;
-    private Material lineMaterial;
+    private Mesh lineMesh;
+    private Vector3[] lineVertices;
 
     void Start()
     {
-        InitializeLineRenderers();
+        InitializeLineMesh();
+        UpdateLineMesh();
     }
 
-    void InitializeLineRenderers()
+    void InitializeLineMesh()
     {
-        lineRenderers = new LineRenderer[lineCount];
-        lineMaterial = new Material(Shader.Find("Standard")); // You can replace "Standard" with your desired shader
-        lineMaterial.color = Color.white;
+        lineMesh = new Mesh();
+        GetComponent<MeshFilter>().mesh = lineMesh;
+
+        // Initialize line vertices (assuming you have a simple line mesh)
+        lineVertices = new Vector3[lineCount * 2];
         for (int i = 0; i < lineCount; i++)
         {
-            // Create or assign a material for the LineRenderer
-
-            GameObject lineObject = new GameObject("LineSegment_" + i);
-            lineRenderers[i] = lineObject.AddComponent<LineRenderer>();
-            Vector3 startPoint = Random.onUnitSphere * 5f;
-            Vector3 endPoint = startPoint + Random.onUnitSphere * lineLength;
-
-            lineRenderers[i].positionCount = 2;
-            lineRenderers[i].SetPosition(0, startPoint);
-            lineRenderers[i].SetPosition(1, endPoint);
-
-            // Optional: Customize LineRenderer settings
-            lineRenderers[i].startWidth = 0.1f;
-            lineRenderers[i].endWidth = 0.1f;
-
-            lineRenderers[i].material = lineMaterial;
+            lineVertices[i * 2] = Random.onUnitSphere * 5f; // Example: Random positions
+            lineVertices[i * 2 + 1] = Random.onUnitSphere * 5f; // Example: Random positions
         }
+
+        lineMesh.vertices = lineVertices;
+
+        // Assuming you have a simple line mesh (two vertices per line)
+        int[] lineIndices = new int[lineCount * 2];
+        for (int i = 0; i < lineCount * 2; i++)
+        {
+            lineIndices[i] = i;
+        }
+
+        lineMesh.SetIndices(lineIndices, MeshTopology.Lines, 0);
+    }
+
+    void UpdateLineMesh()
+    {
+        // You can use the Standard Shader for simplicity
+        Renderer rend = GetComponent<Renderer>();
+        rend.material = new Material(Shader.Find("Standard"));
+
+        // Assign the material to the mesh
+        rend.sharedMaterial = rend.material;
     }
 
     void Update()
     {
-        //Simulate dynamic movement by updating line positions each frame
+        // Simulate dynamic movement by updating line positions each frame
         for (int i = 0; i < lineCount; i++)
         {
             Vector3 startPoint = Random.onUnitSphere * 5f;
-            Vector3 endPoint = startPoint + Random.onUnitSphere * lineLength;
+            Vector3 endPoint = startPoint + Random.onUnitSphere * 5f;
 
-            lineRenderers[i].SetPosition(0, startPoint);
-            lineRenderers[i].SetPosition(1, endPoint);
+            lineVertices[i * 2] = startPoint;
+            lineVertices[i * 2 + 1] = endPoint;
         }
+
+        lineMesh.vertices = lineVertices;
     }
 }
-
 
 //using System.Collections;
 //using System.Collections.Generic;

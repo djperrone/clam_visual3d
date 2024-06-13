@@ -60,26 +60,62 @@ impl<'a> Handle<'a> {
     //     }
     // }
 
+    /// Function to shutdown the handle
+    /// 
+    /// This function sets the tree to `None` and the labels to `None`
+    /// 
+    /// # Arguments
+    /// 
+    /// * `self` - The handle
+    /// 
+    /// # Returns
+    /// 
+    /// Nothing
     pub fn shutdown(&mut self) {
         self.tree = None;
         // self.labels = None;
     }
 
-    pub fn get_tree(&self) -> Option<&Tree<Vec<f32>, f32, VecDataset<Vec<f32>, f32, u8>>> {
-        self.tree.as_ref()
-    }
-
+    /// Function to get the tree
+    /// 
+    /// # Arguments
+    /// 
+    /// * `self` - The handle
+    /// 
+    /// # Returns
+    /// 
+    /// An `Option` containing a reference to the tree or `None` if the tree does not exist
     pub fn tree(&self) -> Option<&Tree<Vec<f32>, f32, VecDataset<Vec<f32>, f32, u8>>> {
         self.tree.as_ref()
     }
 
+    /// Function to get the data
+    /// 
+    /// # Arguments
+    /// 
+    /// * `self` - The handle
+    /// 
+    /// # Returns
+    /// 
+    /// An `Option` containing a reference to the data or `None` if the tree does not exist
     pub fn data(&self) -> Option<&DataSetf32> {
+        // If the tree exists, return the data
         return if let Some(tree) = self.tree() {
             Some(tree.data())
         } else {
             None
         };
     }
+
+    /// Function to get the root of the tree
+    /// 
+    /// # Arguments
+    /// 
+    /// * `self` - The handle
+    /// 
+    /// # Returns
+    /// 
+    /// An `Option` containing a reference to the root of the tree or `None` if the tree does not exist
     pub fn root(&self) -> Option<&Clusterf32> {
         return if let Some(t) = self.tree() {
             Some(t.root())
@@ -88,6 +124,15 @@ impl<'a> Handle<'a> {
         };
     }
 
+    /// Function to get the labels of the tree
+    /// 
+    /// # Arguments
+    /// 
+    /// * `self` - The handle
+    /// 
+    /// # Returns
+    /// 
+    /// An `Option` containing a reference to the labels or `None` if the tree does not exist
     pub fn labels(&self) -> Option<&[u8]> {
         match self.tree() {
             Some(tree) => Some(tree.data().metadata()),
@@ -95,27 +140,48 @@ impl<'a> Handle<'a> {
         }
     }
 
+    /// Function to create a new handle
+    /// 
+    /// # Arguments
+    /// 
+    /// * `data_name` - A string slice containing the name of the data
+    /// * `cardinality` - The cardinality of the data
+    /// * `distance_metric` - The distance metric to use
+    /// * `is_expensive` - A boolean indicating if the distance metric is expensive
+    /// 
+    /// # Returns
+    /// 
+    /// A `Result` containing the handle or an `FFIError` if the handle could not be created
     pub fn new(
         data_name: &str,
         cardinality: usize,
         distance_metric: DistanceMetric,
         is_expensive: bool,
     ) -> Result<Self, FFIError> {
+        // Get the data directory
         let mut data_dir = std::env::current_dir().unwrap();
         // println!(
         //     "data dir here 123 {}",
         //     data_dir.file_name().unwrap().to_str().unwrap()
         // );
+        // Pop the current directory and add the data directory
         data_dir.pop();
         data_dir.push("data");
         data_dir.push("anomaly_data");
         data_dir.push("preprocessed");
+
+        // Create the partition criteria with the cardinality
         let criteria = PartitionCriteria::new(true).with_min_cardinality(cardinality);
+
+        // Create the dataset from the data name, data directory, distance metric, and if the distance metric is expensive
         match Self::create_dataset(data_name, &data_dir, distance_metric, is_expensive) {
+
+            // If the dataset was created successfully, create the tree from the dataset and partition it with the criteria
             Ok(dataset) => {
                 let tree = Tree::new(dataset, Some(1))
                     .partition(&criteria)
                     .with_ratios(false);
+                // Return the handle with the tree
                 Ok(Handle {
                     tree: Some(tree),
                     clam_graph: None,
@@ -124,11 +190,22 @@ impl<'a> Handle<'a> {
                     force_directed_graph: None,
                 })
             }
+            // If the dataset could not be created, return an error
             Err(_) => Err(FFIError::HandleInitFailed),
         }
     }
 
+    /// Function to load a handle from a tree startup data FFI struct
+    /// 
+    /// # Arguments
+    /// 
+    /// * `data` - A reference to the tree startup data FFI struct
+    /// 
+    /// # Returns
+    /// 
+    /// A `Result` containing the handle or an `FFIError` if the handle could not be loaded
     pub fn load_struct(data: &TreeStartupDataFFI) -> Result<Self, FFIError> {
+        // Get the data name from the data struct
         let data_name = match data.data_name.as_string() {
             Ok(data_name) => data_name,
             Err(e) => {
@@ -137,6 +214,7 @@ impl<'a> Handle<'a> {
             }
         };
 
+        // Get the distance metric from the data struct
         let metric = match utils::distances::from_enum(data.distance_metric) {
             Ok(metric) => metric,
             Err(e) => {
@@ -144,6 +222,8 @@ impl<'a> Handle<'a> {
                 return Err(e);
             }
         };
+
+        // Load the tree from the data name, distance metric, and if the distance metric is expensive
         if let Ok(tree) = Tree::<Vec<f32>, f32, DataSetf32>::load(
             Path::new(&data_name),
             metric,
@@ -162,12 +242,25 @@ impl<'a> Handle<'a> {
         }
     }
 
+    /// Function to create a dataset
+    /// 
+    /// # Arguments
+    /// 
+    /// * `data_name` - A string slice containing the name of the data
+    /// * `data_dir` - A reference to the data directory
+    /// * `distance_metric` - The distance metric to use
+    /// * `is_expensive` - A boolean indicating if the distance metric is expensive
+    /// 
+    /// # Returns
+    /// 
+    /// A `Result` containing the dataset or an `FFIError` if the dataset could not be created
     pub fn create_dataset(
         data_name: &str,
         data_dir: &PathBuf,
         distance_metric: DistanceMetric,
         is_expensive: bool,
     ) -> Result<DataSetf32, FFIError> {
+        // Get the distance metric from the enum
         let metric = match utils::distances::from_enum(distance_metric) {
             Ok(metric) => metric,
             Err(e) => {
@@ -176,12 +269,15 @@ impl<'a> Handle<'a> {
             }
         };
 
+        // Read the anomaly data from the data name and data directory
         match anomaly_readers::read_anomaly_data(data_name, data_dir, false) {
             Ok((first_data, labels)) => {
                 // let labels = labels.iter().map(|x| *x == 1).collect::<Vec<bool>>();
                 let dataset =
                     VecDataset::new(data_name.to_string(), first_data, metric, is_expensive)
                         .assign_metadata(labels);
+
+                // Return the dataset if it was created successfully or an error if it was not
                 if dataset.is_ok() {
                     Ok(dataset.unwrap())
                 } else {
@@ -195,15 +291,30 @@ impl<'a> Handle<'a> {
         }
     }
 
+    /// Function to create a clam graph from the tree
+    /// 
+    /// # Arguments
+    /// 
+    /// * `self` - The handle
+    /// * `scoring_function` - The scoring function to use
+    /// * `min_depth` - The minimum depth of the graph
+    /// * `cluster_selector` - The cluster selector function
+    /// 
+    /// # Returns
+    /// 
+    /// An `FFIError` indicating if the graph was created successfully or not
     pub fn init_clam_graph(
         &'a mut self,
         scoring_function: ScoringFunction,
         min_depth: i32,
         cluster_selector: CBFnNodeVisitor,
     ) -> FFIError {
+        // If the tree exists
         if let Some(tree) = &self.tree {
+            // Get the scoring function from the enum
             match enum_to_function(&scoring_function) {
                 Ok(scorer) => {
+                    // Create the graph from the tree and the scoring function
                     if let Ok(graph) = Graph::from_tree(tree, &scorer, min_depth as usize) {
                         self.clam_graph = Some(graph);
                         for cluster in self.clam_graph().unwrap().clusters() {
@@ -222,14 +333,28 @@ impl<'a> Handle<'a> {
         FFIError::GraphBuildFailed
     }
 
+    /// Function to create a clam graph from the tree without a visual
+    /// 
+    /// # Arguments
+    /// 
+    /// * `self` - The handle
+    /// * `scoring_function` - The scoring function to use
+    /// * `min_depth` - The minimum depth of the graph
+    /// 
+    /// # Returns
+    /// 
+    /// An `FFIError` indicating if the graph was created successfully or not
     pub fn init_clam_graph_no_visual(
         &'a mut self,
         scoring_function: ScoringFunction,
         min_depth: i32,
     ) -> FFIError {
+        // If the tree exists
         if let Some(tree) = &self.tree {
+            // Get the scoring function from the enum
             match enum_to_function(&scoring_function) {
                 Ok(scorer) => {
+                    // Create the graph from the tree and the scoring function
                     if let Ok(graph) = Graph::from_tree(tree, &scorer, min_depth as usize) {
                         self.clam_graph = Some(graph);
 
@@ -244,7 +369,17 @@ impl<'a> Handle<'a> {
         FFIError::GraphBuildFailed
     }
 
+    /// Function to force a shutdown of the graph physics
+    /// 
+    /// # Arguments
+    /// 
+    /// * `self` - The handle
+    /// 
+    /// # Returns
+    /// 
+    /// An `FFIError` indicating if the physics was shutdown successfully or not
     pub unsafe fn force_physics_shutdown(&mut self) -> FFIError {
+        // If the force directed graph exists, shutdown the physics
         if let Some(force_directed_graph) = &self.force_directed_graph {
             force_directed_graph::force_shutdown(&force_directed_graph.1);
             let _ = self.force_directed_graph.take().unwrap().0.join();
@@ -256,6 +391,16 @@ impl<'a> Handle<'a> {
         FFIError::PhysicsAlreadyShutdown
     }
 
+    /// Function to initialize the unity edges for the graph
+    /// 
+    /// # Arguments
+    /// 
+    /// * `self` - The handle
+    /// * `edge_detect_cb` - The edge detect callback function
+    /// 
+    /// # Returns
+    /// 
+    /// An `FFIError` indicating if the edges were initialized successfully or not
     pub unsafe fn init_unity_edges(&mut self, edge_detect_cb: CBFnNodeVisitorMut) -> FFIError {
         if let Some(force_directed_graph) = &self.force_directed_graph {
             force_directed_graph::init_unity_edges(&force_directed_graph.1, edge_detect_cb);
@@ -263,8 +408,20 @@ impl<'a> Handle<'a> {
         FFIError::PhysicsAlreadyShutdown
     }
 
+    /// Function to update the physics asynchronously
+    /// 
+    /// # Arguments
+    /// 
+    /// * `self` - The handle
+    /// * `updater` - The node visitor function
+    /// 
+    /// # Returns
+    /// 
+    /// An `FFIError` indicating if the physics was updated successfully or not
     pub unsafe fn physics_update_async(&mut self, updater: CBFnNodeVisitor) -> FFIError {
+        // If the force directed graph exists, update the physics
         if let Some(force_directed_graph) = &self.force_directed_graph {
+            // If the physics is finished, join the thread and set the force directed graph to `None`
             let is_finished = force_directed_graph.0.is_finished();
 
             return if is_finished {
@@ -286,10 +443,25 @@ impl<'a> Handle<'a> {
         FFIError::PhysicsAlreadyShutdown
     }
 
+    /// Function to set the graph
+    /// 
+    /// # Arguments
+    /// 
+    /// * `self` - The handle
+    /// * `graph` - The graph to set
     pub fn set_graph(&mut self, graph: (JoinHandle<()>, Arc<ForceDirectedGraph>)) {
         self.force_directed_graph = Some(graph);
     }
 
+    /// Function to get the number of edges in the graph
+    /// 
+    /// # Arguments
+    /// 
+    /// * `self` - The handle
+    /// 
+    /// # Returns
+    /// 
+    /// An `i32` containing the number of edges in the graph or -1 if the graph does not exist
     pub fn get_num_edges_in_graph(&self) -> i32 {
         if let Some(g) = self.clam_graph() {
             return g.edge_cardinality() as i32;
@@ -297,15 +469,24 @@ impl<'a> Handle<'a> {
         return -1;
     }
 
+    /// Function to color the graph based on the distance to the query
+    /// 
+    /// # Arguments
+    /// 
+    /// * `self` - The handle
+    /// * `id_arr` - An array of strings containing the cluster IDs
+    /// * `node_visitor` - The node visitor function
     pub unsafe fn color_by_dist_to_query(
         &self,
         id_arr: &[String],
         node_visitor: CBFnNodeVisitor,
     ) -> FFIError {
+        // If the current query exists
         for id in id_arr {
             match self.get_cluster_from_string(id.clone()) {
                 Ok(cluster) => {
                     if let Some(query) = &self.current_query {
+                        // Color the cluster by the distance to the query
                         let mut baton_data = ClusterDataWrapper::from_cluster(cluster);
 
                         baton_data.data_mut().dist_to_query =
@@ -324,14 +505,28 @@ impl<'a> Handle<'a> {
         FFIError::Ok
     }
 
+    /// Function to iterate through the tree in a depth-first traversal
+    /// 
+    /// # Arguments
+    /// 
+    /// * `self` - The handle
+    /// * `node_visitor` - The node visitor function
+    /// * `start_node` - The starting node
+    /// * `max_depth` - The maximum depth
+    /// 
+    /// # Returns
+    /// 
+    /// An `FFIError` indicating if the traversal was successful or not
     pub unsafe fn for_each_dft(
         &self,
         node_visitor: CBFnNodeVisitor,
         start_node: String,
         max_depth: i32,
     ) -> FFIError {
+        // If the tree exists
         return if self.tree().is_some() {
             if start_node == "root" {
+                // If the start node is the root, iterate through the tree
                 if let Some(node) = self.root() {
                     Self::for_each_dft_helper(node, node_visitor, max_depth);
                     FFIError::Ok
@@ -339,8 +534,10 @@ impl<'a> Handle<'a> {
                     FFIError::HandleInitFailed
                 }
             } else {
+                // If the start node is not the root, get the cluster from the string
                 match Self::get_cluster_from_string(self, start_node) {
                     Ok(root) => {
+                        // Iterate through the tree
                         Self::for_each_dft_helper(root, node_visitor, max_depth);
                         FFIError::Ok
                     }
@@ -355,12 +552,25 @@ impl<'a> Handle<'a> {
         };
     }
 
+    /// Function to set the names of the clusters
+    /// 
+    /// # Arguments
+    /// 
+    /// * `self` - The handle
+    /// * `node_visitor` - The node visitor function
+    /// * `start_node` - The starting node
+    /// 
+    /// # Returns
+    /// 
+    /// An `FFIError` indicating if the names were set successfully or not
     pub unsafe fn set_names(
         &self,
         node_visitor: crate::CBFnNameSetter,
         start_node: String,
     ) -> FFIError {
+        // If the tree exists
         return if self.tree().is_some() {
+            // If the start node is the root, set the names of the clusters
             if start_node == "root" {
                 if let Some(node) = self.root() {
                     Self::set_names_helper(node, node_visitor);
@@ -369,6 +579,7 @@ impl<'a> Handle<'a> {
                     FFIError::HandleInitFailed
                 }
             } else {
+                // If the start node is not the root, get the cluster from the string
                 match Self::get_cluster_from_string(self, start_node) {
                     Ok(root) => {
                         Self::set_names_helper(root, node_visitor);
@@ -385,13 +596,25 @@ impl<'a> Handle<'a> {
         };
     }
 
+    /// Helper function for name definition
+    /// 
+    /// # Arguments
+    /// 
+    /// * `root` - The root of the tree
+    /// * `node_visitor` - The node visitor function
+    /// 
+    /// # Returns
+    /// 
+    /// Nothing
     fn set_names_helper(root: &Clusterf32, node_visitor: crate::CBFnNameSetter) {
+        // If the root is a leaf, set the name of the cluster
         if root.is_leaf() {
             let baton = ClusterIDsWrapper::from_cluster(root);
 
             node_visitor(Some(baton.data()));
             return;
         }
+        // If the root has children, set the name of the cluster and iterate through the children
         if let Some([left, right]) = root.children() {
             let baton = ClusterIDsWrapper::from_cluster(root);
 
@@ -400,12 +623,26 @@ impl<'a> Handle<'a> {
             Self::set_names_helper(right, node_visitor);
         }
     }
+
+    /// Helper function for depth-first traversal
+    /// 
+    /// # Arguments
+    /// 
+    /// * `root` - The root of the tree
+    /// * `node_visitor` - The node visitor function
+    /// * `max_depth` - The maximum depth
+    /// 
+    /// # Returns
+    /// 
+    /// Nothing
     fn for_each_dft_helper(root: &Clusterf32, node_visitor: CBFnNodeVisitor, max_depth: i32) {
+        // If the root is a leaf or the depth is greater than the maximum depth, set the node visitor
         if root.is_leaf() || root.depth() as i32 >= max_depth {
             let baton = ClusterDataWrapper::from_cluster(root);
             node_visitor(Some(baton.data()));
             return;
         }
+        // If the root has children, set the node visitor and iterate through the children
         if let Some([left, right]) = root.children() {
             let baton = ClusterDataWrapper::from_cluster(root);
 
@@ -428,11 +665,30 @@ impl<'a> Handle<'a> {
     //     }
     // }
 
+    /// Function to set the current query
+    /// 
+    /// # Arguments
+    /// 
+    /// * `self` - The handle
+    /// * `data` - A reference to the query data
+    /// 
+    /// # Returns
+    /// 
+    /// Nothing
     pub fn set_current_query(&mut self, _data: &Vec<f32>) {
         todo!()
         // self.current_query = Some(data.clone());
     }
 
+    /// Function to get the current query
+    /// 
+    /// # Arguments
+    /// 
+    /// * `self` - The handle
+    /// 
+    /// # Returns
+    /// 
+    /// An `Option` containing the current query or `None` if the query does not exist
     pub fn get_current_query(&self) -> &Option<Vec<f32>> {
         &self.current_query
     }
@@ -450,6 +706,15 @@ impl<'a> Handle<'a> {
     //     return Err(FFIError::NullPointerPassed);
     // }
 
+    /// Function to get the number of nodes in the tree
+    /// 
+    /// # Arguments
+    /// 
+    /// * `self` - The handle
+    /// 
+    /// # Returns
+    /// 
+    /// An `i32` containing the number of nodes in the tree or 0 if the tree does not exist
     pub fn get_num_nodes(&self) -> i32 {
         if let Some(tree) = self.tree() {
             tree.cardinality() as i32
@@ -458,10 +723,28 @@ impl<'a> Handle<'a> {
         }
     }
 
+    /// Function to get the clam graph of the handle
+    /// 
+    /// # Arguments
+    /// 
+    /// * `self` - The handle
+    /// 
+    /// # Returns
+    /// 
+    /// An `Option` containing a reference to the graph or `None` if the graph does not exist
     pub fn clam_graph(&self) -> Option<&Graph<'a, f32>> {
         self.clam_graph.as_ref()
     }
 
+    /// Function to get the tree height of the handle
+    /// 
+    /// # Arguments
+    /// 
+    /// * `self` - The handle
+    /// 
+    /// # Returns
+    /// 
+    /// An `i32` containing the height of the tree or 0 if the tree does not exist
     pub fn tree_height(&self) -> i32 {
         if let Some(tree) = self.tree() {
             tree.depth() as i32
@@ -470,6 +753,16 @@ impl<'a> Handle<'a> {
         }
     }
 
+    /// Function to get the cluster name from a string
+    /// 
+    /// # Arguments
+    /// 
+    /// * `self` - The handle
+    /// * `cluster_id` - The cluster ID
+    /// 
+    /// # Returns
+    /// 
+    /// A `Result` containing a reference to the cluster or an `FFIError` if the cluster could not be found
     // why isnt string taken by reference?
     pub unsafe fn get_cluster_from_string(
         &self,
@@ -477,6 +770,7 @@ impl<'a> Handle<'a> {
     ) -> Result<&Clusterf32, FFIError> {
         let mut parts = cluster_id.split('-');
 
+        // If the cluster ID has an offset and a cardinality, get the cluster
         if let (Some(offset_str), Some(cardinality_str)) = (parts.next(), parts.next()) {
             if let (Ok(offset), Ok(cardinality)) = (
                 offset_str.parse::<usize>(),
@@ -489,12 +783,24 @@ impl<'a> Handle<'a> {
         Err(FFIError::HandleInitFailed)
     }
 
+    /// Function to get the cluster from an offset and a cardinality
+    /// 
+    /// # Arguments
+    /// 
+    /// * `self` - The handle
+    /// * `offset` - The offset of the cluster
+    /// * `cardinality` - The cardinality of the cluster
+    /// 
+    /// # Returns
+    /// 
+    /// A `Result` containing a reference to the cluster or an `FFIError` if the cluster could not be found
     pub unsafe fn get_cluster(
         &self,
         offset: usize,
         cardinality: usize,
     ) -> Result<&Clusterf32, FFIError> {
-        if let Some(tree) = self.get_tree() {
+        // If the tree exists, get the cluster from the offset and cardinality
+        if let Some(tree) = self.tree() {
             return if let Some(cluster) = tree.get_cluster(offset, cardinality) {
                 Ok(cluster)
             } else {
@@ -504,12 +810,23 @@ impl<'a> Handle<'a> {
         debug!("root not built get cluster");
         Err(FFIError::HandleInitFailed)
     }
+
+    /// Function to create a reginald tilford layout. Runs the layout algorithm within the function.
+    /// 
+    /// # Arguments
+    /// 
+    /// * `self` - The handle
+    /// * `node_visitor` - The node visitor function
+    /// 
+    /// # Returns
+    /// 
+    /// An `FFIError` indicating if the layout was created successfully or not
     pub fn create_reingold_layout(&self, node_visitor: CBFnNodeVisitor) -> FFIError {
         return if self.tree().is_some() {
             reingold_tilford::run(
                 self.root()
                     .unwrap_or_else(|| unreachable!("cakes exists - root should exist")),
-                self.get_tree().unwrap().depth() as i32,
+                self.tree().unwrap().depth() as i32,
                 node_visitor,
             )
         } else {
@@ -517,6 +834,19 @@ impl<'a> Handle<'a> {
         };
     }
 
+    /// Function to create a reginald tilford layout with an offset. Runs the layout algorithm within the function.
+    /// 
+    /// # Arguments
+    /// 
+    /// * `self` - The handle
+    /// * `root` - The root of the cluster
+    /// * `current_depth` - The current depth
+    /// * `max_depth` - The maximum depth
+    /// * `node_visitor` - The node visitor function
+    /// 
+    /// # Returns
+    /// 
+    /// An `FFIError` indicating if the layout was created successfully or not
     pub unsafe fn create_reingold_layout_offset_from(
         &self,
         root: &ClusterData,

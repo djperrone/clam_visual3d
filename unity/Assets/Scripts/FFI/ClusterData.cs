@@ -1,4 +1,3 @@
-using Clam.FFI;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -79,7 +78,6 @@ namespace Clam
                 stringBuilder.AppendLine(this.id.AsString);
                 stringBuilder.AppendLine(depth.ToString());
                 stringBuilder.AppendLine(cardinality.ToString());
-                stringBuilder.AppendLine(offset.ToString());
                 stringBuilder.AppendLine(radius.ToString());
                 stringBuilder.AppendLine(lfd.ToString());
                 stringBuilder.AppendLine(argCenter.ToString());

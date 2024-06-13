@@ -1,5 +1,5 @@
 use std::{
-    collections::{HashMap, HashSet},
+    collections::HashSet,
     env,
     fs::{self, ReadDir},
     io::Read,
@@ -8,7 +8,7 @@ use std::{
 
 use abd_clam::{Dataset, Graph, PartitionCriteria, Tree};
 use distances::Number;
-use rand::{seq::SliceRandom, thread_rng};
+use rand::seq::SliceRandom;
 
 use crate::{
     graph::{force_directed_graph::ForceDirectedGraph, graph_builder::build_force_directed_graph},
@@ -39,11 +39,11 @@ fn test_params(
 
     // Open the directory
     let data_folder = fs::read_dir(dir_path).unwrap();
-    let min_cardinality = 1;
-    let min_depth = 11;
+    let min_cardinality = 10;
+    let min_depth = 14;
     let distance_metric = DistanceMetric::Euclidean;
     let scalar = 100.0;
-    let max_iters = 1200;
+    let max_iters = 1000;
     let data_folder_name = PathBuf::from(dir_path);
 
     (
@@ -55,8 +55,7 @@ fn test_params(
         max_iters,
         data_folder_name,
         String::from("accuracy_results"),
-        Some("wine".to_string()),
-        // single_target,
+        single_target,
     )
 }
 
@@ -217,115 +216,109 @@ pub fn run_triangle_test(
 }
 
 #[test]
-fn edge_equivalence() {
-    for i in 4..15 {
-        let (
-            dir,
-            min_cardinality,
-            min_depth,
-            distance_metric,
-            scalar,
-            max_iters,
-            src_folder,
-            out_folder_root,
-            target,
-        ) = test_params(None);
-        // ) = test_params(None);
+fn triangle_equivalency() {
+    let (
+        dir,
+        min_cardinality,
+        min_depth,
+        distance_metric,
+        scalar,
+        max_iters,
+        src_folder,
+        out_folder_root,
+        target,
+    ) = test_params(Some("http".to_string()));
+    // ) = test_params(None);
 
-        // let outfolder = "edge_equivalence";
-        let mut out_folder = PathBuf::new();
-        out_folder.push(out_folder_root);
-        out_folder.push("edge_equivalence");
-        let metric_cb = utils::are_triangles_equivalent;
+    // let outfolder = "edge_equivalence";
+    let mut out_folder = PathBuf::new();
+    out_folder.push(out_folder_root);
+    out_folder.push("edge_equivalence");
+    let metric_cb = utils::are_triangles_equivalent;
 
-        run_for_each(
-            dir,
-            min_cardinality,
-            i,
-            distance_metric,
-            scalar,
-            max_iters,
-            &src_folder,
-            out_folder.to_str().unwrap(),
-            target,
-            metric_cb,
-        );
-    }
+    run_for_each(
+        dir,
+        min_cardinality,
+        min_depth,
+        distance_metric,
+        scalar,
+        max_iters,
+        &src_folder,
+        out_folder.to_str().unwrap(),
+        target,
+        metric_cb,
+    );
 }
 
 #[test]
 fn edge_distortion() {
-    for i in 4..12 {
-        let (
-            dir,
-            min_cardinality,
-            min_depth,
-            distance_metric,
-            scalar,
-            max_iters,
-            src_folder,
-            out_folder_root,
-            target,
-        ) = test_params(None);
+    let (
+        dir,
+        min_cardinality,
+        min_depth,
+        distance_metric,
+        scalar,
+        max_iters,
+        src_folder,
+        out_folder_root,
+        target,
+    ) = test_params(Some("http".to_string()));
 
-        // ) = test_params(Some("vertebral".to_string()));
-        // test_params(None);
+    // ) = test_params(Some("vertebral".to_string()));
+    // test_params(None);
 
-        let mut out_folder = PathBuf::new();
-        out_folder.push(out_folder_root);
-        out_folder.push("edge_distortion");
-        let metric_cb = utils::calc_edge_distortion;
+    let mut out_folder = PathBuf::new();
+    out_folder.push(out_folder_root);
+    out_folder.push("edge_distortion");
+    let metric_cb = utils::calc_edge_distortion;
 
-        run_for_each(
-            dir,
-            min_cardinality,
-            i,
-            distance_metric,
-            scalar,
-            max_iters,
-            &src_folder,
-            out_folder.to_str().unwrap(),
-            target,
-            metric_cb,
-        );
-    }
+    run_for_each(
+        dir,
+        min_cardinality,
+        min_depth,
+        distance_metric,
+        scalar,
+        max_iters,
+        &src_folder,
+        out_folder.to_str().unwrap(),
+        target,
+        metric_cb,
+    );
 }
 
 #[test]
 fn angle_distortion() {
-    for i in 4..12 {
-        let (
-            dir,
-            min_cardinality,
-            min_depth,
-            distance_metric,
-            scalar,
-            max_iters,
-            src_folder,
-            out_folder_root,
-            target,
-            // ) = test_params(None);
-        ) = test_params(None);
+    let (
+        dir,
+        min_cardinality,
+        min_depth,
+        distance_metric,
+        scalar,
+        max_iters,
+        src_folder,
+        out_folder_root,
+        target,
+        // ) = test_params(None);
+    ) = test_params(Some("http".to_string()));
 
-        // let outfolder = "angle_distortion";
-        let mut out_folder = PathBuf::new();
-        out_folder.push(out_folder_root);
-        out_folder.push("angle_distortion");
-        let metric_cb = utils::calc_angle_distortion;
+    // let outfolder = "angle_distortion";
+    let mut out_folder = PathBuf::new();
+    out_folder.push(out_folder_root);
+    out_folder.push("angle_distortion");
+    let metric_cb = utils::calc_angle_distortion;
 
-        run_for_each(
-            dir,
-            min_cardinality,
-            i,
-            distance_metric,
-            scalar,
-            max_iters,
-            &src_folder,
-            out_folder.to_str().unwrap(),
-            target,
-            metric_cb,
-        );
-    }
+    run_for_each(
+        dir,
+        min_cardinality,
+        min_depth,
+        distance_metric,
+        scalar,
+        max_iters,
+        &src_folder,
+        out_folder.to_str().unwrap(),
+        target,
+        metric_cb,
+    );
 }
 
 fn run_for_each(
@@ -395,244 +388,6 @@ fn run_for_each(
                     }
                 }
             }
-        }
-    }
-}
-
-fn run_umap_test_on_file(
-    file_path: &str,
-    tree: &Treef32,
-    metric_cb: fn(&mut [(&str, f32); 3], &mut [(&str, f32); 3]) -> f64,
-) -> Result<f64, String> {
-    let mut valid_count = 0;
-    let mut metric_sum: f64 = 0.;
-
-    if let Ok(positions) = utils::read_umap_positions(file_path) {
-        let range_start: usize = 0;
-        let range_end: usize = positions.len() - 1;
-        let mut range: Vec<usize> = (range_start..=range_end).collect();
-
-        if let Some(max_value) = range.iter().max() {
-            println!("Highest value: {}", max_value);
-        } else {
-            println!("The vector is empty.");
-        }
-
-        let data = tree.data();
-        if let Some(max_value) = data.permuted_indices().unwrap().iter().max() {
-            println!("Highest value perm: {}", max_value);
-        } else {
-            println!("The vector is empty.");
-        }
-
-        let mut rng = thread_rng();
-
-        for _ in 0..range_end * 3 {
-            let permuted_indices = utils::randomly_select_three_indices(&mut range, &mut rng);
-            // println!("test1");
-            let original_indices = (
-                data.original_index(permuted_indices.0 as usize),
-                data.original_index(permuted_indices.1 as usize),
-                data.original_index(permuted_indices.2 as usize),
-            );
-            // println!("test2");
-
-            let selected_positions = [
-                positions[original_indices.0],
-                positions[original_indices.1],
-                positions[original_indices.2],
-            ];
-
-            if let Ok(mut umap_triangle) = utils::positions_to_distances(&selected_positions) {
-                let clusters = [
-                    tree.get_cluster(permuted_indices.0, 1).unwrap(),
-                    tree.get_cluster(permuted_indices.1, 1).unwrap(),
-                    tree.get_cluster(permuted_indices.2, 1).unwrap(),
-                ];
-
-                if let Ok(mut clam_triangle) = utils::triangle_from_clusters(tree, &clusters) {
-                    // let mut results: Vec<f64> =
-                    //     Vec::with_capacity(clam_graph.clusters().len() * num_test_iters as usize);
-                    metric_sum += metric_cb(&mut clam_triangle, &mut umap_triangle);
-                    valid_count += 1;
-                }
-            }
-
-            // results.push(perc_correct);
-        }
-    }
-    if valid_count == 0 {
-        return Err("no valid triangles found".to_string());
-    }
-    let average_distortion = metric_sum as f64 / (valid_count as f64) as f64;
-    return Ok(average_distortion);
-}
-
-#[test]
-fn umap_test_edge_e9quivalence_umap() {
-    let (
-        search_dir,
-        _min_cardinality,
-        _min_depth,
-        distance_metric,
-        _scalar,
-        _max_iters,
-        data_folder,
-        out_folder_root,
-        target,
-        // ) = test_params(None);
-    ) = test_params(Some("satellite".to_string()));
-
-    let mut out_folder = PathBuf::new();
-    out_folder.push(out_folder_root);
-    out_folder.push("umap_edge_equivalence");
-    let metric_cb = utils::are_triangles_equivalent;
-
-    run_for_each_umap(
-        search_dir,
-        target.unwrap().as_str(),
-        &data_folder,
-        out_folder.to_str().unwrap(),
-        distance_metric,
-        metric_cb,
-    );
-}
-
-#[test]
-fn umap_test_edge_1distortion() {
-    let (
-        search_dir,
-        _min_cardinality,
-        _min_depth,
-        distance_metric,
-        _scalar,
-        _max_iters,
-        data_folder,
-        out_folder_root,
-        target,
-        // ) = test_params(None);
-    ) = test_params(None);
-
-    let mut out_folder = PathBuf::new();
-    out_folder.push(out_folder_root);
-    out_folder.push("umap_edge_distortion");
-    let metric_cb = utils::calc_edge_distortion;
-
-    run_for_each_umap(
-        search_dir,
-        target.unwrap().as_str(),
-        &data_folder,
-        out_folder.to_str().unwrap(),
-        distance_metric,
-        metric_cb,
-    );
-}
-
-#[test]
-fn umap_test_ang1le_distortion() {
-    let (
-        search_dir,
-        _min_cardinality,
-        _min_depth,
-        distance_metric,
-        _scalar,
-        _max_iters,
-        data_folder,
-        out_folder_root,
-        target,
-        // ) = test_params(None);
-    ) = test_params(None);
-
-    let mut out_folder = PathBuf::new();
-    out_folder.push(out_folder_root);
-    out_folder.push("umap_angle_distortion");
-    let metric_cb = utils::calc_angle_distortion;
-
-    run_for_each_umap(
-        search_dir,
-        target.unwrap().as_str(),
-        &data_folder,
-        out_folder.to_str().unwrap(),
-        distance_metric,
-        metric_cb,
-    );
-}
-
-fn run_for_each_umap(
-    dir: ReadDir,
-    data_name: &str,
-    src_folder: &PathBuf,
-    outfolder: &str,
-    distance_metric: DistanceMetric,
-    metric_cb: fn(&mut [(&str, f32); 3], &mut [(&str, f32); 3]) -> f64,
-) {
-    match Handle::create_dataset(data_name, &src_folder, distance_metric, false) {
-        Ok(data) => {
-            println!("created dataset {}", data_name);
-            let criteria = PartitionCriteria::new(true).with_min_cardinality(1);
-
-            let tree = Tree::new(data, Some(1)).partition(&criteria);
-            println!("tree card :{}", tree.cardinality());
-            println!("tree data name :{}", tree.data().name());
-            // let dir_path = ;
-            // let dir_path = "../../umap/".to_string() + data_name;
-
-            let mut scores: HashMap<u32, Vec<f64>> = HashMap::new();
-            for _ in 0..5 {
-                let dir_path = "../../umap/";
-                let dir_path = dir_path.to_string() + data_name;
-                // Iterate through the directory entries
-                if let Ok(entries) = fs::read_dir(dir_path) {
-                    for entry in entries {
-                        if let Ok(entry) = entry {
-                            // Get the path of the entry
-                            let entry_path = entry.path();
-
-                            // Check if it's a directory
-                            if entry_path.is_dir() {
-                                // Process the directory
-                                println!("Found directory: {}", entry_path.display());
-                            } else {
-                                if let Some(positions_file) = entry_path.to_str() {
-                                    println!("positions file : {}", positions_file);
-
-                                    let avg =
-                                        run_umap_test_on_file(positions_file, &tree, metric_cb)
-                                            .unwrap();
-                                    println!("avg: {}", avg);
-                                    let k = utils::extract_umap_k(positions_file).unwrap();
-                                    if !scores.contains_key(&k) {
-                                        scores.insert(k, Vec::new());
-                                    }
-                                    scores.get_mut(&k).unwrap().push(avg);
-                                }
-                                // Process the file
-                                println!("Found file: {}", entry_path.display());
-                            }
-                        }
-                    }
-                } else {
-                    // eprintln!("Failed to read directory {}", dir_path);
-                }
-            }
-
-            println!("scores: {:?}", scores);
-            let mut outpath = PathBuf::new();
-            outpath.push(outfolder);
-            fs::create_dir_all(&outpath);
-
-            outpath.push(data_name.to_string() + ".csv");
-            // outpath.push(".csv");
-            println!("ouptath {:?}", outpath);
-            let mut avg_scores: HashMap<u32, f64> = HashMap::new();
-            for (key, value) in scores {
-                let avg: f64 = value.iter().sum::<f64>() / value.len().as_f64();
-                avg_scores.insert(key, avg);
-            }
-            utils::write_umap_scores_to_file(outpath.to_str().unwrap(), &avg_scores);
-        }
-        Err(e) => {
-            println!("{:?}", e);
         }
     }
 }

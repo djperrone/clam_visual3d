@@ -10,7 +10,7 @@ namespace Clam
 
     public class Node : MonoBehaviour
     {
-        private static Color m_SelectedColor = new Color(0.0f/255.0f, 231.0f/ 255.0f, 250.0f / 255.0f);
+
         private string m_ID;
         private string m_LeftChildID;
         private string m_RightChildID;
