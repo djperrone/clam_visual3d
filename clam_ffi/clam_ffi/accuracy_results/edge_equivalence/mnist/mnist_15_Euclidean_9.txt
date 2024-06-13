@@ -1,0 +1,6 @@
+data_cardinality,graph_vertex_cardinality,graph_edge_cardinality,tree_height
+70000,575,162936,35
+data_cardinality,graph_vertex_cardinality,graph_edge_cardinality,tree_height
+70000,575,162936,35
+data_cardinality,graph_vertex_cardinality,graph_edge_cardinality,tree_height
+70000,575,162936,35

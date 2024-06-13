@@ -1,0 +1,4 @@
+data_cardinality,graph_vertex_cardinality,graph_edge_cardinality,tree_height
+129,16,8,12
+data_cardinality,graph_vertex_cardinality,graph_edge_cardinality,tree_height
+129,16,8,12

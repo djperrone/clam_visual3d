@@ -1,0 +1,2 @@
+data_cardinality,graph_vertex_cardinality,graph_edge_cardinality,tree_height
+7200,112,1247,20

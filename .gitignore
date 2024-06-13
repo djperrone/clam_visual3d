@@ -82,5 +82,7 @@ unity/crashlytics-build.properties
 
 #data/binaries/*
 data/
-clam_ffi/clam_ffi/accuracy_results/
-accuracy_benchmarks/plots/
+# clam_ffi/clam_ffi/accuracy_results/
+# accuracy_benchmarks/plots/
+# accuracy_benchmarks/*.png
+# accuracy_benchmarks/*.csv
