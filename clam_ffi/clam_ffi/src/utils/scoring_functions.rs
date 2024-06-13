@@ -61,7 +61,7 @@ pub fn enum_to_string(scoring_function: &ScoringFunction) -> Result<String, FFIE
 
 pub fn enum_to_function(
     scoring_function: &ScoringFunction,
-) -> Result<abd_clam::MetaMLScorer, FFIError> {
+) -> Result<abd_clam::graph::MetaMLScorer, FFIError> {
     let pretrained_models = abd_clam::chaoda::pretrained_models::get_meta_ml_scorers();
     match enum_to_string(scoring_function) {
         Ok(function_name) => {

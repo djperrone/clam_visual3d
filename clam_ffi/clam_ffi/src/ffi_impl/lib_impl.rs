@@ -2,6 +2,7 @@ use core::num;
 use std::collections::HashSet;
 use std::ffi::{c_char, CStr};
 
+use abd_clam::Cluster;
 use distances::Number;
 
 use crate::ffi_impl::cleanup::Cleanup;
@@ -10,7 +11,7 @@ use crate::{
     utils::{
         error::FFIError,
         helpers,
-        types::{Clusterf32, InHandlePtr},
+        types::{InHandlePtr, Vertexf32},
     },
     CBFnNameSetter, CBFnNodeVisitor,
 };
@@ -18,20 +19,20 @@ use crate::{
 use super::{cluster_data::ClusterData, cluster_data_wrapper::ClusterDataWrapper};
 
 /// Function that calls the `for_each_dft` method on the handle
-/// 
+///
 /// # Safety
-/// 
+///
 /// This function is unsafe because it dereferences the pointer passed to it
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `ptr` - A pointer to the handle
 /// * `node_visitor` - A function pointer to the node visitor function
 /// * `start_node` - A pointer to the start node
 /// * `max_depth` - The maximum depth to traverse
-/// 
+///
 /// # Returns
-/// 
+///
 /// An `FFIError` enum
 pub unsafe fn for_each_dft_impl(
     ptr: InHandlePtr,
@@ -52,21 +53,20 @@ pub unsafe fn for_each_dft_impl(
     FFIError::NullPointerPassed
 }
 
-
 /// Function that calls the `set_names` method on the handle
-/// 
+///
 /// # Safety
-/// 
+///
 /// This function is unsafe because it dereferences the pointer passed to it
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `ptr` - A pointer to the handle
 /// * `node_visitor` - A function pointer to the name setter function
 /// * `start_node` - A pointer to the start node
-/// 
+///
 /// # Returns
-/// 
+///
 /// An `FFIError` enum
 pub unsafe fn set_names_impl(
     ptr: InHandlePtr,
@@ -86,14 +86,14 @@ pub unsafe fn set_names_impl(
 }
 
 /// Function that frees a resource that was passed to the FFI from the cluster data
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `in_cluster_data` - The input cluster data
 /// * `out_cluster_data` - The output cluster data
-/// 
+///
 /// # Returns
-/// 
+///
 /// An `FFIError` enum
 pub fn free_resource<T: Clone + Cleanup>(
     in_cluster_data: Option<&T>,
@@ -113,17 +113,17 @@ pub fn free_resource<T: Clone + Cleanup>(
 }
 
 /// Function that returns the tree height of the handle
-/// 
+///
 /// # Safety
-/// 
+///
 /// This function is unsafe because it dereferences the pointer passed to it
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `ptr` - A pointer to the handle
-/// 
+///
 /// # Returns
-/// 
+///
 /// The tree height as an `i32`
 pub unsafe fn tree_height_impl(ptr: InHandlePtr) -> i32 {
     if let Some(handle) = ptr {
@@ -135,17 +135,17 @@ pub unsafe fn tree_height_impl(ptr: InHandlePtr) -> i32 {
 }
 
 /// Function that returns the tree cardinality of the handle
-/// 
+///
 /// # Safety
-/// 
+///
 /// This function is unsafe because it dereferences the pointer passed to it
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `ptr` - A pointer to the handle
-/// 
+///
 /// # Returns
-/// 
+///
 /// The tree cardinality as an `i32`
 pub unsafe fn tree_cardinality_impl(ptr: InHandlePtr) -> i32 {
     if let Some(handle) = ptr {
@@ -157,20 +157,19 @@ pub unsafe fn tree_cardinality_impl(ptr: InHandlePtr) -> i32 {
     -1
 }
 
-
 /// Function that returns the vertex degree of a cluster in the handle
-/// 
+///
 /// # Safety
-/// 
+///
 /// This function is unsafe because it dereferences the pointer passed to it
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `ptr` - A pointer to the handle
 /// * `cluster_id` - A pointer to the cluster id
-/// 
+///
 /// # Returns
-/// 
+///
 /// The vertex degree as an `i32` or -1 if the handle is not created
 pub unsafe fn vertex_degree_impl(ptr: InHandlePtr, cluster_id: *const c_char) -> i32 {
     if let Some(handle) = ptr {
@@ -188,18 +187,18 @@ pub unsafe fn vertex_degree_impl(ptr: InHandlePtr, cluster_id: *const c_char) ->
 }
 
 /// Function that returns the cluster label of a cluster in the handle
-/// 
+///
 /// # Safety
-/// 
+///
 /// This function is unsafe because it dereferences the pointer passed to it
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `ptr` - A pointer to the handle
 /// * `cluster_id` - A pointer to the cluster id
-/// 
+///
 /// # Returns
-/// 
+///
 /// The cluster label as an `i32` or -1 if the handle is not created
 pub unsafe fn get_cluster_label_impl(ptr: InHandlePtr, cluster_id: *const c_char) -> i32 {
     // If the handle and label exist
@@ -238,17 +237,17 @@ pub unsafe fn get_cluster_label_impl(ptr: InHandlePtr, cluster_id: *const c_char
 }
 
 /// Function that returns the max vertex degree of the handle
-/// 
+///
 /// # Safety
-/// 
+///
 /// This function is unsafe because it dereferences the pointer passed to it
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `ptr` - A pointer to the handle
-/// 
+///
 /// # Returns
-/// 
+///
 /// The max vertex degree as an `i32` or -1 with a debug message based on where the error occurred
 pub unsafe fn max_vertex_degree_impl(ptr: InHandlePtr) -> i32 {
     // If the handle exists
@@ -259,7 +258,7 @@ pub unsafe fn max_vertex_degree_impl(ptr: InHandlePtr) -> i32 {
             if let Some(graph) = handle.clam_graph() {
                 // Get the max vertex degree of the graph
                 let mut max_degree = -1;
-                for c in graph.clusters() {
+                for c in graph.ordered_clusters() {
                     let vertex_degree = graph.vertex_degree(c).unwrap_or_else(|_| {
                         unreachable!(
                             "We are iterating through clusters in graph so it must be there"
@@ -281,17 +280,17 @@ pub unsafe fn max_vertex_degree_impl(ptr: InHandlePtr) -> i32 {
 }
 
 /// Function that returns the maximum leaf-to-root distance of each cluster in the handle
-/// 
+///
 /// # Safety
-/// 
+///
 /// This function is unsafe because it dereferences the pointer passed to it
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `ptr` - A pointer to the handle
-/// 
+///
 /// # Returns
-/// 
+///
 /// The max distance to leaf as an `f32` or -1.0 otherwise.
 pub unsafe fn max_lfd_impl(ptr: InHandlePtr) -> f32 {
     // If the handle and tree exist
@@ -312,14 +311,14 @@ pub unsafe fn max_lfd_impl(ptr: InHandlePtr) -> f32 {
 }
 
 /// Function that colors a provided cluster by the entropy of the cluster
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `ptr` - A pointer to the handle
 /// * `node_visitor` - A function pointer to the node visitor function
-/// 
+///
 /// # Returns
-/// 
+///
 /// An `FFIError` enum
 pub fn color_clusters_by_entropy_impl(ptr: InHandlePtr, node_visitor: CBFnNodeVisitor) -> FFIError {
     // If the handle and root exist
@@ -338,16 +337,16 @@ pub fn color_clusters_by_entropy_impl(ptr: InHandlePtr, node_visitor: CBFnNodeVi
 }
 
 /// Function that calculates the entropy color of a cluster
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `cluster` - The cluster to calculate the entropy color of
 /// * `labels` - The labels of the cluster
-/// 
+///
 /// # Returns
-/// 
+///
 /// A `glam::Vec3` representing the entropy color
-fn calc_cluster_entropy_color(cluster: &Clusterf32, labels: &[u8]) -> glam::Vec3 {
+fn calc_cluster_entropy_color(cluster: &Vertexf32, labels: &[u8]) -> glam::Vec3 {
     // Get the indices of the cluster
     let indices = cluster.indices();
     let mut entropy = [0; 2];
@@ -366,19 +365,19 @@ fn calc_cluster_entropy_color(cluster: &Clusterf32, labels: &[u8]) -> glam::Vec3
 }
 
 /// Function that calculates the dominant color of a cluster
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `cluster` - The cluster to calculate the dominant color of
 /// * `labels` - The labels of the cluster
 /// * `num_unique_labels` - The number of unique labels
 /// * `color_choices` - The color choices
-/// 
+///
 /// # Returns
-/// 
+///
 /// A `Result` containing the dominant color as a `glam::Vec3` or an error message as a `String`
 fn calc_cluster_dominant_color(
-    cluster: &Clusterf32,
+    cluster: &Vertexf32,
     labels: &[u8],
     num_unique_labels: usize,
     color_choices: &Vec<glam::Vec3>,
@@ -396,19 +395,19 @@ fn calc_cluster_dominant_color(
 }
 
 /// Function that calculates the dominant label of a cluster
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `cluster` - The cluster to calculate the dominant label of
 /// * `labels` - The labels of the cluster
 /// * `num_unique_labels` - The number of unique labels
 /// * `color_choices` - The color choices
-/// 
+///
 /// # Returns
-/// 
+///
 /// An `Option` containing the dominant label as a `usize`
 fn calc_cluster_dominant_label(
-    cluster: &Clusterf32,
+    cluster: &Vertexf32,
     labels: &[u8],
     num_unique_labels: usize,
     color_choices: &Vec<glam::Vec3>,
@@ -432,18 +431,18 @@ fn calc_cluster_dominant_label(
 }
 
 /// Function that colors the clusters by the dominant label of the cluster
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `ptr` - A pointer to the handle
 /// * `node_visitor` - A function pointer to the node visitor function
-fn color_helper(root: Option<&Clusterf32>, labels: &[u8], node_visitor: CBFnNodeVisitor) {
+fn color_helper(root: Option<&Vertexf32>, labels: &[u8], node_visitor: CBFnNodeVisitor) {
     // If the root exists
     if let Some(cluster) = root {
         // Get the cluster data
         let mut cluster_data = ClusterDataWrapper::from_cluster(cluster);
         cluster_data.data_mut().color = calc_cluster_entropy_color(cluster, labels);
-        
+
         // Visit the node
         node_visitor(Some(cluster_data.data()));
 
@@ -456,14 +455,14 @@ fn color_helper(root: Option<&Clusterf32>, labels: &[u8], node_visitor: CBFnNode
 }
 
 /// Function that colors the clusters by the dominant label of the cluster
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `ptr` - A pointer to the handle
 /// * `node_visitor` - A function pointer to the node visitor function
-/// 
+///
 /// # Returns
-/// 
+///
 /// An `FFIError` enum
 pub fn color_clusters_by_dominant_label_impl(
     ptr: InHandlePtr,
@@ -505,20 +504,20 @@ pub fn color_clusters_by_dominant_label_impl(
 }
 
 /// Function that colors the clusters by the distance to the query
-/// 
+///
 /// # Safety
-/// 
+///
 /// This function is unsafe because it dereferences the pointer passed to it
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `context` - A pointer to the handle
 /// * `arr_ptr` - A pointer to the cluster data
 /// * `len` - The length of the cluster data
 /// * `node_visitor` - A function pointer to the node visitor function
-/// 
+///
 /// # Returns
-/// 
+///
 /// An `FFIError` enum
 pub unsafe fn color_by_dist_to_query_impl(
     context: InHandlePtr,
@@ -549,19 +548,19 @@ pub unsafe fn color_by_dist_to_query_impl(
 }
 
 /// Function that returns the distance to the other cluster
-/// 
+///
 /// # Safety
-/// 
+///
 /// This function is unsafe because it dereferences the pointer passed to it
-/// 
+///
 /// # Arguments
-/// 
+///
 /// * `ptr` - A pointer to the handle
 /// * `node_name1` - A pointer to the first cluster name
 /// * `node_name2` - A pointer to the second cluster name
-/// 
+///
 /// # Returns
-/// 
+///
 /// The distance to the other cluster as an `f32` or -1.0 otherwise
 pub unsafe fn distance_to_other_impl(
     ptr: InHandlePtr,

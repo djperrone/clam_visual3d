@@ -1,3 +1,4 @@
+use abd_clam::Cluster;
 use rand::seq::IteratorRandom;
 
 use super::physics_node::PhysicsNode;
@@ -154,9 +155,9 @@ impl ForceDirectedGraph {
         scalar: f32,
     ) {
         let mut rng: rand::prelude::ThreadRng = rand::thread_rng();
-        for cluster1 in clam_graph.clusters() {
+        for cluster1 in clam_graph.ordered_clusters() {
             for _ in 0..3 {
-                if let Some(cluster2) = clam_graph.clusters().iter().choose(&mut rng) {
+                if let Some(cluster2) = clam_graph.ordered_clusters().iter().choose(&mut rng) {
                     let dist = cluster1.distance_to_other(tree.data(), cluster2);
 
                     let spring = Spring::new(dist, cluster1.name(), cluster2.name(), false);

@@ -1,5 +1,7 @@
+use abd_clam::Cluster;
+
 use crate::graph;
-use crate::utils::types::Clusterf32;
+use crate::utils::types::Vertexf32;
 
 // pub struct NodeNDim<const N: usize> {
 //     position: [f32; N],
@@ -20,7 +22,7 @@ pub struct PhysicsNode {
 }
 
 impl PhysicsNode {
-    pub fn new(pos: glam::Vec3, cluster: &Clusterf32) -> Self {
+    pub fn new(pos: glam::Vec3, cluster: &Vertexf32) -> Self {
         PhysicsNode {
             position: pos,
             friction: 0.98,

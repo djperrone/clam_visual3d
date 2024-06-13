@@ -2,8 +2,10 @@
 #![allow(unused_variables)]
 #![allow(unreachable_code)]
 
-use abd_clam::Cluster;
+use abd_clam::{graph::Vertex, Cluster};
 use std::{cell::RefCell, rc::Rc};
+
+use crate::utils::types::Vertexf32;
 
 extern crate nalgebra as na;
 type Vec3 = na::Vector3<f32>;
@@ -65,7 +67,7 @@ impl Node {
         Some(Rc::new(RefCell::new(Node::new(depth, name))))
     }
 
-    pub fn create_layout(abd_clam_root: &Cluster<f32>, max_depth: i32) -> Link {
+    pub fn create_layout(abd_clam_root: &Vertexf32, max_depth: i32) -> Link {
         let draw_root = Node::new_link(0f32, abd_clam_root.name());
 
         Self::init_helper(draw_root.clone(), abd_clam_root, 0f32, max_depth);
@@ -82,7 +84,7 @@ impl Node {
         draw_root
     }
 
-    fn init_helper(draw_root: Link, abd_clam_root: &Cluster<f32>, depth: f32, max_depth: i32) {
+    fn init_helper(draw_root: Link, abd_clam_root: &Vertexf32, depth: f32, max_depth: i32) {
         if abd_clam_root.is_leaf() || depth as i32 == max_depth {
             return;
         }

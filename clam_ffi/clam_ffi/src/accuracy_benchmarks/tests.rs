@@ -6,7 +6,10 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use abd_clam::{Dataset, Graph, PartitionCriteria, Tree};
+use abd_clam::{
+    graph::{self, Graph},
+    Dataset, PartitionCriteria, Tree,
+};
 use distances::Number;
 use rand::{seq::SliceRandom, thread_rng};
 
@@ -76,9 +79,7 @@ fn run_test_on_file(
             println!("created dataset");
             let criteria = PartitionCriteria::new(true).with_min_cardinality(min_cardinality);
 
-            let tree = Tree::new(data, Some(1))
-                .partition(&criteria)
-                .with_ratios(false);
+            let tree = Tree::new(data, Some(1)).partition(&criteria, None);
 
             if let Ok(graph) = Graph::from_tree(
                 &tree,
@@ -181,10 +182,14 @@ pub fn run_triangle_test(
     num_test_iters: i32,
     metric_cb: fn(&mut [(&str, f32); 3], &mut [(&str, f32); 3]) -> f64,
 ) -> Result<f64, String> {
-    if clam_graph.clusters().len() < 3 {
+    if clam_graph.ordered_clusters().len() < 3 {
         return Err("less than 3 clusters in graph".to_string());
     }
-    let mut clusters: Vec<_> = clam_graph.clusters().into_iter().map(|c| *c).collect();
+    let mut clusters: Vec<_> = clam_graph
+        .ordered_clusters()
+        .into_iter()
+        .map(|c| *c)
+        .collect();
     let mut rng: rand::prelude::ThreadRng = rand::thread_rng();
     let mut metric_sum: f64 = 0.;
 
@@ -192,7 +197,7 @@ pub fn run_triangle_test(
     //     Vec::with_capacity(clam_graph.clusters().len() * num_test_iters as usize);
     let mut valid_count = 0;
     for _ in 0..num_test_iters {
-        for a in clam_graph.clusters() {
+        for a in clam_graph.ordered_clusters() {
             // clusters.shuffle(&mut rng);
             clusters.partial_shuffle(&mut rng, 5);
             if let Some(chosen_clusters) = utils::choose_two_random_clusters_exclusive(&clusters, a)
@@ -571,7 +576,7 @@ fn run_for_each_umap(
             println!("created dataset {}", data_name);
             let criteria = PartitionCriteria::new(true).with_min_cardinality(1);
 
-            let tree = Tree::new(data, Some(1)).partition(&criteria);
+            let tree = Tree::new(data, Some(1)).partition(&criteria, None);
             println!("tree card :{}", tree.cardinality());
             println!("tree data name :{}", tree.data().name());
             // let dir_path = ;
