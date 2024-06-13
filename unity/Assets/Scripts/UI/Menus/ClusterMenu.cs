@@ -106,6 +106,7 @@ public class ClusterMenu
             stringBuilder.AppendLine("id: ");
             stringBuilder.AppendLine("depth: ");
             stringBuilder.AppendLine("card: ");
+            stringBuilder.AppendLine("offset: ");
             stringBuilder.AppendLine("radius: ");
             stringBuilder.AppendLine("lfd: ");
             stringBuilder.AppendLine("argC: ");

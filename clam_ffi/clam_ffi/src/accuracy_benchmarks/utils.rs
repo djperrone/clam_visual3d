@@ -1,9 +1,15 @@
-use std::{f32::consts::PI, fs::OpenOptions, path::PathBuf};
+use std::{
+    collections::HashMap,
+    error::Error,
+    f32::consts::PI,
+    fs::{File, OpenOptions},
+    path::{Path, PathBuf},
+};
 
 use abd_clam::Cluster;
-use csv::WriterBuilder;
+use csv::{Writer, WriterBuilder};
 use distances::Number;
-use rand::seq::SliceRandom;
+use rand::{rngs::ThreadRng, seq::SliceRandom, thread_rng};
 
 use crate::{
     ffi_impl::cluster_data_wrapper::ClusterDataWrapper,
@@ -104,30 +110,47 @@ pub fn calc_angle_distortion(
     clam_edges: &mut [(&str, f32); 3],
     unity_edges: &mut [(&str, f32); 3],
 ) -> f64 {
-    let triangle_perimeter = 180.;
     // println!("unity edges");
     let unity_angles = compute_angles_from_edge_lengths(unity_edges);
     // println!("clam edges");
 
     let clam_angles = compute_angles_from_edge_lengths(clam_edges);
+    let ref_angle_sum: f32 = clam_angles.iter().sum();
+    let test_angle_sum: f32 = unity_angles.iter().sum();
+    let mut err = false;
+    if ref_angle_sum > 180. {
+        err = true;
+        println!("ref angle sum: {}", ref_angle_sum)
+    }
+
+    if test_angle_sum > 180. {
+        err = true;
+
+        println!("ref angle sum: {}", test_angle_sum)
+    }
 
     // assumes angles sum to 180 - write separate test for this
 
-    let ref_percentages: Vec<f32> = clam_angles
-        .iter()
-        .map(|&val| val / triangle_perimeter)
-        .collect();
+    let ref_percentages: Vec<f32> = clam_angles.iter().map(|&val| val / ref_angle_sum).collect();
 
     let test_percentages: Vec<f32> = unity_angles
         .iter()
-        .map(|&val| val / triangle_perimeter)
+        .map(|&val| val / test_angle_sum)
         .collect();
+
+    if err {
+        println!("ref perc: {:?}", ref_percentages);
+        println!("test perc: {:?}", test_percentages);
+    }
 
     let distortion: f32 = ref_percentages
         .iter()
         .zip(test_percentages.iter())
         .map(|(&x, &y)| (y - x).abs())
         .sum();
+    if err {
+        println!("disortion: {}", distortion);
+    }
     return distortion as f64;
 }
 
@@ -177,6 +200,13 @@ pub fn compute_angles_from_edge_lengths(edges: &[(&str, f32)]) -> [f32; 3] {
     assert!(!angle_a.is_nan());
     assert!(!angle_b.is_nan());
     assert!(!angle_c.is_nan());
+
+    // if angle_a + angle_b + angle_c > 180.0 {
+    //     panic!(
+    //         "angle sums greater than 180 {}",
+    //         angle_a + angle_b + angle_c
+    //     )
+    // }
 
     [angle_a, angle_b, angle_c]
 }
@@ -239,6 +269,106 @@ pub fn are_collinear(p1: glam::Vec3, p2: glam::Vec3, p3: glam::Vec3) -> bool {
 
     determinant.abs() < 1e-6 // Adjust tolerance as needed
 }
+
+pub fn read_umap_positions(file_path: &str) -> Result<Vec<glam::Vec3>, Box<dyn Error>> {
+    // Open the CSV file
+    let file = File::open(Path::new(file_path))?;
+    println!("fileapth2 {:?}", file);
+    // Create a CSV reader
+    let mut rdr = csv::Reader::from_reader(file);
+
+    // Skip the first line (headers)
+    rdr.headers().unwrap();
+
+    // Vector to store positions
+    let mut positions: Vec<glam::Vec3> = Vec::new();
+
+    // Iterate over each record in the CSV file
+    for result in rdr.records() {
+        let record = result?;
+        // Parse the x, y, z values from the record
+        let x: f32 = record[0].parse()?;
+        let y: f32 = record[1].parse()?;
+        let z: f32 = record[2].parse()?;
+        // Create a Position struct and store it in the vector
+        positions.push(glam::Vec3::new(x, y, z));
+    }
+
+    // Print the positions (for demonstration)
+    // println!("Positions: {:?}", positions);
+
+    Ok(positions)
+}
+
+pub fn positions_to_distances<'a>(
+    positions: &[glam::Vec3; 3],
+) -> Result<[(&'a str, f32); 3], String> {
+    let triangle = [
+        ("ab", positions[0].distance(positions[1])),
+        ("ac", positions[0].distance(positions[2])),
+        ("bc", positions[1].distance(positions[2])),
+    ];
+
+    if is_valid_triangle(&triangle) {
+        return Ok(triangle);
+    } else {
+        return Err("invalid triangle".to_string());
+    }
+}
+
+pub fn randomly_select_three_indices(
+    range: &mut Vec<usize>,
+    mut rng: &mut ThreadRng,
+) -> (usize, usize, usize) {
+    range.partial_shuffle(&mut rng, 3);
+
+    return (range[0], range[1], range[2]);
+}
+
+pub fn extract_umap_k(filename: &str) -> Option<u32> {
+    // Find the last occurrence of '_'
+    if let Some(index) = filename.rfind('n') {
+        // Extract the substring from '_' to the end of the string
+        let mut substring = filename[index + 1..].to_string();
+        substring.truncate(substring.len() - 4);
+        println!("subtr {}", substring);
+        // Convert the substring to a number
+        if let Ok(number) = substring.parse::<u32>() {
+            println!("Extracted number: {}", number);
+            return Some(number);
+        } else {
+            println!("Failed to parse the number.");
+        }
+    } else {
+        println!("No '_' found in the string.");
+    }
+    return None;
+}
+
+pub fn write_umap_scores_to_file(
+    outpath: &str,
+    scores: &HashMap<u32, f64>,
+) -> Result<(), Box<dyn Error>> {
+    // Open the CSV file for writing
+    let file = File::create(outpath)?;
+    let mut writer = Writer::from_writer(file);
+
+    // Write keys to the first row
+    let keys: Vec<u32> = scores.keys().cloned().collect();
+    let keys: Vec<String> = keys.iter().map(|val| val.to_string()).collect();
+    writer.write_record(&keys)?;
+
+    // Write values to the second row
+    let values: Vec<f64> = scores.values().cloned().collect();
+    let values: Vec<String> = values.iter().map(|val| val.to_string()).collect();
+
+    writer.write_record(&values)?;
+
+    writer.flush()?;
+
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
