@@ -98,7 +98,7 @@ pub fn build_force_directed_graph_async(
     scalar: f32,
     max_iters: i32,
 ) -> Result<(JoinHandle<()>, Arc<ForceDirectedGraph>), FFIError> {
-    if let Some(tree) = handle.get_tree() {
+    if let Some(tree) = handle.tree() {
         if let Some(clam_graph) = handle.clam_graph() {
             // let mut graph: HashMap<String, PhysicsNode> = HashMap::new();
             // let mut rng = rand::thread_rng();
