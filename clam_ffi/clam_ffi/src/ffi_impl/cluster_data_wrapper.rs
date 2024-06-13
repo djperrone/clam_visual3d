@@ -1,6 +1,5 @@
 use super::cluster_data::ClusterData;
 use crate::{tree_layout::reingold_impl, utils::types::Clusterf32};
-
 pub struct ClusterDataWrapper {
     data: ClusterData,
 }

@@ -31,7 +31,6 @@ use crate::handle::entry_point::{
 use crate::utils::scoring_functions::ScoringFunction;
 
 type CBFnNodeVisitor = extern "C" fn(Option<&ClusterData>) -> ();
-
 type CBFnNameSetter = extern "C" fn(Option<&ClusterIDs>) -> ();
 type CBFnNodeVisitorMut = extern "C" fn(Option<&mut ClusterData>) -> ();
 
@@ -218,11 +217,7 @@ pub unsafe extern "C" fn set_names(
 
 #[no_mangle]
 pub unsafe extern "C" fn tree_height(ptr: InHandlePtr) -> i32 {
-    if let Some(handle) = ptr {
-        return handle.tree_height() + 1;
-    }
-    debug!("handle not created");
-    -1
+    tree_height_impl(ptr)
 }
 
 #[no_mangle]
@@ -362,12 +357,12 @@ pub unsafe extern "C" fn force_physics_shutdown(ptr: InHandlePtr) -> i32 {
     0
 }
 // ------------------------------------- RNN Search -------------------------------------
-// #[no_mangle]
-// pub unsafe extern "C" fn color_by_dist_to_query(
-//     context: InHandlePtr,
-//     arr_ptr: *mut ClusterData,
-//     len: i32,
-//     node_visitor: CBFnNodeVisitor,
-// ) -> FFIError {
-//     color_by_dist_to_query_impl(context, arr_ptr, len, node_visitor)
-// }
+#[no_mangle]
+pub unsafe extern "C" fn color_by_dist_to_query(
+    context: InHandlePtr,
+    arr_ptr: *mut ClusterData,
+    len: i32,
+    node_visitor: CBFnNodeVisitor,
+) -> FFIError {
+    color_by_dist_to_query_impl(context, arr_ptr, len, node_visitor)
+}

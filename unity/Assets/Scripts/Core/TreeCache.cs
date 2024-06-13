@@ -64,7 +64,7 @@ namespace Clam
             {
                 Debug.Log("ERROR " + e);
             }
-            //Clam.FFI.NativeMethods.DrawHierarchy(PositionUpdater);
+            Clam.FFI.NativeMethods.DrawHierarchy(PositionUpdater);
             //Clam.FFI.NativeMethods.ColorClustersByEntropy(ColorFiller);
             var colorErr = Clam.FFI.NativeMethods.ColorClustersByDominantLabel(ColorFiller);
             if (colorErr != FFIError.Ok)

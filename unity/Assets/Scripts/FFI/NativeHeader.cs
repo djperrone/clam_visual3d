@@ -43,7 +43,6 @@ namespace Clam
 
             [DllImport(__DllName, EntryPoint = "tree_height", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
             private static extern int tree_height(IntPtr handle);
-
             [DllImport(__DllName, EntryPoint = "tree_cardinality", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
             private static extern int tree_cardinality(IntPtr handle);
 
@@ -69,7 +68,6 @@ namespace Clam
 
             [DllImport(__DllName, EntryPoint = "get_root_data", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
             private static extern int get_root_data(IntPtr handle);
-
             [DllImport(__DllName, EntryPoint = "create_cluster_data", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
             private static extern FFIError create_cluster_data(IntPtr ptr, string id, out ClusterData data);
 

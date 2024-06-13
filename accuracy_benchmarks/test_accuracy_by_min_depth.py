@@ -1,8 +1,6 @@
 import matplotlib.pyplot as plt
 
 import os
-import matplotlib.ticker as mtick
-
 
 def extract_data_from_filename(filename):
     # Extract the filename from the path
@@ -87,10 +85,9 @@ def process_directory(directory):
 
             # Update the dictionary with depth and max value pairs
             if depthvalue not in depth_max_dict:
-                depth_max_dict[depthvalue] = averages[len(averages)-1]
+                depth_max_dict[depthvalue] = max(averages)
             else:
-                print("test")
-                depth_max_dict[depthvalue] = max(depth_max_dict[depthvalue], averages[len(averages)-1])
+                depth_max_dict[depthvalue] = max(depth_max_dict[depthvalue], max(averages))
 
     return depth_max_dict
 
@@ -102,37 +99,22 @@ def create_scatterplot_from_dict(depth_max_dict, outfile):
 
     print(depths)
     print(max_values)
-    max_values = [val * 100 for val in max_values]
 
     # Create scatter plot
     plt.figure(figsize=(8, 6))
     plt.scatter(depths, max_values, color='blue', marker='o')
-    plt.title('Accuracy vs Depth')
+    plt.title('Maximum Values vs Depth')
     plt.xlabel('Depth')
-    plt.ylabel('Accuracy')
+    plt.ylabel('Maximum Value')
     plt.grid(True)
-    plt.gca().yaxis.set_major_formatter(mtick.PercentFormatter(xmax=100.0))
-    plt.ylim(0, 100)
-    # plt.legend(loc='upper right') 
-    # Set the y-axis ticks at intervals of 10%
-    plt.yticks(range(0, 101, 10))
-
     plt.show()
     print("out ", outfile)
     plt.savefig(outfile)  # Save the plot to the specified file
     plt.close()  # Close the plot to release memory
 
-# filename = "../clam_ffi/clam_ffi/mnist/mnist_1_Euclidean_9.csv"
-# dataname, depthvalue = extract_data_from_filename(filename)
-directory = "clam"
-
-# Check if directory doesn't exist, then create it
-if not os.path.exists(directory):
-    os.makedirs(directory)
-
-dataname = "http"
-depth_dict = process_directory("../clam_ffi/clam_ffi/accuracy_results/edge_equivalence/" + dataname + "/")
-create_scatterplot_from_dict(depth_dict, directory+ "/clam_" + dataname + "depth_acc")
+filename = "../unity/triangle_test_results/mnist_1_Euclidean_9.csv"
+dataname, depthvalue = extract_data_from_filename(filename)
+depth_dict = process_directory("../unity/triangle_test_results/")
+create_scatterplot_from_dict(depth_dict, dataname)
 
 print(dataname)
-

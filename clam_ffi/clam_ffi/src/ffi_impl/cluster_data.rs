@@ -26,8 +26,6 @@ pub struct ClusterData {
     pub message: StringFFI,
 }
 
-
-
 impl ClusterData {
     pub fn default() -> Self {
         ClusterData {
