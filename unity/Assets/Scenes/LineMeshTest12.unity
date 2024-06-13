@@ -198,7 +198,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c0f66de9dde9eb84ab7d4eb51550fcd1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lineCount: 3000
+  lineCount: 10000
+  lineLength: 1
 --- !u!4 &77695325
 Transform:
   m_ObjectHideFlags: 0
@@ -471,10 +472,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 45f05ec1c599c9040b7c57f8c59dd67e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_NodePrefab: {fileID: 0}
-  m_SpringPrefab: {fileID: 0}
-  m_TreeData: {fileID: 0}
-  m_IsPhysicsRunning: 0
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -699,6 +696,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lineCount: 3000
+  lineLength: 1
 --- !u!114 &769231938
 MonoBehaviour:
   m_ObjectHideFlags: 0

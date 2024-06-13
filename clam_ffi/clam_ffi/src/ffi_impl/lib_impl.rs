@@ -289,28 +289,28 @@ pub fn color_clusters_by_dominant_label_impl(
     FFIError::HandleInitFailed
 }
 
-pub unsafe fn color_by_dist_to_query_impl(
-    context: InHandlePtr,
-    arr_ptr: *mut ClusterData,
-    len: i32,
-    node_visitor: CBFnNodeVisitor,
-) -> FFIError {
-    if let Some(handle) = context {
-        if arr_ptr.is_null() {
-            return FFIError::NullPointerPassed;
-        }
-        let arr = std::slice::from_raw_parts(arr_ptr, len as usize);
+// pub unsafe fn color_by_dist_to_query_impl(
+//     context: InHandlePtr,
+//     arr_ptr: *mut ClusterData,
+//     len: i32,
+//     node_visitor: CBFnNodeVisitor,
+// ) -> FFIError {
+//     if let Some(handle) = context {
+//         if arr_ptr.is_null() {
+//             return FFIError::NullPointerPassed;
+//         }
+//         let arr = std::slice::from_raw_parts(arr_ptr, len as usize);
 
-        let mut ids = Vec::new();
-        for node in arr {
-            ids.push(node.id.as_string().unwrap());
-        }
+//         let mut ids = Vec::new();
+//         for node in arr {
+//             ids.push(node.id.as_string().unwrap());
+//         }
 
-        handle.color_by_dist_to_query(ids.as_slice(), node_visitor)
-    } else {
-        FFIError::NullPointerPassed
-    }
-}
+//         handle.color_by_dist_to_query(ids.as_slice(), node_visitor)
+//     } else {
+//         FFIError::NullPointerPassed
+//     }
+// }
 
 pub unsafe fn distance_to_other_impl(
     ptr: InHandlePtr,

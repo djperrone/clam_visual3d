@@ -274,7 +274,7 @@ pub fn init_unity_edges(force_directed_graph: &ForceDirectedGraph, init_edges: C
         let mut data_wrapper = ClusterDataWrapper::default();
         let (id1, id2) = edge.get_node_ids();
         data_wrapper.data_mut().set_id(id1.clone());
-        let mut msg = (edge.is_detected as i32).to_string();
+        let mut msg = (edge.is_real as i32).to_string();
         msg.push(' ');
         msg.push_str(id2.clone().as_str());
         data_wrapper.data_mut().set_message(msg);

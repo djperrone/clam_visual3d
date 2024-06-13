@@ -31,7 +31,7 @@ def calculate_column_averages(data):
 
     for row in data:
         for i, val in enumerate(row):
-            column_sums[i] += val
+            column_sums[i] += val / 3.0
             column_counts[i] += 1
 
     column_averages = [column_sum / column_count for column_sum, column_count in zip(column_sums, column_counts)]
@@ -58,13 +58,13 @@ def convert_to_rolling_mean(column_data, window_size):
 #     plt.close()  # Close the plot to release memory
 
 
-def plot_line_graph_pd(title, outpath, df, descriptor_text):
+def plot_line_graph_pd(title, outpath, df, descriptor_text, y_label):
 
     fig, ax = plt.subplots(figsize = (16,10))
     plt.scatter(range(1, len(df['Column_Averages']) + 1), df['Column_Averages'] * 100, marker='o', label='Raw Data', s = 0.5)
     plt.plot(df['Column_Averages_rolling_10'] * 100, label='Rolling Mean', color='red', linestyle='-', linewidth=1.0)  # Adjust color and style as needed
     plt.xlabel('Time Step')
-    plt.ylabel('Triangle Accuracy')
+    plt.ylabel(y_label)
     plt.title(f'{title}')
     plt.gca().yaxis.set_major_formatter(mtick.PercentFormatter(xmax=100.0))
     plt.ylim(0, 100)
@@ -117,7 +117,7 @@ def plot2(title, outpath, df1, df2):
 
 
 
-def plot_for_each_in_dir(in_folder, out_folder):
+def plot_for_each_in_dir(in_folder, out_folder, testname):
     # Iterate through each file in the folder
     print(out_folder)
     for file_path in in_folder.iterdir() :
@@ -135,22 +135,24 @@ def plot_for_each_in_dir(in_folder, out_folder):
                 descriptor_file = os.path.splitext(file_path)[0] + '.txt'  # Replace .csv with .txt
                 descriptors = extract_descriptor(descriptor_file)
                 descriptor_text = ""
-                for column_name, value in descriptors.items():
-                    descriptor_text += f"{column_name}: {value}\n"
+                # for column_name, value in descriptors.items():
+                #     descriptor_text += f"{column_name}: {value}\n"
                 # Add a text box with additional information
-                graph_size = descriptors['graph_vertex_cardinality']
-                data_size = descriptors['data_cardinality']
-                ratio = float((graph_size) / float(data_size)) * 100
-                ratio = "{:.2f}".format(float(ratio))
-                descriptor_text += "graph/data ratio: " + ratio + "%"
+                # graph_size = descriptors['graph_vertex_cardinality']
+                # data_size = descriptors['data_cardinality']
+                # ratio = float((graph_size) / float(data_size)) * 100
+                # ratio = "{:.2f}".format(float(ratio))
+                # descriptor_text += "graph/data ratio: " + ratio + "%"
                 # print(df)
                 # rolling_means = df.rolling(window=10).mean()
                 # print("Average value of each column:", column_averages)
                 title = os.path.basename(file_path)
+                title = str(title)
+                title = title.replace(".csv", "")
                 filename = os.path.splitext(os.path.basename(file_path))[0]
                 out_path = out_folder / filename
                 # plt.text(3, 6, "testing1234", bbox=dict(facecolor='white', alpha=0.5))
-                plot_line_graph_pd(title, out_path, df, descriptor_text)
+                plot_line_graph_pd(title, out_path, df, descriptor_text, testname)
 
 def create_pd_df(data):
     if not data:
@@ -251,7 +253,7 @@ if __name__ == "__main__":
 
         print("running 1")
         try:
-            plot_for_each_in_dir(data_path, out_folder)
+            plot_for_each_in_dir(data_path, out_folder, testname)
 
         except FileNotFoundError:
             # print("File not found:", filename)

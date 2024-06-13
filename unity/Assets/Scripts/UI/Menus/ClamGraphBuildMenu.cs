@@ -197,7 +197,7 @@ public class ClamGraphBuildMenu
         numGraphComponentsLabel.text = "Num Components: " + numGraphComponents.ToString();
 
         var numGraphEdgesLabel = m_Document.rootVisualElement.Q<Label>("NumGraphEdges");
-        numGraphEdgesLabel.text = "Num Edgesa: " + NativeMethods.GetNumGraphEdges().ToString();
+        numGraphEdgesLabel.text = "Num Edges: " + NativeMethods.GetNumGraphEdges().ToString();
 
         var numGraphClustersLabel = m_Document.rootVisualElement.Q<Label>("NumGraphClusters");
         numGraphClustersLabel.text = "Num Clusters: " + NativeMethods.GetGraphClusterCardinality().ToString();
@@ -279,7 +279,7 @@ public class ClamGraphBuildMenu
     {
         var baseMenu = m_Document.rootVisualElement.Q<VisualElement>("GraphLabelFilter");
         var numLabels = 2;
-        if (Cakes.Tree.m_TreeData.dataName == "mnist")
+        if (Cakes.Tree.m_TreeData.dataName == "mnist" || Cakes.Tree.m_TreeData.dataName == "down-mnist")
         {
             numLabels = 10;
         }

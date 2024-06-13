@@ -12,13 +12,14 @@ namespace Clam
 {
     namespace FFI
     {
-        public unsafe delegate void NodeVisitor(ref Clam.FFI.ClusterData baton);
+        public unsafe delegate void NodeVisitor(ref Clam.FFI.ClusterData data);
+
         public unsafe delegate void NameSetter(ref Clam.FFI.ClusterIDs baton);
         public unsafe delegate void NodeVisitorMut(ref Clam.FFI.ClusterData inData);
 
         public static partial class NativeMethods
         {
-	public const string __DllName = "clam_ffi_2024-03-0212-37-47";
+	public const string __DllName = "clam_ffi_2024-03-1215-22-31";
             private static IntPtr m_Handle;
 
             private static bool m_Initialized = false;
@@ -181,7 +182,7 @@ namespace Clam
                 return FFIError.Ok;
             }
 
-            public static FFIError CreateClusterDataMustFree(string id, out Clam.FFI.ClusterData clusterData, bool addIfNotExists = false)
+            public static FFIError CreateClusterDataMustFree(string id, out Clam.FFI.ClusterData clusterData)
             {
                 var result = create_cluster_data(m_Handle, id, out var data);
                 if (result != FFIError.Ok)
