@@ -1,5 +1,7 @@
+use abd_clam::Cluster;
+
 use super::string_ffi::StringFFI;
-use crate::utils::types::Clusterf32;
+use crate::utils::types::Vertexf32;
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
@@ -18,7 +20,7 @@ impl ClusterIDs {
         &self.id
     }
 
-    pub fn from_clam(node: &Clusterf32) -> Self {
+    pub fn from_clam(node: &Vertexf32) -> Self {
         let (left_id, right_id) = {
             if let Some([left, right]) = node.children() {
                 (left.name(), right.name())

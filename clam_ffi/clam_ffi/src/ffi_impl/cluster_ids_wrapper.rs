@@ -1,5 +1,5 @@
 use crate::ffi_impl::cluster_ids::ClusterIDs;
-use crate::utils::types::Clusterf32;
+use crate::utils::types::Vertexf32;
 
 pub struct ClusterIDsWrapper {
     data: ClusterIDs,
@@ -11,7 +11,7 @@ impl Drop for ClusterIDsWrapper {
 }
 
 impl ClusterIDsWrapper {
-    pub fn from_cluster(cluster: &Clusterf32) -> Self {
+    pub fn from_cluster(cluster: &Vertexf32) -> Self {
         ClusterIDsWrapper {
             data: ClusterIDs::from_clam(cluster),
         }

@@ -2,13 +2,13 @@ use glam::Vec3;
 
 use crate::{
     ffi_impl::cluster_data_wrapper::ClusterDataWrapper,
-    utils::{error::FFIError, types::Clusterf32},
+    utils::{error::FFIError, types::Vertexf32},
 };
 
 use super::reingold_impl;
 
 pub fn run(
-    clam_root: &Clusterf32,
+    clam_root: &Vertexf32,
     max_depth: i32,
     node_visitor: crate::CBFnNodeVisitor,
 ) -> FFIError {
@@ -18,7 +18,7 @@ pub fn run(
 
 pub fn run_offset(
     start_pos: &Vec3,
-    clam_root: &Clusterf32,
+    clam_root: &Vertexf32,
     max_depth: i32,
     node_visitor: crate::CBFnNodeVisitor,
 ) -> FFIError {

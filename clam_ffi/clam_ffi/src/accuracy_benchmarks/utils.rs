@@ -6,7 +6,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use abd_clam::Cluster;
+use abd_clam::{graph::Vertex, Cluster};
 use csv::{Writer, WriterBuilder};
 use distances::Number;
 use rand::{rngs::ThreadRng, seq::SliceRandom, thread_rng};
@@ -14,15 +14,15 @@ use rand::{rngs::ThreadRng, seq::SliceRandom, thread_rng};
 use crate::{
     ffi_impl::cluster_data_wrapper::ClusterDataWrapper,
     graph::force_directed_graph::ForceDirectedGraph,
-    utils::types::{Clusterf32, Treef32},
+    utils::types::{Vertexf32, Treef32},
     CBFnNodeVisitorMut,
 };
 
 pub fn choose_two_random_clusters_exclusive<'a, U: Number>(
-    clusters: &Vec<&'a Cluster<U>>,
-    cluster: &'a Cluster<U>,
-) -> Option<[&'a Cluster<U>; 3]> {
-    let mut triangle: Vec<&'a Cluster<U>> = Vec::new();
+    clusters: &Vec<&'a Vertex<U>>,
+    cluster: &'a Vertex<U>,
+) -> Option<[&'a Vertex<U>; 3]> {
+    let mut triangle: Vec<&'a Vertex<U>> = Vec::new();
     triangle.push(cluster);
     for c in clusters {
         if triangle.len() < 3 {
@@ -37,7 +37,7 @@ pub fn choose_two_random_clusters_exclusive<'a, U: Number>(
 }
 pub fn triangle_from_clusters<'a>(
     tree: &Treef32,
-    clusters: &[&'a Clusterf32; 3],
+    clusters: &[&'a Vertexf32; 3],
 ) -> Result<[(&'a str, f32); 3], String> {
     let triangle = [
         (
@@ -212,7 +212,7 @@ pub fn compute_angles_from_edge_lengths(edges: &[(&str, f32)]) -> [f32; 3] {
 }
 
 pub fn get_unity_triangle<'a>(
-    clusters: &[&'a Clusterf32; 3],
+    clusters: &[&'a Vertexf32; 3],
     fdg: &ForceDirectedGraph,
 ) -> Result<[(&'a str, f32); 3], String> {
     let [a, b, c] = clusters;

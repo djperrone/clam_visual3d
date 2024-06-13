@@ -4,6 +4,7 @@ use std::{
     thread::{self, JoinHandle},
 };
 
+use abd_clam::Cluster;
 use rand::{seq::SliceRandom, Rng};
 
 use crate::{
@@ -13,7 +14,7 @@ use crate::{
     handle::handle::Handle,
     utils::{
         error::FFIError,
-        types::{Clusterf32, DataSetf32, Graphf32, Treef32},
+        types::{Vertexf32, DataSetf32, Graphf32, Treef32},
     },
 };
 
@@ -27,10 +28,10 @@ use super::{
 
 fn get_k_key_clusters<'a>(
     clam_graph: &'a Graphf32,
-    component: &'a HashSet<&'a Clusterf32>,
+    component: &'a HashSet<&'a Vertexf32>,
     k: usize,
-) -> Option<Vec<&'a Clusterf32>> {
-    let mut key_clusters: Vec<&Clusterf32> = Vec::new();
+) -> Option<Vec<&'a Vertexf32>> {
+    let mut key_clusters: Vec<&Vertexf32> = Vec::new();
     let key_cluster = component.iter().max_by(|x, y| {
         clam_graph
             .vertex_degree(x)
@@ -40,7 +41,7 @@ fn get_k_key_clusters<'a>(
     if let Some(kc) = key_cluster {
         key_clusters.push(kc);
 
-        let mut comp: Vec<&Clusterf32> = component.iter().map(|x| *x).collect();
+        let mut comp: Vec<&Vertexf32> = component.iter().map(|x| *x).collect();
 
         let mut rng = rand::thread_rng();
         let (shuffled, _) = comp.partial_shuffle(&mut rng, k + 1);
@@ -60,8 +61,8 @@ fn get_k_key_clusters<'a>(
 }
 
 fn cross_pollinate_components<'a>(
-    key_clusters1: &Vec<&'a Clusterf32>,
-    key_clusters2: &Vec<&'a Clusterf32>,
+    key_clusters1: &Vec<&'a Vertexf32>,
+    key_clusters2: &Vec<&'a Vertexf32>,
     data: &DataSetf32,
     edges: &mut Vec<Spring>,
 ) {
@@ -146,7 +147,7 @@ pub fn build_force_directed_graph<'a>(
     let mut graph: HashMap<String, PhysicsNode> = HashMap::new();
     let mut rng = rand::thread_rng();
 
-    for c in clam_graph.clusters().iter() {
+    for c in clam_graph.ordered_clusters().iter() {
         let x: f32 = rng.gen_range(0.0..=100.0);
         let y: f32 = rng.gen_range(0.0..=100.0);
         let z: f32 = rng.gen_range(0.0..=100.0);

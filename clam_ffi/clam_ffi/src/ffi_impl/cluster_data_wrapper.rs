@@ -1,5 +1,5 @@
 use super::cluster_data::ClusterData;
-use crate::{tree_layout::reingold_impl, utils::types::Clusterf32};
+use crate::{tree_layout::reingold_impl, utils::types::Vertexf32};
 
 pub struct ClusterDataWrapper {
     data: ClusterData,
@@ -17,7 +17,7 @@ impl ClusterDataWrapper {
             data: ClusterData::default(),
         }
     }
-    pub fn from_cluster(cluster: &Clusterf32) -> Self {
+    pub fn from_cluster(cluster: &Vertexf32) -> Self {
         ClusterDataWrapper {
             data: ClusterData::from_clam(cluster),
         }
