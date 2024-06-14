@@ -26,33 +26,58 @@ impl<'a, U: Number> FNN_Wrapper<'a, U> {
 
 impl<'a, U: Number> Eq for FNN_Wrapper<'a, U> {}
 
+// impl<'a, U: Number> PartialEq for FNN_Wrapper<'a, U> {
+//     fn eq(&self, other: &Self) -> bool {
+//         self.distance == other.distance
+//     }
+// }
+
+// // Implementing PartialOrd for PointByX
+// impl<'a, U: Number> PartialOrd for FNN_Wrapper<'a, U> {
+//     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+//         Some(self.cmp(other))
+//     }
+// }
+
+// Implementing PartialEq based on name
 impl<'a, U: Number> PartialEq for FNN_Wrapper<'a, U> {
     fn eq(&self, other: &Self) -> bool {
-        self.distance == other.distance
+        self.cluster.name() == other.cluster.name()
     }
 }
 
-// Implementing PartialOrd for PointByX
+// Implementing PartialOrd based on distance
 impl<'a, U: Number> PartialOrd for FNN_Wrapper<'a, U> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
+        self.distance.partial_cmp(&other.distance)
     }
 }
 
+// Implementing Ord based on distance, with name as tie-breaker
 impl<'a, U: Number> Ord for FNN_Wrapper<'a, U> {
     fn cmp(&self, other: &Self) -> Ordering {
-        self.distance
-            .partial_cmp(&other.distance)
-            .unwrap_or(Ordering::Equal)
+        match self.distance.partial_cmp(&other.distance) {
+            Some(Ordering::Equal) => self.cluster.name().cmp(&other.cluster.name()),
+            Some(ordering) => ordering,
+            None => Ordering::Equal, // Handle NaN case or any other undefined behavior
+        }
     }
 }
+
+// impl<'a, U: Number> Ord for FNN_Wrapper<'a, U> {
+//     fn cmp(&self, other: &Self) -> Ordering {
+//         self.distance
+//             .partial_cmp(&other.distance)
+//             .unwrap_or(Ordering::Equal)
+//     }
+// }
 
 pub fn knn_naive_original<'a>(
     cluster: &'a Vertexf32,
     graph_clusters: &[&'a Vertexf32],
     data: &DataSetf32,
     k: usize,
-) -> Vec<&'a Vertexf32> {
+) -> Vec<FNN_Wrapper<'a, f32>> {
     let mut nearest_neighbors: BinaryHeap<FNN_Wrapper<'a, f32>> = BinaryHeap::new();
 
     for &c in graph_clusters {
@@ -65,9 +90,9 @@ pub fn knn_naive_original<'a>(
         }
     }
 
-    let mut result: Vec<&'a Vertexf32> = Vec::with_capacity(k);
+    let mut result: Vec<FNN_Wrapper<'a, f32>> = Vec::with_capacity(k);
     while let Some(wrapper) = nearest_neighbors.pop() {
-        result.push(wrapper.cluster);
+        result.push(wrapper);
     }
 
     // Since the BinaryHeap pops the largest element first, we need to reverse the vector
@@ -81,7 +106,7 @@ pub fn knn_naive_3d<'a>(
     graph_clusters: &[&'a Vertexf32],
     fdg: &'a ForceDirectedGraph,
     k: usize,
-) -> Vec<&'a Vertexf32> {
+) -> Vec<FNN_Wrapper<'a, f32>> {
     let mut nearest_neighbors: BinaryHeap<FNN_Wrapper<'a, f32>> = BinaryHeap::new();
     if let Ok(cluster_position) = fdg.get_cluster_position(&cluster.name()) {
         for &c in graph_clusters {
@@ -96,9 +121,9 @@ pub fn knn_naive_3d<'a>(
         }
     }
 
-    let mut result: Vec<&'a Vertexf32> = Vec::with_capacity(k);
+    let mut result: Vec<FNN_Wrapper<'a, f32>> = Vec::with_capacity(k);
     while let Some(wrapper) = nearest_neighbors.pop() {
-        result.push(wrapper.cluster);
+        result.push(wrapper);
     }
 
     // Since the BinaryHeap pops the largest element first, we need to reverse the vector
@@ -110,7 +135,7 @@ pub fn find_all_knn_original<'a>(
     graph: &'a Graphf32,
     data: &DataSetf32,
     k: usize,
-) -> HashMap<String, Vec<&'a Vertexf32>> {
+) -> HashMap<String, Vec<FNN_Wrapper<'a, f32>>> {
     let mut nearest_neighbors_map = HashMap::new();
     let clusters = graph.ordered_clusters();
     for c in clusters {
@@ -124,7 +149,7 @@ pub fn find_all_knn_3d<'a>(
     fdg: &'a ForceDirectedGraph,
     clam_graph: &'a Graphf32,
     k: usize,
-) -> HashMap<String, Vec<&'a Vertexf32>> {
+) -> HashMap<String, Vec<FNN_Wrapper<'a, f32>>> {
     let mut nearest_neighbors_map = HashMap::new();
     let clusters = clam_graph.ordered_clusters();
     for c in clusters {
@@ -148,7 +173,7 @@ pub fn false_nearest_neighbors(
         // Compare original_neighbors with graph_neighbors and calculate metrics
         let intersection: usize = original_neighbors
             .iter()
-            .filter(|&&n| graph_neighbors.contains(&n))
+            .filter(|&n| graph_neighbors.contains(&n))
             .count();
 
         let precision = intersection as f64 / original_neighbors.len() as f64;
