@@ -13,6 +13,7 @@ use abd_clam::{
     Cluster, Dataset, PartitionCriteria, Tree,
 };
 use distances::Number;
+use glam::Vec3;
 use ndarray::Data;
 
 use crate::{
@@ -124,8 +125,8 @@ pub fn knn_naive_3d<'a>(
     if let Ok(cluster_position) = fdg.get_cluster_position(&cluster.name()) {
         for &c in graph_clusters {
             if c.name() != cluster.name() {
-                let c_3d = fdg.get_cluster_position(&c.name()).unwrap();
-                nearest_neighbors.push(FNN_Wrapper::new(c, c_3d.distance(cluster_position)));
+                let other_pos = fdg.get_cluster_position(&c.name()).unwrap();
+                nearest_neighbors.push(FNN_Wrapper::new(c, other_pos.distance(cluster_position)));
 
                 if nearest_neighbors.len() > k {
                     nearest_neighbors.pop();
@@ -145,12 +146,12 @@ pub fn knn_naive_3d<'a>(
     result
 }
 pub fn find_all_knn_original<'a>(
-    graph: &'a Graphf32,
+    clusters: &[&'a Vertexf32],
     data: &DataSetf32,
     k: usize,
 ) -> HashMap<String, Vec<FNN_Wrapper<'a, f32>>> {
     let mut nearest_neighbors_map = HashMap::new();
-    let clusters = graph.ordered_clusters();
+    // let clusters = graph.ordered_clusters();
     for c in clusters {
         nearest_neighbors_map.insert(c.name(), knn_naive_original(c, clusters, data, k));
     }
@@ -160,11 +161,10 @@ pub fn find_all_knn_original<'a>(
 
 pub fn find_all_knn_3d<'a>(
     fdg: &'a ForceDirectedGraph,
-    clam_graph: &'a Graphf32,
+    clusters: &[&'a Vertexf32],
     k: usize,
 ) -> HashMap<String, Vec<FNN_Wrapper<'a, f32>>> {
     let mut nearest_neighbors_map = HashMap::new();
-    let clusters = clam_graph.ordered_clusters();
     for c in clusters {
         nearest_neighbors_map.insert(c.name(), knn_naive_3d(c, clusters, fdg, k));
     }
@@ -178,8 +178,8 @@ pub fn false_nearest_neighbors(
     fdg: &ForceDirectedGraph,
     k: usize,
 ) {
-    let original_nn = find_all_knn_original(clam_graph, data, k);
-    let fdg_nn = find_all_knn_3d(fdg, clam_graph, k);
+    let original_nn = find_all_knn_original(clam_graph.ordered_clusters(), data, k);
+    let fdg_nn = find_all_knn_3d(fdg, clam_graph.ordered_clusters(), k);
 
     for (idx, original_neighbors) in original_nn.iter() {
         let graph_neighbors = fdg_nn.get(idx).unwrap();
@@ -376,7 +376,7 @@ fn run_physics_sim(
     let mut recall_results: Vec<String> = Vec::with_capacity(max_iters as usize);
     let mut f1_score_results: Vec<String> = Vec::with_capacity(max_iters as usize);
 
-    let original_nn = find_all_knn_original(graph, tree.data(), k);
+    let original_nn = find_all_knn_original(graph.ordered_clusters(), tree.data(), k);
     for i in 0..max_iters {
         if i % 100 == 0 {
             println!("time step {}", i);
@@ -409,7 +409,7 @@ pub fn run_fnn_test(
         return Err("less than 3 clusters in graph".to_string());
     }
 
-    let fdg_nn = find_all_knn_3d(fdg, clam_graph, k);
+    let fdg_nn = find_all_knn_3d(fdg, clam_graph.ordered_clusters(), k);
 
     for (idx, original_neighbors) in original_nn.iter() {
         let graph_neighbors = fdg_nn.get(idx).unwrap();
@@ -544,3 +544,172 @@ fn fnn() {
     // }
     // }
 }
+
+// #[test]
+// fn umap_test_ang1le_distortion() {
+//     let (
+//         search_dir,
+//         _min_cardinality,
+//         _min_depth,
+//         distance_metric,
+//         _scalar,
+//         _max_iters,
+//         data_folder,
+//         out_folder_root,
+//         target,
+//         // ) = test_params(None);
+//     ) = test_params(None);
+
+//     let mut out_folder = PathBuf::new();
+//     out_folder.push(out_folder_root);
+//     out_folder.push("umap_fnn");
+//     // let metric_cb = utils::calc_angle_distortion;
+
+//     run_for_each_umap(
+//         search_dir,
+//         target.unwrap().as_str(),
+//         &data_folder,
+//         out_folder.to_str().unwrap(),
+//         distance_metric,
+//         k,
+//     );
+// }
+
+// fn run_for_each_umap(
+//     dir: ReadDir,
+//     data_name: &str,
+//     src_folder: &PathBuf,
+//     outfolder: &str,
+//     distance_metric: DistanceMetric,
+//     k: usize,
+// ) {
+//     match Handle::create_dataset(data_name, &src_folder, distance_metric, false) {
+//         Ok(data) => {
+//             println!("created dataset {}", data_name);
+//             let criteria = PartitionCriteria::new(true).with_min_cardinality(1);
+
+//             let tree = Tree::new(data, Some(1)).partition(&criteria, None);
+//             println!("tree card :{}", tree.cardinality());
+//             println!("tree data name :{}", tree.data().name());
+//             // let dir_path = ;
+//             // let dir_path = "../../umap/".to_string() + data_name;
+
+//             let mut scores: HashMap<u32, Vec<f64>> = HashMap::new();
+//             for _ in 0..5 {
+//                 let dir_path = "../../umap/";
+//                 let dir_path = dir_path.to_string() + data_name;
+//                 // Iterate through the directory entries
+//                 if let Ok(entries) = fs::read_dir(dir_path) {
+//                     for entry in entries {
+//                         if let Ok(entry) = entry {
+//                             // Get the path of the entry
+//                             let entry_path = entry.path();
+
+//                             // Check if it's a directory
+//                             if entry_path.is_dir() {
+//                                 // Process the directory
+//                                 println!("Found directory: {}", entry_path.display());
+//                             } else {
+//                                 if let Some(positions_file) = entry_path.to_str() {
+//                                     println!("positions file : {}", positions_file);
+//                                     let umap_k =
+//                                         utils::extract_umap_k(positions_file).unwrap() as usize;
+
+//                                     let avg =
+//                                         run_umap_test_on_file(positions_file, &tree, metric_cb)
+//                                             .unwrap();
+//                                     println!("avg: {}", avg);
+//                                     if !scores.contains_key(&k) {
+//                                         scores.insert(k, Vec::new());
+//                                     }
+//                                     scores.get_mut(&k).unwrap().push(avg);
+//                                 }
+//                                 // Process the file
+//                                 println!("Found file: {}", entry_path.display());
+//                             }
+//                         }
+//                     }
+//                 } else {
+//                     // eprintln!("Failed to read directory {}", dir_path);
+//                 }
+//             }
+
+//             println!("scores: {:?}", scores);
+//             let mut outpath = PathBuf::new();
+//             outpath.push(outfolder);
+//             fs::create_dir_all(&outpath);
+
+//             outpath.push(data_name.to_string() + ".csv");
+//             // outpath.push(".csv");
+//             println!("ouptath {:?}", outpath);
+//             let mut avg_scores: HashMap<u32, f64> = HashMap::new();
+//             for (key, value) in scores {
+//                 let avg: f64 = value.iter().sum::<f64>() / value.len().as_f64();
+//                 avg_scores.insert(key, avg);
+//             }
+//             utils::write_umap_scores_to_file(outpath.to_str().unwrap(), &avg_scores);
+//         }
+//         Err(e) => {
+//             println!("{:?}", e);
+//         }
+//     }
+// }
+
+// fn umap_find_knn<'a>(
+//     positions: &Vec<Vec3>,
+//     original_index: usize,
+//     cluster: &Vertexf32,
+//     k: usize,
+// ) -> Vec<FNN_Wrapper<'a, f32>> {
+//     let mut nearest_neighbors: BinaryHeap<FNN_Wrapper<'a, f32>> = BinaryHeap::new();
+
+//     for i in 0..positions.len() {
+//         if i != original_index {
+//             nearest_neighbors.push(FNN_Wrapper::new(
+//                 cluster,
+//                 positions[i].distance(positions[original_index]),
+//             ));
+
+//             if nearest_neighbors.len() > k {
+//                 nearest_neighbors.pop();
+//             }
+//         }
+//     }
+
+//     let mut result: Vec<FNN_Wrapper<'a, f32>> = Vec::with_capacity(k);
+//     while let Some(wrapper) = nearest_neighbors.pop() {
+//         result.push(wrapper);
+//     }
+
+//     // Since the BinaryHeap pops the largest element first, we need to reverse the vector
+//     result.reverse();
+
+//     result
+// }
+
+// fn run_umap_fnn_on_file(file_path: &str, tree: &Treef32, k: usize) -> () {
+//     let mut valid_count = 0;
+//     let mut metric_sum: f64 = 0.;
+
+//     if let Ok(positions) = utils::read_umap_positions(file_path) {
+//         let data = tree.data();
+
+//         let mut cluster_pool: Vec<&Vertexf32> = Vec::with_capacity(positions.len());
+
+//         for reordered_index in 0..positions.len() {
+//             cluster_pool.push(tree.get_cluster(reordered_index, 1).unwrap());
+//         }
+
+//         for reordered_index in 0..positions.len() {
+//             // println!("test1");
+//             let original_index = data.original_index(reordered_index as usize);
+//             // println!("test2");
+
+//             let selected_position = positions[original_index];
+//             let cluster = tree.get_cluster(reordered_index, 1).unwrap();
+
+//             let umap_nn = umap_find_knn(&positions, original_index, cluster, k);
+//             // results.push(perc_correct);
+//         }
+//     }
+// }
