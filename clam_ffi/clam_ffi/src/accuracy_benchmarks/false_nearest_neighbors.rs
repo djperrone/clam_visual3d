@@ -245,7 +245,7 @@ fn run_test_on_file(
     out_folder: &str,
     distance_metric: DistanceMetric,
     min_cardinality: usize,
-    min_depth: usize,
+    _min_depth: usize,
     max_iters: i32,
     scalar: f32,
     _k: usize,
@@ -256,102 +256,103 @@ fn run_test_on_file(
             let criteria = PartitionCriteria::new(true).with_min_cardinality(min_cardinality);
 
             let tree = Tree::new(data, Some(1)).partition(&criteria, None);
+            for depth in 5..12 {
+                if let Ok(graph) = Graph::from_tree(
+                    &tree,
+                    &enum_to_function(&ScoringFunction::LrEuclideanCc).unwrap(),
+                    depth,
+                ) {
+                    for k in 3..20 {
+                        println!("created graph");
+                        let outfile_name = format!(
+                            "{}_{}_{:?}_{}.csv",
+                            tree.data().name(),
+                            min_cardinality.to_string(),
+                            distance_metric,
+                            k,
+                        );
+                        let descriptor_file = format!(
+                            "{}_{}_{:?}_{}.txt",
+                            tree.data().name(),
+                            min_cardinality.to_string(),
+                            distance_metric,
+                            k,
+                        );
 
-            if let Ok(graph) = Graph::from_tree(
-                &tree,
-                &enum_to_function(&ScoringFunction::LrEuclideanCc).unwrap(),
-                min_depth,
-            ) {
-                for k in 3..50 {
-                    println!("created graph");
-                    let outfile_name = format!(
-                        "{}_{}_{:?}_{}.csv",
-                        tree.data().name(),
-                        min_cardinality.to_string(),
-                        distance_metric,
-                        k,
-                    );
-                    let descriptor_file = format!(
-                        "{}_{}_{:?}_{}.txt",
-                        tree.data().name(),
-                        min_cardinality.to_string(),
-                        distance_metric,
-                        k,
-                    );
+                        if let Ok(results) = run_physics_sim(&tree, &graph, scalar, max_iters, k) {
+                            let mut file_path = PathBuf::new();
+                            // file_path.push("triangle_acc_results");
+                            file_path.push(out_folder);
+                            file_path.push(tree.data().name());
+                            file_path.push("depth_".to_string() + depth.to_string().as_str());
 
-                    if let Ok(results) = run_physics_sim(&tree, &graph, scalar, max_iters, k) {
-                        let mut file_path = PathBuf::new();
-                        // file_path.push("triangle_acc_results");
-                        file_path.push(out_folder);
-                        file_path.push(tree.data().name());
-                        file_path.push("depth_".to_string() + min_depth.to_string().as_str());
-
-                        file_path.push("k_".to_string() + k.to_string().as_str());
-                        match fs::create_dir_all(&file_path) {
-                            Ok(_) => {
-                                println!("Folder created successfully or already exists.")
+                            file_path.push("k_".to_string() + k.to_string().as_str());
+                            match fs::create_dir_all(&file_path) {
+                                Ok(_) => {
+                                    println!("Folder created successfully or already exists.")
+                                }
+                                Err(e) => eprintln!("Error creating folder: {}", e),
                             }
-                            Err(e) => eprintln!("Error creating folder: {}", e),
+
+                            let outfile_name = format!(
+                                "{}_{}_{:?}_{}_precision.csv",
+                                tree.data().name(),
+                                min_cardinality.to_string(),
+                                distance_metric,
+                                k,
+                            );
+                            file_path.push(outfile_name);
+
+                            println!("writing to {:?}", file_path.to_str().unwrap());
+                            utils::write_results(&file_path, &results.0);
+
+                            file_path.pop();
+
+                            let outfile_name = format!(
+                                "{}_{}_{:?}_{}_recall.csv",
+                                tree.data().name(),
+                                min_cardinality.to_string(),
+                                distance_metric,
+                                k,
+                            );
+
+                            file_path.push(outfile_name);
+                            println!("writing to {:?}", file_path.to_str().unwrap());
+                            utils::write_results(&file_path, &results.1);
+
+                            file_path.pop();
+
+                            let outfile_name = format!(
+                                "{}_{}_{:?}_{}_f1-score.csv",
+                                tree.data().name(),
+                                min_cardinality.to_string(),
+                                distance_metric,
+                                k,
+                            );
+
+                            file_path.push(outfile_name);
+                            println!("writing to {:?}", file_path.to_str().unwrap());
+                            utils::write_results(&file_path, &results.2);
+
+                            file_path.pop();
+                            file_path.push(descriptor_file);
+                            let descriptors = vec![
+                                "data_cardinality".to_string(),
+                                "graph_vertex_cardinality".to_string(),
+                                "graph_edge_cardinality".to_string(),
+                                "tree_height".to_string(),
+                            ];
+                            let descriptor_data = vec![
+                                tree.data().cardinality().to_string(),
+                                graph.vertex_cardinality().to_string(),
+                                graph.edge_cardinality().to_string(),
+                                tree.depth().to_string(),
+                            ];
+                            utils::write_results(&file_path, &descriptors);
+                            utils::write_results(&file_path, &descriptor_data);
+                        } else {
+                            panic!("collecting data for this graph failed");
                         }
-
-                        let outfile_name = format!(
-                            "{}_{}_{:?}_{}_precision.csv",
-                            tree.data().name(),
-                            min_cardinality.to_string(),
-                            distance_metric,
-                            k,
-                        );
-                        file_path.push(outfile_name);
-
-                        println!("writing to {:?}", file_path.to_str().unwrap());
-                        utils::write_results(&file_path, &results.0);
-
-                        file_path.pop();
-
-                        let outfile_name = format!(
-                            "{}_{}_{:?}_{}_recall.csv",
-                            tree.data().name(),
-                            min_cardinality.to_string(),
-                            distance_metric,
-                            k,
-                        );
-
-                        file_path.push(outfile_name);
-                        println!("writing to {:?}", file_path.to_str().unwrap());
-                        utils::write_results(&file_path, &results.1);
-
-                        file_path.pop();
-
-                        let outfile_name = format!(
-                            "{}_{}_{:?}_{}_f1-score.csv",
-                            tree.data().name(),
-                            min_cardinality.to_string(),
-                            distance_metric,
-                            k,
-                        );
-
-                        file_path.push(outfile_name);
-                        println!("writing to {:?}", file_path.to_str().unwrap());
-                        utils::write_results(&file_path, &results.2);
-
-                        file_path.pop();
-                        file_path.push(descriptor_file);
-                        let descriptors = vec![
-                            "data_cardinality".to_string(),
-                            "graph_vertex_cardinality".to_string(),
-                            "graph_edge_cardinality".to_string(),
-                            "tree_height".to_string(),
-                        ];
-                        let descriptor_data = vec![
-                            tree.data().cardinality().to_string(),
-                            graph.vertex_cardinality().to_string(),
-                            graph.edge_cardinality().to_string(),
-                            tree.depth().to_string(),
-                        ];
-                        utils::write_results(&file_path, &descriptors);
-                        utils::write_results(&file_path, &descriptor_data);
-                    } else {
-                        panic!("collecting data for this graph failed");
                     }
                 }
             }
@@ -375,6 +376,7 @@ fn run_physics_sim(
     let mut recall_results: Vec<String> = Vec::with_capacity(max_iters as usize);
     let mut f1_score_results: Vec<String> = Vec::with_capacity(max_iters as usize);
 
+    let original_nn = find_all_knn_original(graph, tree.data(), k);
     for i in 0..max_iters {
         if i % 100 == 0 {
             println!("time step {}", i);
@@ -382,7 +384,6 @@ fn run_physics_sim(
 
         fdg.update(&graph, &tree);
 
-        let original_nn = find_all_knn_original(graph, tree.data(), k);
         match run_fnn_test(&graph, &fdg, &original_nn, k) {
             Ok(accuracy) => {
                 precision_results.push(accuracy.0.to_string());
@@ -507,39 +508,39 @@ fn run_for_each(
 #[test]
 fn fnn() {
     let k = 0;
-    for depth in 4..12 {
-        // build tree/graph here
-        // for k in 3..50 {
-        let (
-            dir,
-            min_cardinality,
-            min_depth,
-            distance_metric,
-            scalar,
-            max_iters,
-            src_folder,
-            out_folder_root,
-            target,
-            // ) = test_params(None);
-        ) = test_params(None);
+    // for depth in 4..12 {
+    // build tree/graph here
+    // for k in 3..50 {
+    let (
+        dir,
+        min_cardinality,
+        min_depth,
+        distance_metric,
+        scalar,
+        max_iters,
+        src_folder,
+        out_folder_root,
+        target,
+        // ) = test_params(None);
+    ) = test_params(None);
 
-        // let outfolder = "angle_distortion";
-        let mut out_folder = PathBuf::new();
-        out_folder.push(out_folder_root);
-        out_folder.push("fnn");
+    // let outfolder = "angle_distortion";
+    let mut out_folder = PathBuf::new();
+    out_folder.push(out_folder_root);
+    out_folder.push("fnn");
 
-        run_for_each(
-            dir,
-            min_cardinality,
-            depth,
-            distance_metric,
-            scalar,
-            max_iters,
-            &src_folder,
-            out_folder.to_str().unwrap(),
-            target,
-            k,
-        );
-    }
+    run_for_each(
+        dir,
+        min_cardinality,
+        min_depth,
+        distance_metric,
+        scalar,
+        max_iters,
+        &src_folder,
+        out_folder.to_str().unwrap(),
+        target,
+        k,
+    );
+    // }
     // }
 }
