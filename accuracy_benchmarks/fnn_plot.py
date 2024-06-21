@@ -16,7 +16,7 @@ import seaborn as sns
 
 from typing import Dict, Tuple
 
-# example usage: python3 fnn_plot.py arrhythmia f1-score
+# example usage: python3 clam/umap fnn_plot.py arrhythmia f1-score
 
 def process_directory(directory, test_name):
 
@@ -69,7 +69,7 @@ def process_directory(directory, test_name):
     return df_sorted
 
 
-def plot_contour(df, out_file, dataname, test_name):
+def plot_contour(df, out_file, dataname, test_name, source):
     # Extract data from DataFrame
 # Replace NaN with 0
     df.fillna(0, inplace=True)
@@ -90,8 +90,12 @@ def plot_contour(df, out_file, dataname, test_name):
     contour = plt.contourf(K, Depth, f1_scores, cmap='viridis')
     plt.colorbar(contour, label='F1 Score')
     plt.xlabel('k')
-    plt.ylabel('Depth')
-    title = "Contour Plot of " + test_name + " for " + dataname
+    if source == "clam":
+        plt.ylabel('Depth')
+    else:
+        plt.ylabel('graph_k')
+
+    title = "Contour Plot of " + test_name + " for " + dataname + "from " + source
     plt.title(title)
     plt.grid(True)
     plt.tight_layout()
@@ -99,7 +103,7 @@ def plot_contour(df, out_file, dataname, test_name):
     plt.savefig(out_file)
     # print(out_file)
 
-def plot_heatmap(df, out_file, dataname, test_name):
+def plot_heatmap(df, out_file, dataname, test_name, source):
     df.fillna(0, inplace=True)
 
     # Pivot the DataFrame to prepare for contour plot
@@ -109,28 +113,17 @@ def plot_heatmap(df, out_file, dataname, test_name):
     sns.heatmap(pivot_df, annot=True, fmt=".2f", cmap="YlGnBu", cbar_kws={'label': 'F1 Score'},vmin=0, vmax=1)
 #     sns.heatmap(pivot_df, annot=True, fmt=".2f", cmap="YlGnBu", cbar_kws={'label': 'F1 Score'})
 
-    title = "Heatmap of " + test_name + " for " + dataname
-    plt.title(title)
     plt.xlabel('k')
-    plt.ylabel('Depth')
+
+    if source == "clam":
+        plt.ylabel('Depth')
+    else:
+        plt.ylabel('graph_k')
+
+    title = "Contour Plot of " + test_name + " for " + dataname + " from " + source
+    plt.title(title)
 
     # Save the heatmap as a PNG file
-    df.fillna(0, inplace=True)
-
-# # Pivot the DataFrame to prepare for contour plot
-#     pivot_df = df.pivot(index='Depth', columns='k', values='F1_Score')
-#     print("n------------------------\n")
-#     print(pivot_df.head())
-# # Extract values for plotting
-#     pivot_df = df.pivot(index='Depth', columns='k', values='F1_Score')
-
-#     # Plotting the heatmap
-#     plt.figure(figsize=(10, 8))
-#     sns.heatmap(pivot_df, annot=True, fmt=".2f", cmap="YlGnBu", cbar_kws={'label': 'F1 Score'})
-#     plt.title('Heatmap of F1 Scores')
-#     plt.xlabel('k')
-#     plt.ylabel('Depth')
-
 
     plt.savefig(out_file)
 
@@ -139,13 +132,20 @@ if __name__ == "__main__":
     
     if len(sys.argv) < 2:
         print("Usage: python script.py dataname test_name<1..n>")
-    if len(sys.argv) == 3:
-        dataname = sys.argv[1]
-        test_name = sys.argv[2]
+    if len(sys.argv) == 4:
+        source = sys.argv[1]
+        dataname = sys.argv[2]
+        test_name = sys.argv[3]
         root_path = pathlib.Path("../clam_ffi/clam_ffi/accuracy_results/fnn")
+
+        if source == "umap":
+            root_path = pathlib.Path("../clam_ffi/clam_ffi/accuracy_results/umap_fnn")
+
 
         # data_paths = [root_path /equivalence_test / dataname, root_path / edge_distortion_test/ dataname, root_path / angle_distortion_test/ dataname ]
         out_folder = pathlib.Path("plots/" + "fnn/" + dataname +"/")
+        if source == "umap":
+            out_folder = pathlib.Path("umap_plots/" + "fnn/" + dataname +"/")
         if not os.path.exists(out_folder):
             os.makedirs(out_folder)
         
@@ -154,7 +154,7 @@ if __name__ == "__main__":
         # print(out_file)
         # 
         # create_joint_plot(dataname, "", result, "")
-        plot_heatmap(df, out_file, dataname, test_name)
+        plot_heatmap(df, out_file, dataname, test_name, source)
 
    
 

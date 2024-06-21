@@ -90,4 +90,5 @@ data/
 clam_ffi/clam_ffi/ffi_log
 clam_ffi/clam_ffi/accuracy_results
 accuracy_benchmarks/plots
+accuracy_benchmarks/umap_plots
 umap
