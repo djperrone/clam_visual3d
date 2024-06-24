@@ -15,6 +15,7 @@ use abd_clam::{
 };
 use distances::Number;
 use glam::Vec3;
+use nalgebra::max;
 use ndarray::Data;
 
 use crate::{
@@ -235,10 +236,8 @@ fn run_test_on_file(
     out_folder: &str,
     distance_metric: DistanceMetric,
     min_cardinality: usize,
-    _min_depth: usize,
     max_iters: i32,
     scalar: f32,
-    _k: usize,
 ) {
     match Handle::create_dataset(filename, &src_folder, distance_metric, false) {
         Ok(data) => {
@@ -269,9 +268,9 @@ fn run_test_on_file(
                                 distance_metric,
                                 k,
                             );
-                            let (original_nn, umap_nn) = clam_find_knn2(&fdg, &graph, &tree, k);
+                            let (original_nn, fdg_nn) = clam_find_knn2(&fdg, &graph, &tree, k);
                             let (precision, recall, f1_score) =
-                                calc_fnn_scores(&original_nn, &umap_nn).unwrap();
+                                calc_fnn_scores(&original_nn, &fdg_nn).unwrap();
                             let mut file_path = PathBuf::new();
                             // file_path.push("triangle_acc_results");
                             file_path.push(out_folder);
@@ -427,6 +426,26 @@ fn run_physics_sim(
 //     return Err("something went wrong".to_string());
 // }
 
+fn run_single_target(
+    filename: &str,
+    src_folder: &PathBuf,
+    out_folder: &str,
+    distance_metric: DistanceMetric,
+    min_cardinality: usize,
+    max_iters: i32,
+    scalar: f32,
+) {
+    run_test_on_file(
+        filename,
+        &src_folder,
+        out_folder,
+        distance_metric,
+        min_cardinality,
+        max_iters,
+        scalar,
+    );
+}
+
 fn run_for_each(
     dir: ReadDir,
     min_cardinality: usize,
@@ -468,10 +487,8 @@ fn run_for_each(
                                     outfolder,
                                     distance_metric,
                                     min_cardinality,
-                                    min_depth,
                                     max_iters,
                                     scalar,
-                                    k,
                                 );
                                 break;
                             }
@@ -482,10 +499,8 @@ fn run_for_each(
                                 outfolder,
                                 distance_metric,
                                 min_cardinality,
-                                min_depth,
                                 max_iters,
                                 scalar,
-                                k,
                             );
                         }
 
@@ -500,7 +515,6 @@ fn run_for_each(
 
 #[test]
 fn fnn() {
-    let k = 0;
     // for depth in 4..12 {
     // build tree/graph here
     // for k in 3..50 {
@@ -522,21 +536,39 @@ fn fnn() {
     out_folder.push(out_folder_root);
     out_folder.push("fnn");
 
-    run_for_each(
-        dir,
-        min_cardinality,
-        min_depth,
-        distance_metric,
-        scalar,
-        max_iters,
-        &src_folder,
-        out_folder.to_str().unwrap(),
-        target,
-        k,
-    );
-    // }
-    // }
+    let targets = vec![
+        // "arrhythmia".to_string(),
+        // "satellite".to_string(),
+        "wine".to_string(),
+    ];
+
+    for target in targets {
+        run_single_target(
+            &target,
+            &src_folder,
+            out_folder.to_str().unwrap(),
+            distance_metric,
+            min_cardinality,
+            max_iters,
+            scalar,
+        )
+    }
+
+    // run_for_each(
+    //     dir,
+    //     min_cardinality,
+    //     min_depth,
+    //     distance_metric,
+    //     scalar,
+    //     max_iters,
+    //     &src_folder,
+    //     out_folder.to_str().unwrap(),
+    //     target,
+    //     k,
+    // );
 }
+// }
+// }
 
 // #[test]
 // fn umap_test_ang1le_distortion() {
@@ -753,10 +785,10 @@ fn clam_find_knn2<'a>(
         }
 
         let original_nn_vec = binary_heap_to_vec(original_nn);
-        let umap_nn_vec = binary_heap_to_vec(fdg_nn);
+        let fdg_nn_vec = binary_heap_to_vec(fdg_nn);
 
         original_nn_map.insert(current_cluster.name(), original_nn_vec);
-        fdg_nn_map.insert(current_cluster.name(), umap_nn_vec);
+        fdg_nn_map.insert(current_cluster.name(), fdg_nn_vec);
     }
 
     return (original_nn_map, fdg_nn_map);

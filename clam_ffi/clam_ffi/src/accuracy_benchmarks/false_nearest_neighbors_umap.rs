@@ -309,7 +309,7 @@ fn run_for_each_umap(
     }
 }
 #[test]
-fn umap_fnn() {
+fn umap_test() {
     let (
         _search_dir,
         _min_cardinality,
