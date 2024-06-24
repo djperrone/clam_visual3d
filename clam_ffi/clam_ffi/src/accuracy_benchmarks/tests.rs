@@ -151,7 +151,7 @@ fn run_physics_sim(
     max_iters: i32,
     metric_cb: fn(&mut [(&str, f32); 3], &mut [(&str, f32); 3]) -> f64,
 ) -> Result<Vec<String>, String> {
-    let mut fdg = build_force_directed_graph(&tree, &graph, scalar, max_iters);
+    let mut fdg = build_force_directed_graph(&tree, &graph, scalar, max_iters, true);
     println!("created fdg");
     let mut results: Vec<String> = Vec::with_capacity(max_iters as usize);
 

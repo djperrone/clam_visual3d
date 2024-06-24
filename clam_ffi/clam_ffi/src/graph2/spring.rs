@@ -4,11 +4,12 @@ use nalgebra::max;
 
 use super::physics_node::PhysicsNode;
 
-use crate::graph;
+use crate::graph2;
 #[derive(Debug)]
 pub struct Spring {
     nat_len: f32,
-    k: f32,
+    k_attractive: f32,
+    k_repulsive: f32,
     node1: String, //String's reference hash table
     node2: String,
     pub is_real: bool,
@@ -18,7 +19,8 @@ impl Spring {
     pub fn new(nat_len: f32, hash_code1: String, hash_code2: String, real: bool) -> Self {
         Spring {
             nat_len, //: nat_len.min(1.0),
-            k: 0.005,
+            k_attractive: 0.005,
+            k_repulsive: 0.002,
             node1: hash_code1,
             node2: hash_code2,
             is_real: real,
@@ -45,7 +47,14 @@ impl Spring {
         // let target_len = (self.nat_len / longest_edge.max(f32::MIN)) * scalar;
         // let target_len = (self.nat_len / longest_edge.max(f32::MIN)).max(min_length) * scalar;
         // let target_len = ((self.nat_len / longest_edge.max(f32::MIN)) * scalar).max(min_length);
-        let new_magnitude = self.k * (force_magnitude - self.nat_len());
+        let k = {
+            if self.is_real {
+                self.k_attractive
+            } else {
+                self.k_repulsive
+            }
+        };
+        let new_magnitude = k * (force_magnitude - self.nat_len());
 
         // Scale the force magnitude if the spring is not real
         // let scaled_magnitude = if !self.is_real {
@@ -54,7 +63,7 @@ impl Spring {
         //     new_magnitude
         // };
 
-        let mut new_force = graph::helpers::set_magnitude(force, new_magnitude);
+        let mut new_force = graph2::helpers::set_magnitude(force, new_magnitude);
 
         let node1 = nodes.get_mut(&self.node1).unwrap();
         node1.accelerate(new_force);
@@ -69,23 +78,23 @@ impl Spring {
         self.nat_len
     }
 
-    pub fn normalized(self, max_len: f32) -> Self {
-        Self {
-            nat_len: self.nat_len / max_len,
-            k: self.k,
-            node1: self.node1,
-            node2: self.node2,
-            is_real: self.is_real,
-        }
-    }
+    // pub fn normalized(self, max_len: f32) -> Self {
+    //     Self {
+    //         nat_len: self.nat_len / max_len,
+    //         k: self.k,
+    //         node1: self.node1,
+    //         node2: self.node2,
+    //         is_real: self.is_real,
+    //     }
+    // }
 
-    pub fn scaled(self, scalar: f32) -> Self {
-        Self {
-            nat_len: self.nat_len * scalar,
-            k: self.k,
-            node1: self.node1,
-            node2: self.node2,
-            is_real: self.is_real,
-        }
-    }
+    // pub fn scaled(self, scalar: f32) -> Self {
+    //     Self {
+    //         nat_len: self.nat_len * scalar,
+    //         k: self.k,
+    //         node1: self.node1,
+    //         node2: self.node2,
+    //         is_real: self.is_real,
+    //     }
+    // }
 }

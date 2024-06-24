@@ -37,6 +37,8 @@ use crate::graph::physics_node::PhysicsNode;
 use crate::utils::scoring_functions::ScoringFunction;
 use spring::Spring;
 
+
+
 pub struct Handle<'a> {
     tree: Option<Treef32>,
     clam_graph: Option<Graphf32<'a>>,
@@ -450,7 +452,7 @@ impl<'a> Handle<'a> {
     ///
     /// * `self` - The handle
     /// * `graph` - The graph to set
-    pub fn set_graph(&mut self, graph: (JoinHandle<()>, Arc<ForceDirectedGraph>)) {
+    pub fn set_graph(&'a mut self, graph: (JoinHandle<()>, Arc<ForceDirectedGraph>)) {
         self.force_directed_graph = Some(graph);
     }
 

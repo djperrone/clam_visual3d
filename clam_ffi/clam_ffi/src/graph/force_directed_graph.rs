@@ -1,3 +1,4 @@
+use abd_clam::graph::Edge;
 use abd_clam::Cluster;
 use rand::seq::IteratorRandom;
 
@@ -7,7 +8,7 @@ use crate::ffi_impl::cluster_data_wrapper::ClusterDataWrapper;
 use crate::utils::error::FFIError;
 use crate::utils::types::{Graphf32, Treef32};
 use crate::{debug, utils, CBFnNodeVisitor, CBFnNodeVisitorMut};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use std::sync::{Condvar, Mutex};
 
@@ -41,8 +42,9 @@ impl ForceDirectedGraph {
         edges: Vec<Spring>,
         scalar: f32,
         max_iters: i32,
+        max_edge_len: f32,
     ) -> Self {
-        let max_edge_len = Self::calc_max_edge_len(&edges);
+        // let max_edge_len = Self::calc_max_edge_len(&edges);
 
         ForceDirectedGraph {
             graph: Mutex::new((Status::new(), graph)),
@@ -58,7 +60,7 @@ impl ForceDirectedGraph {
         match self.graph.get_mut() {
             Ok(g) => {
                 for spring in self.edges.iter() {
-                    spring.move_nodes(&mut g.1, self.max_edge_len, self.scalar);
+                    spring.move_nodes(&mut g.1); //, self.max_edge_len, self.scalar);
                 }
 
                 Self::accumulate_random_forces(
@@ -75,12 +77,12 @@ impl ForceDirectedGraph {
         }
     }
 
-    pub fn graph_mut(&mut self) -> Result<&mut HashMap<String, PhysicsNode>, String> {
-        match self.graph.get_mut() {
-            Ok(graph) => Ok(&mut graph.1),
-            Err(e) => Err(e.to_string()),
-        }
-    }
+    // pub fn graph_mut(&mut self) -> Result<&mut HashMap<String, PhysicsNode>, String> {
+    //     match self.graph.get_mut() {
+    //         Ok(graph) => Ok(&mut graph.1),
+    //         Err(e) => Err(e.to_string()),
+    //     }
+    // }
 
     pub fn get_cluster_position(&self, id: &String) -> Result<glam::Vec3, String> {
         match self.graph.try_lock() {
@@ -121,8 +123,8 @@ impl ForceDirectedGraph {
                     Self::accumulate_edge_forces(
                         &mut g.1,
                         &self.edges,
-                        self.max_edge_len,
-                        self.scalar,
+                        // self.max_edge_len,
+                        // self.scalar,
                     );
 
                     g.0.data_ready = true;
@@ -139,11 +141,11 @@ impl ForceDirectedGraph {
     pub fn accumulate_edge_forces(
         graph: &mut HashMap<String, PhysicsNode>,
         edges: &Vec<Spring>,
-        max_edge_len: f32,
-        scalar: f32,
+        // max_edge_len: f32,
+        // scalar: f32,
     ) {
         for spring in edges.iter() {
-            spring.move_nodes(graph, max_edge_len, scalar);
+            spring.move_nodes(graph); //, max_edge_len, scalar);
         }
     }
 
@@ -158,11 +160,12 @@ impl ForceDirectedGraph {
         for cluster1 in clam_graph.ordered_clusters() {
             for _ in 0..3 {
                 if let Some(cluster2) = clam_graph.ordered_clusters().iter().choose(&mut rng) {
-                    let dist = cluster1.distance_to_other(tree.data(), cluster2);
+                    let dist =
+                        (cluster1.distance_to_other(tree.data(), cluster2) / max_edge_len) * scalar;
 
                     let spring = Spring::new(dist, cluster1.name(), cluster2.name(), false);
 
-                    spring.move_nodes(graph, max_edge_len, scalar);
+                    spring.move_nodes(graph); //, max_edge_len, scalar);
                 }
             }
         }
@@ -232,15 +235,17 @@ impl ForceDirectedGraph {
         }
     }
 
-    fn calc_max_edge_len(edges: &[Spring]) -> f32 {
-        match edges.iter().reduce(|cur_max: &Spring, val: &Spring| {
-            if cur_max.nat_len() > val.nat_len() {
-                cur_max
-            } else {
-                val
-            }
-        }) {
-            Some(spring) => spring.nat_len(),
+    pub fn calc_max_edge_len<'a>(edges: &'a HashSet<Edge<'a, f32>>) -> f32 {
+        match edges
+            .iter()
+            .reduce(|cur_max: &'a Edge<f32>, val: &'a Edge<f32>| {
+                if cur_max.distance() > val.distance() {
+                    cur_max
+                } else {
+                    val
+                }
+            }) {
+            Some(spring) => spring.distance(),
             None => 1.0,
         }
 

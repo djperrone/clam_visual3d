@@ -18,13 +18,14 @@ pub unsafe fn physics_update_async_impl(
     }
 }
 
+// normalized parameter or no?
 pub fn init_force_directed_graph_impl(
     context: InHandlePtr,
     scalar: f32,
     max_iters: i32,
 ) -> FFIError {
     if let Some(handle) = context {
-        match graph_builder::build_force_directed_graph_async(handle, scalar, max_iters) {
+        match graph_builder::build_force_directed_graph_async(handle, scalar, max_iters, true) {
             Ok(g) => {
                 handle.set_graph(g);
                 FFIError::Ok

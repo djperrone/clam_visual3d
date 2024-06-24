@@ -1,5 +1,6 @@
 use std::{
     collections::{HashMap, HashSet},
+    f32::consts::PI,
     sync::Arc,
     thread::{self, JoinHandle},
 };
@@ -14,7 +15,7 @@ use crate::{
     handle::handle::Handle,
     utils::{
         error::FFIError,
-        types::{Vertexf32, DataSetf32, Graphf32, Treef32},
+        types::{DataSetf32, Graphf32, Treef32, Vertexf32},
     },
 };
 
@@ -65,10 +66,14 @@ fn cross_pollinate_components<'a>(
     key_clusters2: &Vec<&'a Vertexf32>,
     data: &DataSetf32,
     edges: &mut Vec<Spring>,
+    max_edge_len: f32,
+    scalar: f32,
 ) {
     for c1 in key_clusters1.iter() {
         for c2 in key_clusters2.iter() {
-            let spring = Spring::new(c1.distance_to_other(data, c2), c1.name(), c2.name(), false);
+            let length = (c1.distance_to_other(data, c2) / max_edge_len) * scalar;
+
+            let spring = Spring::new(length, c1.name(), c2.name(), false);
             edges.push(spring);
         }
     }
@@ -79,6 +84,8 @@ fn create_intercomponent_edges(
     clam_graph: &Graphf32,
     edges: &mut Vec<Spring>,
     k: usize,
+    max_edge_len: f32,
+    scalar: f32,
 ) {
     let component_clusters = clam_graph.find_component_clusters();
 
@@ -86,7 +93,14 @@ fn create_intercomponent_edges(
         if let Some(key_clusters) = get_k_key_clusters(clam_graph, component, k) {
             for component2 in component_clusters.iter().skip(i + 1) {
                 if let Some(key_clusters2) = get_k_key_clusters(clam_graph, component2, k) {
-                    cross_pollinate_components(&key_clusters, &key_clusters2, data, edges)
+                    cross_pollinate_components(
+                        &key_clusters,
+                        &key_clusters2,
+                        data,
+                        edges,
+                        max_edge_len,
+                        scalar,
+                    )
                 }
             }
         }
@@ -98,6 +112,7 @@ pub fn build_force_directed_graph_async(
     handle: &Handle,
     scalar: f32,
     max_iters: i32,
+    normalized: bool,
 ) -> Result<(JoinHandle<()>, Arc<ForceDirectedGraph>), FFIError> {
     if let Some(tree) = handle.tree() {
         if let Some(clam_graph) = handle.clam_graph() {
@@ -123,7 +138,7 @@ pub fn build_force_directed_graph_async(
             // create_intercomponent_edges(tree.data(), clam_graph, &mut springs, 3);
 
             let force_directed_graph = Arc::new(build_force_directed_graph(
-                tree, clam_graph, scalar, max_iters,
+                tree, clam_graph, scalar, max_iters, normalized,
             ));
 
             let b = force_directed_graph.clone();
@@ -143,27 +158,44 @@ pub fn build_force_directed_graph<'a>(
     clam_graph: &'a Graphf32,
     scalar: f32,
     max_iters: i32,
+    normalized: bool,
 ) -> ForceDirectedGraph {
     let mut graph: HashMap<String, PhysicsNode> = HashMap::new();
     let mut rng = rand::thread_rng();
 
     for c in clam_graph.ordered_clusters().iter() {
-        let x: f32 = rng.gen_range(0.0..=100.0);
-        let y: f32 = rng.gen_range(0.0..=100.0);
-        let z: f32 = rng.gen_range(0.0..=100.0);
+        let area = PI * clam_graph.ordered_clusters().len() as f32;
+        // let area = 100.0f32;
+        let x: f32 = rng.gen_range(0.0..=area);
+        let y: f32 = rng.gen_range(0.0..=area);
+        let z: f32 = rng.gen_range(0.0..=area);
         graph.insert(c.name(), PhysicsNode::new(glam::Vec3::new(x, y, z), c));
     }
+
+    let max_edge_len = ForceDirectedGraph::calc_max_edge_len(clam_graph.edges()).max(f32::MIN);
+
     let mut springs = Vec::new();
     for e in clam_graph.edges() {
-        springs.push(Spring::new(
-            e.distance(),
+        let spring = Spring::new(
+            (e.distance() / max_edge_len) * scalar,
             e.left().name(),
             e.right().name(),
             true,
-        ));
+        );
+        // .normalized(max_edge_len)
+        // .scaled(scalar);
+
+        springs.push(spring);
     }
 
-    create_intercomponent_edges(tree.data(), clam_graph, &mut springs, 3);
+    create_intercomponent_edges(
+        tree.data(),
+        clam_graph,
+        &mut springs,
+        3,
+        max_edge_len,
+        scalar,
+    );
 
-    ForceDirectedGraph::new(graph, springs, scalar, max_iters)
+    ForceDirectedGraph::new(graph, springs, scalar, max_iters, max_edge_len)
 }

@@ -360,7 +360,7 @@ fn run_physics_sim(
     scalar: f32,
     max_iters: i32,
 ) -> Result<ForceDirectedGraph, String> {
-    let mut fdg = build_force_directed_graph(&tree, &graph, scalar, max_iters);
+    let mut fdg = build_force_directed_graph(&tree, &graph, scalar, max_iters, true);
     println!("created fdg");
     // let mut precision_results: Vec<String> = Vec::with_capacity(max_iters as usize);
     // let mut recall_results: Vec<String> = Vec::with_capacity(max_iters as usize);
