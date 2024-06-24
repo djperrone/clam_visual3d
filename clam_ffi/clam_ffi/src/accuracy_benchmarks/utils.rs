@@ -1,5 +1,5 @@
 use std::{
-    collections::HashMap,
+    collections::{BinaryHeap, HashMap},
     error::Error,
     f32::consts::PI,
     fs::{File, OpenOptions},
@@ -14,9 +14,11 @@ use rand::{rngs::ThreadRng, seq::SliceRandom, thread_rng};
 use crate::{
     ffi_impl::cluster_data_wrapper::ClusterDataWrapper,
     graph::force_directed_graph::ForceDirectedGraph,
-    utils::types::{Vertexf32, Treef32},
+    utils::types::{Treef32, Vertexf32},
     CBFnNodeVisitorMut,
 };
+
+use super::false_nearest_neighbors::FNN_Wrapper;
 
 pub fn choose_two_random_clusters_exclusive<'a, U: Number>(
     clusters: &Vec<&'a Vertex<U>>,
@@ -429,5 +431,65 @@ mod tests {
 
         // Check if the points are not collinear
         assert!(!are_collinear(p4, p5, p6));
+    }
+}
+
+pub fn binary_heap_to_vec<'a>(
+    mut heap: BinaryHeap<FNN_Wrapper<'a, f32>>,
+) -> Vec<FNN_Wrapper<'a, f32>> {
+    let mut result: Vec<FNN_Wrapper<'a, f32>> = Vec::with_capacity(heap.len());
+    while let Some(wrapper) = heap.pop() {
+        result.push(wrapper);
+    }
+
+    // Since the BinaryHeap pops the largest element first, we need to reverse the vector
+    result.reverse();
+
+    result
+}
+
+pub fn calc_fnn_scores<'a>(
+    original_nn: &HashMap<String, Vec<FNN_Wrapper<'a, f32>>>,
+    umap_nn: &HashMap<String, Vec<FNN_Wrapper<'a, f32>>>,
+) -> Result<(f64, f64, f64), String> {
+    let mut total_precision = 0.0;
+    let mut total_recall = 0.0;
+    let mut total_f1_score = 0.0;
+    let mut count = 0;
+
+    for (idx, original_neighbors) in original_nn.iter() {
+        let graph_neighbors = umap_nn.get(idx).unwrap();
+        // Compare original_neighbors with graph_neighbors and calculate metrics
+        let intersection: usize = original_neighbors
+            .iter()
+            .filter(|&n| graph_neighbors.contains(&n))
+            .count();
+
+        if !original_neighbors.is_empty() && !graph_neighbors.is_empty() {
+            let precision = intersection as f64 / original_neighbors.len() as f64;
+            let recall = intersection as f64 / graph_neighbors.len() as f64;
+            let f1_score = if precision + recall > 0.0 {
+                2.0 * (precision * recall) / (precision + recall)
+            } else {
+                0.0
+            };
+
+            total_precision += precision;
+            total_recall += recall;
+            total_f1_score += f1_score;
+            count += 1;
+        } else {
+            panic!();
+        }
+    }
+    if count > 0 {
+        Ok((
+            total_precision / count as f64,
+            total_recall / count as f64,
+            total_f1_score / count as f64,
+        ))
+    } else {
+        // Err("No valid clusters found".to_string())
+        panic!();
     }
 }
