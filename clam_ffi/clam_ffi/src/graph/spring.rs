@@ -8,17 +8,29 @@ use crate::graph;
 #[derive(Debug)]
 pub struct Spring {
     nat_len: f32,
-    k: f32,
+    // k: f32,
+    k_attractive: f32,
+    k_repulsive: f32,
     node1: String, //String's reference hash table
     node2: String,
     pub is_real: bool,
 }
 
 impl Spring {
-    pub fn new(nat_len: f32, hash_code1: String, hash_code2: String, real: bool) -> Self {
+    pub fn new(
+        nat_len: f32,
+        hash_code1: String,
+        hash_code2: String,
+        real: bool,
+        normalize_len: Option<f32>,
+        scalar: Option<f32>,
+    ) -> Self {
+        let len =
+            (nat_len / normalize_len.unwrap_or(1.0f32).max(f32::MIN)) * scalar.unwrap_or(1.0f32);
         Spring {
-            nat_len, //: nat_len.min(1.0),
-            k: 0.005,
+            nat_len: len, //: nat_len.min(1.0),
+            k_attractive: 0.005,
+            k_repulsive: 0.002,
             node1: hash_code1,
             node2: hash_code2,
             is_real: real,
@@ -45,7 +57,14 @@ impl Spring {
         // let target_len = (self.nat_len / longest_edge.max(f32::MIN)) * scalar;
         // let target_len = (self.nat_len / longest_edge.max(f32::MIN)).max(min_length) * scalar;
         // let target_len = ((self.nat_len / longest_edge.max(f32::MIN)) * scalar).max(min_length);
-        let new_magnitude = self.k * (force_magnitude - self.nat_len());
+        let k = {
+            if self.is_real {
+                self.k_attractive
+            } else {
+                self.k_repulsive
+            }
+        };
+        let new_magnitude = k * (force_magnitude - self.nat_len());
 
         // Scale the force magnitude if the spring is not real
         // let scaled_magnitude = if !self.is_real {
@@ -67,25 +86,5 @@ impl Spring {
 
     pub fn nat_len(&self) -> f32 {
         self.nat_len
-    }
-
-    pub fn normalized(self, max_len: f32) -> Self {
-        Self {
-            nat_len: self.nat_len / max_len,
-            k: self.k,
-            node1: self.node1,
-            node2: self.node2,
-            is_real: self.is_real,
-        }
-    }
-
-    pub fn scaled(self, scalar: f32) -> Self {
-        Self {
-            nat_len: self.nat_len * scalar,
-            k: self.k,
-            node1: self.node1,
-            node2: self.node2,
-            is_real: self.is_real,
-        }
     }
 }

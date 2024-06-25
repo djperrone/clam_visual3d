@@ -71,9 +71,14 @@ fn cross_pollinate_components<'a>(
 ) {
     for c1 in key_clusters1.iter() {
         for c2 in key_clusters2.iter() {
-            let length = (c1.distance_to_other(data, c2) / max_edge_len) * scalar;
-
-            let spring = Spring::new(length, c1.name(), c2.name(), false);
+            let spring = Spring::new(
+                c1.distance_to_other(data, c2),
+                c1.name(),
+                c2.name(),
+                false,
+                Some(max_edge_len),
+                Some(scalar),
+            );
             edges.push(spring);
         }
     }
@@ -177,10 +182,12 @@ pub fn build_force_directed_graph<'a>(
     let mut springs = Vec::new();
     for e in clam_graph.edges() {
         let spring = Spring::new(
-            (e.distance() / max_edge_len) * scalar,
+            e.distance(),
             e.left().name(),
             e.right().name(),
             true,
+            Some(max_edge_len),
+            Some(scalar),
         );
         // .normalized(max_edge_len)
         // .scaled(scalar);

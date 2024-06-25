@@ -160,10 +160,14 @@ impl ForceDirectedGraph {
         for cluster1 in clam_graph.ordered_clusters() {
             for _ in 0..3 {
                 if let Some(cluster2) = clam_graph.ordered_clusters().iter().choose(&mut rng) {
-                    let dist =
-                        (cluster1.distance_to_other(tree.data(), cluster2) / max_edge_len) * scalar;
-
-                    let spring = Spring::new(dist, cluster1.name(), cluster2.name(), false);
+                    let spring = Spring::new(
+                        cluster1.distance_to_other(tree.data(), cluster2),
+                        cluster1.name(),
+                        cluster2.name(),
+                        false,
+                        Some(max_edge_len),
+                        Some(scalar),
+                    );
 
                     spring.move_nodes(graph); //, max_edge_len, scalar);
                 }
