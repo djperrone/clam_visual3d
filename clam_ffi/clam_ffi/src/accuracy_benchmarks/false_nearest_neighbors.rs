@@ -538,8 +538,8 @@ fn fnn() {
 
     let targets = vec![
         // "arrhythmia".to_string(),
-        // "satellite".to_string(),
-        "wine".to_string(),
+        "satellite".to_string(),
+        // "wine".to_string(),
     ];
 
     for target in targets {

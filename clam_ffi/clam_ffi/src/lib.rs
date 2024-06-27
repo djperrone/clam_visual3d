@@ -3,6 +3,7 @@ mod accuracy_benchmarks;
 mod ffi_impl;
 mod file_io;
 pub mod graph;
+pub mod h_graph;
 pub mod handle;
 mod tests;
 mod tree_layout;

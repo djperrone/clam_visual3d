@@ -33,6 +33,7 @@ pub struct ForceDirectedGraph {
     pub scalar: f32,
     cond_var: Condvar,
     max_iters: i32,
+    cur_iter: i32,
 }
 
 impl ForceDirectedGraph {
@@ -51,14 +52,17 @@ impl ForceDirectedGraph {
             scalar,
             cond_var: Condvar::new(),
             max_iters,
+            cur_iter: 0,
         }
     }
 
     pub fn update(&mut self, clam_graph: &Graphf32, tree: &Treef32) {
         match self.graph.get_mut() {
             Ok(g) => {
+                //alpha = initial_alpha * (1.0 - (float(n) / float(n_epochs)))
+                let temp: f32 = 1.0 * (1.0 - self.cur_iter as f32 / self.max_iters as f32);
                 for spring in self.edges.iter() {
-                    spring.move_nodes(&mut g.1, self.max_edge_len, self.scalar);
+                    spring.move_nodes(&mut g.1, self.max_edge_len, self.scalar, Some(temp));
                 }
 
                 Self::accumulate_random_forces(
@@ -70,6 +74,7 @@ impl ForceDirectedGraph {
                 );
 
                 Self::apply_forces(&mut g.1);
+                self.cur_iter += 1;
             }
             Err(e) => {}
         }
@@ -143,7 +148,7 @@ impl ForceDirectedGraph {
         scalar: f32,
     ) {
         for spring in edges.iter() {
-            spring.move_nodes(graph, max_edge_len, scalar);
+            spring.move_nodes(graph, max_edge_len, scalar, None);
         }
     }
 
@@ -158,11 +163,21 @@ impl ForceDirectedGraph {
         for cluster1 in clam_graph.ordered_clusters() {
             for _ in 0..3 {
                 if let Some(cluster2) = clam_graph.ordered_clusters().iter().choose(&mut rng) {
+                    if cluster1.name() == cluster2.name() {
+                        continue;
+                    }
                     let dist = cluster1.distance_to_other(tree.data(), cluster2);
 
-                    let spring = Spring::new(dist, cluster1.name(), cluster2.name(), false);
+                    let spring = Spring::new(
+                        dist,
+                        cluster1.name(),
+                        cluster2.name(),
+                        false,
+                        Some(max_edge_len),
+                        Some(scalar),
+                    );
 
-                    spring.move_nodes(graph, max_edge_len, scalar);
+                    spring.move_nodes(graph, max_edge_len, scalar, None);
                 }
             }
         }
