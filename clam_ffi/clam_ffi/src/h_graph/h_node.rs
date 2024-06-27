@@ -1,4 +1,5 @@
 use abd_clam::Cluster;
+use glam::Vec3;
 
 use crate::graph;
 use crate::utils::types::Vertexf32;
@@ -63,5 +64,9 @@ impl PhysicsNode {
         self.acceleration.x = 0.;
         self.acceleration.y = 0.;
         self.acceleration.z = 0.;
+    }
+
+    pub fn set_position(&mut self, pos: Vec3) {
+        self.position = pos;
     }
 }
