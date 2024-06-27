@@ -74,7 +74,7 @@ impl ForceDirectedGraph {
 
     pub fn update(&mut self, tree: &Treef32, clam_graph: &Graphf32) -> Result<(), String> {
         let cleanup_interval = 3;
-        for i in 1..clam_graph.max_depth() + 1 {
+        for i in 1..clam_graph.max_depth() {
             self.cur_depth = i;
 
             for _ in 0..self.max_iters {
@@ -84,11 +84,13 @@ impl ForceDirectedGraph {
 
             if i % cleanup_interval == 0 {
                 self.cleanup(clam_graph, tree, Some(4));
+            } else if i == clam_graph.max_depth() - 1 {
+                self.cleanup(clam_graph, tree, None);
             }
         }
 
-        if clam_graph.max_depth() + 1 % cleanup_interval != 0 {
-            self.cleanup(clam_graph, tree, None);
+        for _ in 0..self.max_iters {
+            self.run_physics();
         }
 
         return Ok(());
