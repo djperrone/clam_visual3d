@@ -33,7 +33,7 @@ def replace_word_in_file(filename, new_libname):
 
 def update_unity(new_libname):
 
-    filename = UNITY_PATH / "Assets" / "Scripts" / "FFI" / "NativeMethods.cs"
+    filename = UNITY_PATH / "Assets" / "Scripts" / "FFI" / "NativeDLLName.cs"
     data = replace_word_in_file(filename, new_libname)
     with open(filename, 'w') as file:
         file.writelines(data)
