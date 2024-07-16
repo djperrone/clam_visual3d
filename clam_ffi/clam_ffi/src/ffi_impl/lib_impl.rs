@@ -42,12 +42,15 @@ pub unsafe fn for_each_dft_impl(
     max_depth: i32,
 ) -> FFIError {
     if let Some(handle) = ptr {
-        if offset != 0 && cardinality != 0 {
+        if offset == 0 && cardinality == 0 {
+            debug!("invalid root dft");
+            
+            return FFIError::InvalidStringPassed;
             // let c_str = unsafe { CStr::from_ptr(start_node) };
             // let r_str = c_str.to_str().unwrap();
-            return handle.for_each_dft(node_visitor, offset, cardinality, max_depth);
         } else {
-            return FFIError::InvalidStringPassed;
+            debug!("frst dft");
+            return handle.for_each_dft(node_visitor, offset, cardinality, max_depth);
         }
     }
 

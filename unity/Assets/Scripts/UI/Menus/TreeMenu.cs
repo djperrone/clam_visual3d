@@ -33,6 +33,7 @@ public class TreeMenu
         (FFIError err, ClusterData rootData) = NativeMethods.GetRootData();
         if (err == FFIError.Ok)
         {
+            rootData.LogInfo();
             m_Layout = new TreeLayout(new ClusterID(rootData.offset, rootData.cardinality));
 
         }

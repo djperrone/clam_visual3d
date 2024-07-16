@@ -69,6 +69,7 @@ namespace Clam
                 Debug.Log("pos: " + this.pos.AsVector3);
                 Debug.Log("color: " + this.color.AsColor);
                 Debug.Log("depth: " + this.depth);
+                Debug.Log("offset: " + this.offset);
                 Debug.Log("cardinality: " + this.cardinality);
                 Debug.Log("argCenter: " + this.argCenter);
                 Debug.Log("argRadius: " + this.argRadial);

@@ -19,6 +19,7 @@ public class TreeLayout
     public TreeLayout(ClusterID rootId)
     {
         m_RootID = rootId;
+        Debug.Log("root data here " + rootId.Offset.ToString() + ' ' + rootId.Cardinality.ToString());
         (FFIError err, ClusterData clusterData) = NativeMethods.GetClusterData(rootId.AsTuple());
         if (err != FFIError.Ok)
         {
@@ -28,6 +29,8 @@ public class TreeLayout
         m_RootDepth = clusterData.depth;
 
         Debug.Log("root depth: " + m_RootDepth);
+        Debug.Log("root o: " + clusterData.offset);
+        Debug.Log("root c: " + clusterData.cardinality);
 
         m_CurrentDepth = m_RootDepth + 1;
         m_MaxDepth = m_CurrentDepth + m_IntervalStep;

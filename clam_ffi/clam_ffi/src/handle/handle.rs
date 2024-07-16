@@ -528,7 +528,7 @@ impl<'a> Handle<'a> {
         cardinality: usize,
         max_depth: i32,
     ) -> FFIError {
-
+        debug!("fir eacgh dft");
         if let Some(tree) = self.tree(){
            if let Some(start_cluster) = tree.get_cluster(offset, cardinality){
                     Self::for_each_dft_helper(start_cluster, node_visitor, max_depth);
