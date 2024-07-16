@@ -10,7 +10,7 @@ public class GraphBuilder : MonoBehaviour
     private int m_VertexCounter;
     private int m_IndexCounter;
     private bool m_IsPhysicsRunning;
-    Dictionary<string, GameObject> m_Graph;
+    Dictionary<(nuint, nuint), GameObject> m_Graph;
 
     //private float m_EdgeScalar = 25.0f;
 
@@ -42,7 +42,7 @@ public class GraphBuilder : MonoBehaviour
         }
     }
 
-    public void Init(System.Collections.Generic.Dictionary<string, GameObject> graph, float edgeScalar, int numIters)
+    public void Init(System.Collections.Generic.Dictionary<(nuint, nuint), GameObject> graph, float edgeScalar, int numIters)
     {
         m_Graph = graph;
         GetComponent<MeshFilter>().mesh = new Mesh();
@@ -89,7 +89,7 @@ public class GraphBuilder : MonoBehaviour
 
     public void PositionUpdater(ref Clam.FFI.ClusterData nodeData)
     {
-        string id = nodeData.id.AsString;
+        var id = nodeData.ID_AsTuple();
         if (m_Graph.TryGetValue(id, out var node))
         {
             node.GetComponent<Node>().SetPosition(nodeData.pos.AsVector3);
@@ -111,29 +111,26 @@ public class GraphBuilder : MonoBehaviour
         }
     }
 
-    public void EdgeDrawer(ref Clam.FFI.ClusterData nodeData)
+    public void EdgeDrawer(ref Clam.FFI.ClusterIDs nodeData)
     {
-        string msg = nodeData.message.AsString;
-        var values = msg.Split(' ').ToList();
-        string otherID = values[1];
-        bool isDetected = values[0][0] == '1';
-
-        if (m_Graph.TryGetValue(nodeData.id.AsString, out var node))
+        //string msg = nodeData.message.AsString;
+        //var values = msg.Split(' ').ToList();
+        //string otherID = values[1];
+        //bool isDetected = values[0][0] == '1';
+        //var oc = otherID.Split("-").ToList();
+        if (m_Graph.TryGetValue(nodeData.id.AsTuple(), out var node))
         {
-            if (m_Graph.TryGetValue(otherID, out var other))
+            if (m_Graph.TryGetValue(nodeData.leftID.AsTuple(), out var other))
             {
-                if (isDetected)
+                var id1 = node.GetComponent<Node>().IndexBufferID;
+                var id2 = other.GetComponent<Node>().IndexBufferID;
+                m_Indices[m_IndexCounter++] = id1;
+                m_Indices[m_IndexCounter++] = id2;
+                if (m_IndexCounter == m_Indices.Length)
                 {
-                    var id1 = node.GetComponent<Node>().IndexBufferID;
-                    var id2 = other.GetComponent<Node>().IndexBufferID;
-                    m_Indices[m_IndexCounter++] = id1;
-                    m_Indices[m_IndexCounter++] = id2;
-                    if (m_IndexCounter == m_Indices.Length)
-                    {
-                        GetComponent<MeshFilter>().mesh.SetIndices(m_Indices, MeshTopology.Lines, 0);
-                        Debug.Log("all edges drawn");
+                    GetComponent<MeshFilter>().mesh.SetIndices(m_Indices, MeshTopology.Lines, 0);
+                    Debug.Log("all edges drawn");
 
-                    }
                 }
             }
         }

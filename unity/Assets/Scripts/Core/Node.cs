@@ -1,3 +1,4 @@
+using Clam.FFI;
 using UnityEngine;
 
 //public interface IClickable
@@ -11,9 +12,9 @@ namespace Clam
     public class Node : MonoBehaviour
     {
         private static Color m_SelectedColor = new Color(0.0f/255.0f, 231.0f/ 255.0f, 250.0f / 255.0f);
-        private string m_ID;
-        private string m_LeftChildID;
-        private string m_RightChildID;
+        private (nuint, nuint) m_ID;
+        private (nuint, nuint) m_LeftChildID;
+        private (nuint, nuint) m_RightChildID;
 
         //public int test = 5;
         private bool m_IsSelected = false;
@@ -90,16 +91,16 @@ namespace Clam
             return m_IsSelected;
         }
 
-        public string GetId()
+        public (nuint, nuint) GetId()
         {
             return m_ID;
         }
 
-        public string GetLeftChildID()
+        public (nuint, nuint) GetLeftChildID()
         {
             return m_LeftChildID;
         }
-        public string GetRightChildID()
+        public (nuint, nuint) GetRightChildID()
         {
             return m_RightChildID;
         }
@@ -123,17 +124,17 @@ namespace Clam
             SetColor(color);
         }
 
-        public void SetID(string id)
+        public void SetID((nuint, nuint) id)
         {
             m_ID = id;
         }
 
-        public void SetLeft(string id)
+        public void SetLeft((nuint,nuint) id)
         {
             m_LeftChildID = id;
         }
 
-        public void SetRight(string id)
+        public void SetRight((nuint, nuint) id)
         {
             m_RightChildID = id;
         }
@@ -141,7 +142,12 @@ namespace Clam
         public bool IsLeaf()
         {
             //print("-------------------------------------------------lid " + m_LeftChildID + ", rid " + m_RightChildID);
-            return m_LeftChildID == "None" && m_RightChildID == "None";
+            return m_LeftChildID == (0,0) && m_RightChildID == (0,0);
+        }
+
+        public ClusterID ID()
+        {
+            return new ClusterID(m_ID.Item1, m_ID.Item2);
         }
     }
 }

@@ -21,7 +21,7 @@ public class SideMenu : MonoBehaviour
     ClamGraphBuildMenu m_ClamGraphBuildMenu;
     TreeMenu m_TreeMenu;
 
-    RadioButtonGroup m_UIMode;
+    //RadioButtonGroup m_UIMode;
 
     // Start is called before the first frame update
     void Start()
@@ -59,9 +59,9 @@ public class SideMenu : MonoBehaviour
         m_ClusterMenu = new ClusterMenu(GetComponent<UIDocument>());
         //m_GraphBuildMenu = new GraphBuildMenu(GetComponent<UIDocument>(), "GraphBuildMenu");
         m_ClamGraphBuildMenu = new ClamGraphBuildMenu(GetComponent<UIDocument>(), "ClamGraphBuildMenu");
-        m_UIMode = m_UIDocument.rootVisualElement.Q<RadioButtonGroup>("UIMode");
-        m_UIMode.choices = new List<string>() { "In-World", "Overlay" };
-        m_UIMode.RegisterValueChangedCallback(UIModeCallback);
+        //m_UIMode = m_UIDocument.rootVisualElement.Q<RadioButtonGroup>("UIMode");
+        //m_UIMode.choices = new List<string>() { "In-World", "Overlay" };
+        //m_UIMode.RegisterValueChangedCallback(UIModeCallback);
 
     }
     void UIModeCallback(ChangeEvent<int> changeEvent)
@@ -82,12 +82,12 @@ public class SideMenu : MonoBehaviour
     }
     public void SwitchToOverlayUIMode()
     {
-        m_UIMode.value = 1;
+        //m_UIMode.value = 1;
     }
 
     public void SwitchToCameraControlMode()
     {
-        m_UIMode.value = 0;
+        //m_UIMode.value = 0;
     }
 
     public void DisplayClusterInfo(ClusterData data)

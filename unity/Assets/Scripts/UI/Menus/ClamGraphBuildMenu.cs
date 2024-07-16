@@ -21,7 +21,7 @@ public class ClamGraphBuildMenu
     TextField m_MinDepth;
 
     GameObject m_GraphBuilder = null;
-    Dictionary<string, GameObject> m_Graph;
+    Dictionary<(nuint, nuint), GameObject> m_Graph;
     UIDocument m_Document;
 
     //string m_TestOutputPath;
@@ -163,7 +163,7 @@ public class ClamGraphBuildMenu
             return;
         }
 
-        m_Graph = new Dictionary<string, GameObject>();
+        m_Graph = new Dictionary<(nuint, nuint), GameObject>();
 
 
         var graphResult = Clam.FFI.NativeMethods.InitClamGraph((ScoringFunction)System.Enum.Parse(typeof(ScoringFunction), m_ScoringSelector.value),int.Parse(m_MinDepth.value), graphFillerCallback);
@@ -259,17 +259,17 @@ public class ClamGraphBuildMenu
 
     public void graphFillerCallback(ref Clam.FFI.ClusterData nodeData)
     {
-        //if (Cakes.Tree.GetTree().TryGetValue(nodeData.id.AsString, out var node))
+        //if (Cakes.Tree.GetTree().TryGetValue(nodeData.ID_AsString(), out var node))
         //{
         //    //node.GetComponent<Node>().Select();
-        //    m_Graph[nodeData.id.AsString] = node;
+        //    m_Graph[nodeData.ID_AsString()] = node;
         //}
         //else
         //{
 
         //    Debug.LogError("cluster not found");
         //}
-        var id = nodeData.id.AsString;
+        var id = nodeData.ID_AsTuple();
         var cluster = Cakes.Tree.GetOrAdd(id);
 
         m_Graph[id] = cluster;

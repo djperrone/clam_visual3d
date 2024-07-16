@@ -70,7 +70,7 @@
 //    {
 //        GameObject node;
 
-//        bool hasValue = Cakes.Tree.GetTree().TryGetValue(nodeData.id.AsString, out node);
+//        bool hasValue = Cakes.Tree.GetTree().TryGetValue(nodeData.ID_AsString(), out node);
 //        if (hasValue)
 //        {
 //            node.GetComponent<Node>().Deselect();
@@ -78,7 +78,7 @@
 //        }
 //        else
 //        {
-//            Debug.Log("cluster key not found - color filler - " + nodeData.id);
+//            Debug.Log("cluster key not found - color filler - " + nodeData.ID_AsString());
 //        }
 //    }
 

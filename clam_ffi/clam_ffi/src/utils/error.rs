@@ -24,4 +24,5 @@ pub enum FFIError {
     NotInCache,
     TooManyLabels,
     ColoringFailed,
+    NotImplemented,
 }

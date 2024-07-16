@@ -3,6 +3,7 @@
 
 use abd_clam::Cluster;
 
+use super::cluster_ids::ClusterID;
 use super::string_ffi::StringFFI;
 use crate::tree_layout::reingold_impl;
 // use crate::utils::types::Vertexf32;
@@ -12,8 +13,8 @@ use crate::utils::types::Vertexf32;
 #[derive(Copy, Clone, Debug)]
 pub struct ClusterData {
     pub depth: i32,
-    pub offset: i32,
-    pub cardinality: i32,
+    pub offset: usize,
+    pub cardinality: usize,
     pub arg_center: i32,
     pub arg_radial: i32,
     pub radius: f32,
@@ -25,8 +26,8 @@ pub struct ClusterData {
     pub pos: glam::Vec3,
     pub color: glam::Vec3,
 
-    pub id: StringFFI,
-    pub message: StringFFI,
+    // pub id: StringFFI,
+    // pub message: StringFFI,
 }
 
 
@@ -34,28 +35,28 @@ pub struct ClusterData {
 impl ClusterData {
     pub fn default() -> Self {
         ClusterData {
-            id: StringFFI::new("".to_string()),
+            // id: StringFFI::new("".to_string()),
             color: glam::Vec3::new(0., 0., 0.),
             pos: glam::Vec3::new(0., 0., 0.),
-            cardinality: -1,
+            cardinality: 0,
             depth: -1,
-            offset: -1,
+            offset: 0,
             radius: -1.0,
             lfd: -1.0,
             arg_center: -1,
             arg_radial: -1,
             vertex_degree: -1,
             dist_to_query: -1f32,
-            message: StringFFI::new("".repeat(50)),
+            // message: StringFFI::new("".repeat(50)),
         }
     }
-    pub fn from_physics(id: &str, position: glam::Vec3) -> Self {
+    pub fn from_physics(id : (usize, usize), position: glam::Vec3) -> Self {
         ClusterData {
-            id: StringFFI::from_str(id),
+            // id: StringFFI::from_str(id),
             color: glam::Vec3::new(0., 0., 0.),
             pos: position,
-            cardinality: -1,
-            offset: -1,
+            cardinality:id.1,
+            offset: id.0,
             depth: -1,
             radius: -1.0,
             lfd: -1.0,
@@ -64,27 +65,27 @@ impl ClusterData {
             vertex_degree: -1,
 
             dist_to_query: -1f32,
-            message: StringFFI::new("".repeat(50)),
+            // message: StringFFI::new("".repeat(50)),
         }
     }
 
-    pub fn set_message(&mut self, msg: String) {
-        self.message.free_data();
-        self.message = StringFFI::new(msg);
+    // pub fn set_message(&mut self, msg: String) {
+    //     self.message.free_data();
+    //     self.message = StringFFI::new(msg);
+    // }
+
+    // pub fn set_id(&mut self, id : &ClusterID) {
+    //     // self.id.free_data();
+    //     self.id = id;
+    // }
+
+    pub unsafe fn id(&self) -> (usize, usize) {
+        (self.offset, self.cardinality)
     }
 
-    pub fn set_id(&mut self, msg: String) {
-        self.id.free_data();
-        self.id = StringFFI::new(msg);
-    }
-
-    pub unsafe fn get_id(&self) -> String {
-        self.id.as_string().unwrap()
-    }
-
-    pub unsafe fn get_ffi_id(&self) -> &StringFFI {
-        &self.id
-    }
+    // pub unsafe fn get_ffi_id(&self) -> &StringFFI {
+    //     &self.id
+    // }
     pub fn set_position(&mut self, pos: glam::Vec3) {
         self.pos = pos;
     }
@@ -94,20 +95,20 @@ impl ClusterData {
     }
 
     pub fn from_clam(node: &Vertexf32) -> Self {
-        let (left_id, right_id) = {
-            if let Some([left, right]) = node.children() {
-                (left.name(), right.name())
-            } else {
-                ("None".to_string(), "None".to_string())
-            }
-        };
+        // let (left_id, right_id) = {
+        //     if let Some([left, right]) = node.children() {
+        //         (left.name(), right.name())
+        //     } else {
+        //         ("None".to_string(), "None".to_string())
+        //     }
+        // };
 
         ClusterData {
             pos: glam::Vec3::new(0., 0., 0.),
             color: glam::Vec3::new(0., 0., 0.),
-            id: (StringFFI::new(node.name())),
-            cardinality: (node.cardinality() as i32),
-            offset: (node.offset() as i32),
+            // id: (StringFFI::new(node.name())),
+            cardinality: (node.cardinality()),
+            offset: (node.offset()),
             depth: (node.depth() as i32),
             radius: node.radius(),
             lfd: node.lfd() as f32,
@@ -116,18 +117,18 @@ impl ClusterData {
             vertex_degree: -1,
 
             dist_to_query: -1f32,
-            message: StringFFI::new("".repeat(50)),
+            // message: StringFFI::new("".repeat(50)),
         }
     }
 
     pub fn from_reingold_node(other: &reingold_impl::Node) -> Self {
-        let (left, right) = other.get_child_names();
+        // let (left, right) = other.get_child_names();
         ClusterData {
             pos: glam::Vec3::new(other.get_x(), other.get_y(), 0.),
             color: glam::Vec3::new(0., 0., 0.),
-            id: StringFFI::new(other.get_name()),
-            cardinality: -1,
-            offset: -1,
+            // id: StringFFI::new(other.get_name()),
+            offset: other.get_name().0,
+            cardinality: other.get_name().1,
             depth: other.depth(),
             radius: -1.0,
             lfd: -1.0,
@@ -136,11 +137,11 @@ impl ClusterData {
             vertex_degree: -1,
 
             dist_to_query: -1f32,
-            message: StringFFI::new("".repeat(50)),
+            // message: StringFFI::new("".repeat(50)),
         }
     }
-    pub fn free_ids(&mut self) {
-        self.id.free_data();
-        self.message.free_data();
-    }
+    // pub fn free_ids(&mut self) {
+    //     self.id.free_data();
+    //     self.message.free_data();
+    // }
 }

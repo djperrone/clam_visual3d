@@ -15,7 +15,9 @@ use abd_clam::Tree;
 use abd_clam::VecDataset;
 use abd_clam::{graph, PartitionCriteria};
 
-use crate::ffi_impl::cluster_ids_wrapper::ClusterIDsWrapper;
+use crate::ffi_impl::cluster_ids::ClusterID;
+use crate::ffi_impl::cluster_ids::ClusterIDs;
+// use crate::ffi_impl::cluster_ids_wrapper::ClusterIDsWrapper;
 // use crate::graph;
 use crate::graph::force_directed_graph::{self, ForceDirectedGraph};
 use crate::graph::spring;
@@ -28,10 +30,11 @@ use crate::utils::types::Treef32;
 use crate::utils::types::{DataSetf32, Vertexf32};
 use crate::utils::{self, anomaly_readers};
 
+use crate::CBFnNameSetter;
 use crate::{debug, CBFnNodeVisitor, CBFnNodeVisitorMut};
 
 use crate::ffi_impl::cluster_data::ClusterData;
-use crate::ffi_impl::cluster_data_wrapper::ClusterDataWrapper;
+// use crate::ffi_impl::cluster_data_wrapper::ClusterDataWrapper;
 use crate::ffi_impl::tree_startup_data_ffi::TreeStartupDataFFI;
 use crate::graph::physics_node::PhysicsNode;
 use crate::utils::scoring_functions::ScoringFunction;
@@ -319,8 +322,8 @@ impl<'a> Handle<'a> {
                     if let Ok(graph) = Graph::from_tree(tree, &scorer, min_depth as usize) {
                         self.clam_graph = Some(graph);
                         for cluster in self.clam_graph().unwrap().ordered_clusters() {
-                            let baton = ClusterDataWrapper::from_cluster(cluster);
-                            cluster_selector(Some(baton.data()));
+                            let data = ClusterData::from_clam(cluster);
+                            cluster_selector(Some(&data));
                         }
 
                         return FFIError::Ok;
@@ -402,7 +405,7 @@ impl<'a> Handle<'a> {
     /// # Returns
     ///
     /// An `FFIError` indicating if the edges were initialized successfully or not
-    pub unsafe fn init_unity_edges(&mut self, edge_detect_cb: CBFnNodeVisitorMut) -> FFIError {
+    pub unsafe fn init_unity_edges(&mut self, edge_detect_cb: CBFnNameSetter) -> FFIError {
         if let Some(force_directed_graph) = &self.force_directed_graph {
             force_directed_graph::init_unity_edges(&force_directed_graph.1, edge_detect_cb);
         }
@@ -483,27 +486,27 @@ impl<'a> Handle<'a> {
         node_visitor: CBFnNodeVisitor,
     ) -> FFIError {
         // If the current query exists
-        for id in id_arr {
-            match self.get_cluster_from_string(id.clone()) {
-                Ok(cluster) => {
-                    if let Some(query) = &self.current_query {
-                        // Color the cluster by the distance to the query
-                        let mut baton_data = ClusterDataWrapper::from_cluster(cluster);
+        // for id in id_arr {
+        //     match self.get_cluster_from_string(id.clone()) {
+        //         Ok(cluster) => {
+        //             if let Some(query) = &self.current_query {
+        //                 // Color the cluster by the distance to the query
+        //                 let mut baton_data = ClusterDataWrapper::from_cluster(cluster);
 
-                        baton_data.data_mut().dist_to_query =
-                            cluster.distance_to_instance(self.data().unwrap(), query);
+        //                 baton_data.data_mut().dist_to_query =
+        //                     cluster.distance_to_instance(self.data().unwrap(), query);
 
-                        node_visitor(Some(baton_data.data()));
-                    } else {
-                        return FFIError::QueryIsNull;
-                    }
-                }
-                Err(e) => {
-                    return e;
-                }
-            }
-        }
-        FFIError::Ok
+        //                 node_visitor(Some(baton_data.data()));
+        //             } else {
+        //                 return FFIError::QueryIsNull;
+        //             }
+        //         }
+        //         Err(e) => {
+        //             return e;
+        //         }
+        //     }
+        // }
+        FFIError::ColoringFailed
     }
 
     /// Function to iterate through the tree in a depth-first traversal
@@ -521,36 +524,45 @@ impl<'a> Handle<'a> {
     pub unsafe fn for_each_dft(
         &self,
         node_visitor: CBFnNodeVisitor,
-        start_node: String,
+        offset: usize,
+        cardinality: usize,
         max_depth: i32,
     ) -> FFIError {
+
+        if let Some(tree) = self.tree(){
+           if let Some(start_cluster) = tree.get_cluster(offset, cardinality){
+                    Self::for_each_dft_helper(start_cluster, node_visitor, max_depth);
+                    return  FFIError::Ok;
+           }
+        }
+        return FFIError::NullPointerPassed;
         // If the tree exists
-        return if self.tree().is_some() {
-            if start_node == "root" {
-                // If the start node is the root, iterate through the tree
-                if let Some(node) = self.root() {
-                    Self::for_each_dft_helper(node, node_visitor, max_depth);
-                    FFIError::Ok
-                } else {
-                    FFIError::HandleInitFailed
-                }
-            } else {
-                // If the start node is not the root, get the cluster from the string
-                match Self::get_cluster_from_string(self, start_node) {
-                    Ok(root) => {
-                        // Iterate through the tree
-                        Self::for_each_dft_helper(root, node_visitor, max_depth);
-                        FFIError::Ok
-                    }
-                    Err(e) => {
-                        debug!("{:?}", e);
-                        FFIError::InvalidStringPassed
-                    }
-                }
-            }
-        } else {
-            FFIError::NullPointerPassed
-        };
+        // return if self.tree().is_some() {
+        //     if offset == 0 && cardinality == tree {
+        //         // If the start node is the root, iterate through the tree
+        //         if let Some(node) = self.root() {
+        //             Self::for_each_dft_helper(node, node_visitor, max_depth);
+        //             FFIError::Ok
+        //         } else {
+        //             FFIError::HandleInitFailed
+        //         }
+        //     } else {
+        //         // If the start node is not the root, get the cluster from the string
+        //         match Self::get_cluster_from_string(self, start_node) {
+        //             Ok(root) => {
+        //                 // Iterate through the tree
+        //                 Self::for_each_dft_helper(root, node_visitor, max_depth);
+        //                 FFIError::Ok
+        //             }
+        //             Err(e) => {
+        //                 debug!("{:?}", e);
+        //                 FFIError::InvalidStringPassed
+        //             }
+        //         }
+        //     }
+        // } else {
+        //     FFIError::NullPointerPassed
+        // };
     }
 
     /// Function to set the names of the clusters
@@ -567,34 +579,44 @@ impl<'a> Handle<'a> {
     pub unsafe fn set_names(
         &self,
         node_visitor: crate::CBFnNameSetter,
-        start_node: String,
+        offset : usize,
+        cardinality: usize
     ) -> FFIError {
-        // If the tree exists
-        return if self.tree().is_some() {
-            // If the start node is the root, set the names of the clusters
-            if start_node == "root" {
-                if let Some(node) = self.root() {
-                    Self::set_names_helper(node, node_visitor);
-                    FFIError::Ok
-                } else {
-                    FFIError::HandleInitFailed
-                }
-            } else {
-                // If the start node is not the root, get the cluster from the string
-                match Self::get_cluster_from_string(self, start_node) {
-                    Ok(root) => {
-                        Self::set_names_helper(root, node_visitor);
-                        FFIError::Ok
-                    }
-                    Err(e) => {
-                        debug!("{:?}", e);
-                        FFIError::InvalidStringPassed
-                    }
-                }
+
+        if let Some(_) = self.tree(){
+            if let Ok(start_cluster) = self.get_cluster(offset, cardinality){
+                Self::set_names_helper(start_cluster, node_visitor);
+                return FFIError::Ok;
             }
-        } else {
-            FFIError::NullPointerPassed
-        };
+
+        }
+        return FFIError::NullPointerPassed;
+        // If the tree exists
+        // return if self.tree().is_some() {
+        //     // If the start node is the root, set the names of the clusters
+        //     if start_node == "root" {
+        //         if let Some(node) = self.root() {
+        //             Self::set_names_helper(node, node_visitor);
+        //             FFIError::Ok
+        //         } else {
+        //             FFIError::HandleInitFailed
+        //         }
+        //     } else {
+        //         // If the start node is not the root, get the cluster from the string
+        //         match Self::get_cluster_from_string(self, start_node) {
+        //             Ok(root) => {
+        //                 Self::set_names_helper(root, node_visitor);
+        //                 FFIError::Ok
+        //             }
+        //             Err(e) => {
+        //                 debug!("{:?}", e);
+        //                 FFIError::InvalidStringPassed
+        //             }
+        //         }
+        //     }
+        // } else {
+        //     FFIError::NullPointerPassed
+        // };
     }
 
     /// Helper function for name definition
@@ -610,16 +632,16 @@ impl<'a> Handle<'a> {
     fn set_names_helper(root: &Vertexf32, node_visitor: crate::CBFnNameSetter) {
         // If the root is a leaf, set the name of the cluster
         if root.is_leaf() {
-            let baton = ClusterIDsWrapper::from_cluster(root);
+            let data = ClusterIDs::from_clam(root);
 
-            node_visitor(Some(baton.data()));
+            node_visitor(Some(&data));
             return;
         }
         // If the root has children, set the name of the cluster and iterate through the children
         if let Some([left, right]) = root.children() {
-            let baton = ClusterIDsWrapper::from_cluster(root);
+            let data = ClusterIDs::from_clam(root);
 
-            node_visitor(Some(baton.data()));
+            node_visitor(Some(&data));
             Self::set_names_helper(left, node_visitor);
             Self::set_names_helper(right, node_visitor);
         }
@@ -639,15 +661,15 @@ impl<'a> Handle<'a> {
     fn for_each_dft_helper(root: &Vertexf32, node_visitor: CBFnNodeVisitor, max_depth: i32) {
         // If the root is a leaf or the depth is greater than the maximum depth, set the node visitor
         if root.is_leaf() || root.depth() as i32 >= max_depth {
-            let baton = ClusterDataWrapper::from_cluster(root);
-            node_visitor(Some(baton.data()));
+            let data = ClusterData::from_clam(root);
+            node_visitor(Some(&data));
             return;
         }
         // If the root has children, set the node visitor and iterate through the children
         if let Some([left, right]) = root.children() {
-            let baton = ClusterDataWrapper::from_cluster(root);
+            let data = ClusterData::from_clam(root);
 
-            node_visitor(Some(baton.data()));
+            node_visitor(Some(&data));
 
             Self::for_each_dft_helper(left, node_visitor, max_depth);
             Self::for_each_dft_helper(right, node_visitor, max_depth);
@@ -765,24 +787,24 @@ impl<'a> Handle<'a> {
     ///
     /// A `Result` containing a reference to the cluster or an `FFIError` if the cluster could not be found
     // why isnt string taken by reference?
-    pub unsafe fn get_cluster_from_string(
-        &self,
-        cluster_id: String,
-    ) -> Result<&Vertexf32, FFIError> {
-        let mut parts = cluster_id.split('-');
+    // pub unsafe fn get_cluster_from_string(
+    //     &self,
+    //     cluster_id: String,
+    // ) -> Result<&Vertexf32, FFIError> {
+    //     let mut parts = cluster_id.split('-');
 
-        // If the cluster ID has an offset and a cardinality, get the cluster
-        if let (Some(offset_str), Some(cardinality_str)) = (parts.next(), parts.next()) {
-            if let (Ok(offset), Ok(cardinality)) = (
-                offset_str.parse::<usize>(),
-                cardinality_str.parse::<usize>(),
-            ) {
-                return self.get_cluster(offset, cardinality);
-            }
-        }
-        debug!("root not built get_cluster from string");
-        Err(FFIError::HandleInitFailed)
-    }
+    //     // If the cluster ID has an offset and a cardinality, get the cluster
+    //     if let (Some(offset_str), Some(cardinality_str)) = (parts.next(), parts.next()) {
+    //         if let (Ok(offset), Ok(cardinality)) = (
+    //             offset_str.parse::<usize>(),
+    //             cardinality_str.parse::<usize>(),
+    //         ) {
+    //             return self.get_cluster(offset, cardinality);
+    //         }
+    //     }
+    //     debug!("root not built get_cluster from string");
+    //     Err(FFIError::HandleInitFailed)
+    // }
 
     /// Function to get the cluster from an offset and a cardinality
     ///
@@ -856,7 +878,7 @@ impl<'a> Handle<'a> {
         node_visitor: CBFnNodeVisitor,
     ) -> FFIError {
         return if self.tree().is_some() {
-            if let Ok(clam_root) = self.get_cluster_from_string(root.get_id()) {
+            if let Ok(clam_root) = self.get_cluster(root.offset as usize, root.cardinality as usize) {
                 reingold_tilford::run_offset(&root.pos, clam_root, max_depth, node_visitor)
             } else {
                 FFIError::NullPointerPassed

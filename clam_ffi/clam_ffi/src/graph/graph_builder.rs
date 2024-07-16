@@ -9,12 +9,12 @@ use rand::{seq::SliceRandom, Rng};
 
 use crate::{
     debug,
-    ffi_impl::cluster_data::ClusterData,
+    ffi_impl::{cluster_data::ClusterData, cluster_ids::ClusterID},
     graph,
     handle::handle::Handle,
     utils::{
         error::FFIError,
-        types::{Vertexf32, DataSetf32, Graphf32, Treef32},
+        types::{DataSetf32, Graphf32, Treef32, Vertexf32},
     },
 };
 
@@ -68,7 +68,7 @@ fn cross_pollinate_components<'a>(
 ) {
     for c1 in key_clusters1.iter() {
         for c2 in key_clusters2.iter() {
-            let spring = Spring::new(c1.distance_to_other(data, c2), c1.name(), c2.name(), false);
+            let spring = Spring::new(c1.distance_to_other(data, c2), ClusterID::from_cluster(&c1), ClusterID::from_cluster(&c2), false);
             edges.push(spring);
         }
     }
@@ -144,21 +144,21 @@ pub fn build_force_directed_graph<'a>(
     scalar: f32,
     max_iters: i32,
 ) -> ForceDirectedGraph {
-    let mut graph: HashMap<String, PhysicsNode> = HashMap::new();
+    let mut graph: HashMap<(usize, usize), PhysicsNode> = HashMap::new();
     let mut rng = rand::thread_rng();
 
     for c in clam_graph.ordered_clusters().iter() {
         let x: f32 = rng.gen_range(0.0..=100.0);
         let y: f32 = rng.gen_range(0.0..=100.0);
         let z: f32 = rng.gen_range(0.0..=100.0);
-        graph.insert(c.name(), PhysicsNode::new(glam::Vec3::new(x, y, z), c));
+        graph.insert(ClusterID::from_cluster(c).to_tuple(), PhysicsNode::new(glam::Vec3::new(x, y, z), c));
     }
     let mut springs = Vec::new();
     for e in clam_graph.edges() {
         springs.push(Spring::new(
             e.distance(),
-            e.left().name(),
-            e.right().name(),
+            ClusterID::from_cluster(e.left()),
+            ClusterID::from_cluster(e.right()),
             true,
         ));
     }

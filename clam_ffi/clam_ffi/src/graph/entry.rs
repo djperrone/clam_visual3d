@@ -1,8 +1,5 @@
 use crate::{
-    debug,
-    ffi_impl::cluster_data::ClusterData,
-    utils::{error::FFIError, types::InHandlePtr},
-    CBFnNodeVisitor, CBFnNodeVisitorMut,
+    debug, ffi_impl::cluster_data::ClusterData, utils::{error::FFIError, types::InHandlePtr}, CBFnNameSetter, CBFnNodeVisitor, CBFnNodeVisitorMut
 };
 
 use super::graph_builder;
@@ -40,7 +37,7 @@ pub fn init_force_directed_graph_impl(
 }
 pub unsafe fn init_graph_vertices_impl(
     context: InHandlePtr,
-    edge_detect_cb: CBFnNodeVisitorMut,
+    edge_detect_cb: CBFnNameSetter,
 ) -> FFIError {
     if let Some(handle) = context {
         return handle.init_unity_edges(edge_detect_cb);

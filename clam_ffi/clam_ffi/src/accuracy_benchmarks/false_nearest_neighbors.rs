@@ -768,9 +768,9 @@ fn clam_find_knn2<'a>(
                 current_cluster.distance_to_other(tree.data(), &other_cluster);
 
             let fdg_distance = fdg
-                .get_cluster_position(&current_cluster.name())
+                .get_cluster_position((current_cluster.offset(), current_cluster.cardinality()))
                 .unwrap()
-                .distance(fdg.get_cluster_position(&other_cluster.name()).unwrap());
+                .distance(fdg.get_cluster_position((other_cluster.offset(), other_cluster.cardinality())).unwrap());
 
             original_nn.push(FNN_Wrapper::new(other_cluster, original_distance));
             fdg_nn.push(FNN_Wrapper::new(other_cluster, fdg_distance));

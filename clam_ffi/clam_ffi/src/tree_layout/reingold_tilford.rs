@@ -1,8 +1,8 @@
 use glam::Vec3;
 
 use crate::{
-    ffi_impl::cluster_data_wrapper::ClusterDataWrapper,
-    utils::{error::FFIError, types::Vertexf32},
+    // ffi_impl::cluster_data_wrapper::ClusterDataWrapper,
+    ffi_impl::cluster_data::ClusterData, utils::{error::FFIError, types::Vertexf32}
 };
 
 use super::reingold_impl;
@@ -57,11 +57,11 @@ fn update_helper_offset(
         return;
     }
     if let Some(node) = root {
-        let mut baton = ClusterDataWrapper::from_reingold_node(&node.as_ref().borrow());
-        baton.data_mut().pos.x += offset.x;
-        baton.data_mut().pos.y -= offset.y;
-        baton.data_mut().pos.z += offset.z;
-        node_visitor(Some(baton.data()));
+        let mut data = ClusterData::from_reingold_node(&node.as_ref().borrow());
+        data.pos.x += offset.x;
+        data.pos.y -= offset.y;
+        data.pos.z += offset.z;
+        node_visitor(Some(&data));
 
         update_helper_offset(
             node.as_ref().borrow().get_left_child(),
@@ -92,9 +92,9 @@ fn update_unity_positions(
 
 fn update_helper(root: reingold_impl::Link, node_visitor: crate::CBFnNodeVisitor) {
     if let Some(node) = root {
-        let baton = ClusterDataWrapper::from_reingold_node(&node.as_ref().borrow());
+        let data = ClusterData::from_reingold_node(&node.as_ref().borrow());
 
-        node_visitor(Some(baton.data()));
+        node_visitor(Some(&data));
         update_helper(node.as_ref().borrow().get_left_child(), node_visitor);
         update_helper(node.as_ref().borrow().get_right_child(), node_visitor);
     }

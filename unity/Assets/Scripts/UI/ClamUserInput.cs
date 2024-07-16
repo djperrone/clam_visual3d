@@ -51,13 +51,13 @@ namespace Clam
             if (Physics.Raycast(ray.origin, ray.direction * 10, out hitInfo, Mathf.Infinity))
             {
                 var selectedNode = hitInfo.collider.gameObject;
-
-                var wrapper = new RustResourceWrapper<ClusterData>(ClusterData.Alloc(selectedNode.GetComponent<Node>().GetId()));
-                if (wrapper != null)
+                (FFIError err, ClusterData clusterData) = NativeMethods.GetClusterData(selectedNode.GetComponent<Node>().GetId());
+                //var wrapper = new RustResourceWrapper<ClusterData>(ClusterData.Alloc(selectedNode.GetComponent<Node>().GetId()));
+                if (err == FFIError.Ok)
                 {
                     if (!selectedNode.GetComponent<Node>().Selected)
                     {
-                        MenuEventManager.instance.GetCurrentMenu().GetComponent<SideMenu>().DisplayClusterInfo(wrapper.Data);
+                        MenuEventManager.instance.GetCurrentMenu().GetComponent<SideMenu>().DisplayClusterInfo(clusterData);
                     }
                     else
                     {
@@ -114,8 +114,8 @@ namespace Clam
                     // should i handle case of only one being active?
                     if (leftChild.activeSelf && rightChild.activeSelf)
                     {
-                        Clam.FFI.NativeMethods.ForEachDFT(SetInactiveCallBack, leftChild.GetComponent<Node>().GetId());
-                        Clam.FFI.NativeMethods.ForEachDFT(SetInactiveCallBack, rightChild.GetComponent<Node>().GetId());
+                        Clam.FFI.NativeMethods.ForEachDFT(SetInactiveCallBack, leftChild.GetComponent<Node>().ID());
+                        Clam.FFI.NativeMethods.ForEachDFT(SetInactiveCallBack, rightChild.GetComponent<Node>().ID());
                     }
                     else
                     {
@@ -123,8 +123,10 @@ namespace Clam
                         rightChild.SetActive(true);
 
                         // need to redraw parent child lines
-                        var wrapper = new RustResourceWrapper<ClusterData>(ClusterData.Alloc(selectedNode.GetComponent<Node>().GetId()));
-                        Clam.FFI.NativeMethods.DrawHierarchyOffsetFrom(wrapper, PositionUpdater);
+                        (FFIError err, ClusterData clusterData) = NativeMethods.GetClusterData(selectedNode.GetComponent<Node>().GetId());
+
+                        //var wrapper = new RustResourceWrapper<ClusterData>(ClusterData.Alloc(selectedNode.GetComponent<Node>().GetId()));
+                        Clam.FFI.NativeMethods.DrawHierarchyOffsetFrom(ref clusterData, PositionUpdater);
 
                         //redrawing lines here after reingold call potentially
                         var springPrefab = Resources.Load("Spring") as GameObject;
@@ -140,27 +142,27 @@ namespace Clam
 
         unsafe void SetInactiveCallBack(ref FFI.ClusterData nodeData)
         {
-            bool hasValue = Cakes.Tree.GetTree().TryGetValue(nodeData.id.AsString, out GameObject node);
+            bool hasValue = Cakes.Tree.GetTree().TryGetValue(nodeData.ID_AsTuple(), out GameObject node);
             if (hasValue)
             {
                 node.SetActive(false);
             }
             else
             {
-                Debug.LogWarning("set inactive key not found - " + nodeData.id);
+                Debug.LogWarning("set inactive key not found - " + nodeData.ID_AsString());
             }
         }
         unsafe void PositionUpdater(ref Clam.FFI.ClusterData nodeData)
         {
 
-            bool hasValue = Cakes.Tree.GetTree().TryGetValue(nodeData.id.AsString, out GameObject node);
+            bool hasValue = Cakes.Tree.GetTree().TryGetValue(nodeData.ID_AsTuple(), out GameObject node);
             if (hasValue)
             {
                 node.GetComponent<Node>().SetPosition(nodeData.pos.AsVector3);
             }
             else
             {
-                Debug.Log("reingoldify key not found - " + nodeData.id);
+                Debug.Log("reingoldify key not found - " + nodeData.ID_AsString());
             }
         }
         void OnExit()

@@ -28,13 +28,13 @@ public class ClusterMenu
         m_ClusterInfoLabel = m_UIDocument.rootVisualElement.Q<Label>("ClusterInfoLabel");
         InitClusterInfoLabel();
 
-        var foundRoot = Clam.FFI.NativeMethods.GetRootData(out var dataWrapper);
-        if (foundRoot == FFIError.Ok)
+        (var err, ClusterData clusterData) = Clam.FFI.NativeMethods.GetRootData();
+        if (err == FFIError.Ok)
         {
             m_IntInputFields = new Dictionary<string, IntTextField>
             {
                 { "Depth", new IntTextField("ClusterDepth", m_UIDocument, 0, Clam.FFI.NativeMethods.TreeHeight(), new Func<bool>(InputFieldChangeCallback)) },
-                { "Cardinality", new IntTextField("ClusterCardinality", m_UIDocument, 0, dataWrapper.Data.cardinality, new Func<bool>(InputFieldChangeCallback)) },
+                { "Cardinality", new IntTextField("ClusterCardinality", m_UIDocument, 0, (int)clusterData.cardinality, new Func<bool>(InputFieldChangeCallback)) },
             };
         }
         else
@@ -59,12 +59,14 @@ public class ClusterMenu
         foreach (var item in Cakes.Tree.GetTree().ToList())
         {
             var cluster = item.Value;
-            var wrapper = new RustResourceWrapper<ClusterData>(ClusterData.Alloc(cluster.GetComponent<Node>().GetId()));
-            if (wrapper.result == FFIError.Ok)
+            (var err, ClusterData clusterData) = Clam.FFI.NativeMethods.GetClusterData(cluster.GetComponent<Node>().GetId());
+
+            //var wrapper = new RustResourceWrapper<ClusterData>(ClusterData.Alloc(cluster.GetComponent<Node>().GetId()));
+            if (err == FFIError.Ok)
             {
                 if (m_IntInputFields.TryGetValue("Depth", out var depthField))
                 {
-                    if (!depthField.IsWithinRange(wrapper.Data.depth))
+                    if (!depthField.IsWithinRange(clusterData.depth))
                     {
                         cluster.GetComponent<Node>().Deselect();
                         continue;
@@ -73,7 +75,7 @@ public class ClusterMenu
 
                 if (m_IntInputFields.TryGetValue("Cardinality", out var cardField))
                 {
-                    if (!cardField.IsWithinRange(wrapper.Data.cardinality))
+                    if (!cardField.IsWithinRange((int)clusterData.cardinality))
                     {
                         cluster.GetComponent<Node>().Deselect();
                         continue;

@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class TreeLayout
 {
-    string m_RootID;
+    ClusterID m_RootID;
     int m_RootDepth;
     int m_CurrentDepth;
     int m_MaxDepth;
@@ -16,22 +16,31 @@ public class TreeLayout
         return m_CurrentDepth;
     }
 
-    public TreeLayout(string rootId)
+    public TreeLayout(ClusterID rootId)
     {
         m_RootID = rootId;
-
-        var dataWrapper = new RustResourceWrapper<ClusterData>(ClusterData.Alloc(rootId));
-        m_RootDepth = dataWrapper.Data.depth;
+        (FFIError err, ClusterData clusterData) = NativeMethods.GetClusterData(rootId.AsTuple());
+        if (err != FFIError.Ok)
+        {
+            Debug.LogError("error: " + err.ToString());
+        }
+        //var dataWrapper = new RustResourceWrapper<ClusterData>(ClusterData.Alloc(rootId));
+        m_RootDepth = clusterData.depth;
 
         Debug.Log("root depth: " + m_RootDepth);
 
-        m_CurrentDepth = m_RootDepth+1;
+        m_CurrentDepth = m_RootDepth + 1;
         m_MaxDepth = m_CurrentDepth + m_IntervalStep;
+        Debug.Log("before draw heir");
 
-        NativeMethods.DrawHierarchyOffsetFrom(new RustResourceWrapper<ClusterData>(ClusterData.Alloc(m_RootID)), UpdatePositionCallback, m_RootDepth, m_CurrentDepth, m_MaxDepth);
-
+        NativeMethods.DrawHierarchyOffsetFrom(ref clusterData, UpdatePositionCallback, m_RootDepth, m_CurrentDepth, m_MaxDepth);
+        Debug.Log("after draw heir");
         NativeMethods.ForEachDFT(ClusterVisibilityCallback, m_RootID);
-        NativeMethods.ForEachDFT(EdgeVisibilityCallback);
+        Debug.Log("after clsuter vis");
+
+        NativeMethods.ForEachDFT(EdgeVisibilityCallback, m_RootID);
+        Debug.Log("after edge vis");
+
     }
 
     public void ShowMore()
@@ -48,7 +57,9 @@ public class TreeLayout
         {
             Debug.Log("Increasing size");
             m_MaxDepth += m_IntervalStep;
-            NativeMethods.DrawHierarchyOffsetFrom(new RustResourceWrapper<ClusterData>(ClusterData.Alloc(m_RootID)), UpdatePositionCallback, m_RootDepth, m_CurrentDepth, m_MaxDepth);
+            (FFIError err, ClusterData clusterData) = NativeMethods.GetClusterData(m_RootID.AsTuple());
+
+            NativeMethods.DrawHierarchyOffsetFrom(ref clusterData, UpdatePositionCallback, m_RootDepth, m_CurrentDepth, m_MaxDepth);
         }
 
         UpdateNodeVisibility(nextDepth);
@@ -64,12 +75,13 @@ public class TreeLayout
         }
         m_CurrentDepth--;
 
-        if (m_CurrentDepth  < m_MaxDepth - m_IntervalStep)
+        if (m_CurrentDepth < m_MaxDepth - m_IntervalStep)
         {
             Debug.Log("Decreasing size");
 
             m_MaxDepth -= m_IntervalStep;
-            NativeMethods.DrawHierarchyOffsetFrom(new RustResourceWrapper<ClusterData>(ClusterData.Alloc(m_RootID)), UpdatePositionCallback, m_RootDepth, m_CurrentDepth, m_MaxDepth);
+            (FFIError err, ClusterData clusterData) = NativeMethods.GetClusterData(m_RootID.AsTuple());
+            NativeMethods.DrawHierarchyOffsetFrom(ref clusterData, UpdatePositionCallback, m_RootDepth, m_CurrentDepth, m_MaxDepth);
         }
 
         UpdateNodeVisibility(nextDepth);
@@ -77,34 +89,43 @@ public class TreeLayout
 
     void UpdateNodeVisibility(int newDepth)
     {
+        Debug.Log("update noe vis cab");
+
         NativeMethods.ForEachDFT(ClusterVisibilityCallback, m_RootID, m_CurrentDepth + 1);
         NativeMethods.ForEachDFT(EdgeVisibilityCallback, m_RootID, m_CurrentDepth + 1);
     }
 
     void UpdatePositionCallback(ref ClusterData data)
     {
-        var id = data.id.AsString;
+        Debug.Log("update pos cab");
+        var id = data.ID_AsTuple();
         GameObject clusterObject = Cakes.Tree.GetOrAdd(id);
         clusterObject.GetComponent<Clam.Node>().SetPosition(data.pos.AsVector3);
     }
 
     void ClusterVisibilityCallback(ref ClusterData data)
     {
-        var id = data.id.AsString;
+        Debug.Log("cb vis cab");
+
+        var id = data.ID_AsTuple();
         GameObject clusterObject = Cakes.Tree.GetOrAdd(id);
         if (data.depth <= m_CurrentDepth)
         {
+            Debug.Log("setting active");
             clusterObject.SetActive(true);
         }
         else
         {
+            Debug.Log("setting INactive");
+
             clusterObject.SetActive(false);
         }
     }
 
     public void EdgeVisibilityCallback(ref Clam.FFI.ClusterData nodeData)
     {
-        if (Cakes.Tree.GetTree().TryGetValue(nodeData.id.AsString, out var node))
+        Debug.Log("edge vis callbv");
+        if (Cakes.Tree.GetTree().TryGetValue(nodeData.ID_AsTuple(), out var node))
         {
             if (node.activeSelf && !node.GetComponent<Node>().IsLeaf())
             {
@@ -114,11 +135,11 @@ public class TreeLayout
         }
     }
 
-    private void UpdateEdgeVisibility(string childId, GameObject parentNode)
+    private void UpdateEdgeVisibility((nuint, nuint) childId, GameObject parentNode)
     {
         if (Cakes.Tree.GetTree().TryGetValue(childId, out var childNode) && childNode.activeSelf)
         {
-            string edgeKey = parentNode.GetComponent<Node>().GetId() + childNode.GetComponent<Node>().GetId();
+            var edgeKey = (parentNode.GetComponent<Node>().GetId(), childNode.GetComponent<Node>().GetId());
 
             if (Cakes.Tree.GetEdges().TryGetValue(edgeKey, out var edgeGameObject) && edgeGameObject != null && !edgeGameObject.activeSelf)
             {

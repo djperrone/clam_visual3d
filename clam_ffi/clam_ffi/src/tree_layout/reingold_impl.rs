@@ -47,11 +47,11 @@ pub struct Node {
     thread: bool,
     left_child: Link,
     right_child: Link,
-    name: String,
+    name: (usize, usize),
 }
 
 impl Node {
-    pub fn new(depth: f32, name: String) -> Self {
+    pub fn new(depth: f32, name: (usize, usize)) -> Self {
         Node {
             x: 0f32,
             y: depth,
@@ -63,12 +63,12 @@ impl Node {
         }
     }
 
-    pub fn new_link(depth: f32, name: String) -> Link {
+    pub fn new_link(depth: f32, name: (usize, usize)) -> Link {
         Some(Rc::new(RefCell::new(Node::new(depth, name))))
     }
 
     pub fn create_layout(abd_clam_root: &Vertexf32, max_depth: i32) -> Link {
-        let draw_root = Node::new_link(0f32, abd_clam_root.name());
+        let draw_root = Node::new_link(0f32, (abd_clam_root.offset(), abd_clam_root.cardinality()));
 
         Self::init_helper(draw_root.clone(), abd_clam_root, 0f32, max_depth);
 
@@ -84,6 +84,10 @@ impl Node {
         draw_root
     }
 
+    fn clam_name_tuple(v : &Vertexf32)->(usize,usize){
+        (v.offset(), v.cardinality())
+    }
+
     fn init_helper(draw_root: Link, abd_clam_root: &Vertexf32, depth: f32, max_depth: i32) {
         if abd_clam_root.is_leaf() || depth as i32 == max_depth {
             return;
@@ -91,8 +95,8 @@ impl Node {
 
         if let Some([left, right]) = abd_clam_root.children() {
             if let Some(node) = draw_root.clone() {
-                node.borrow_mut().left_child = Node::new_link(depth, left.name());
-                node.borrow_mut().right_child = Node::new_link(depth, right.name());
+                node.borrow_mut().left_child = Node::new_link(depth, Self::clam_name_tuple(left));
+                node.borrow_mut().right_child = Node::new_link(depth, Self::clam_name_tuple(right));
                 Self::init_helper(
                     node.as_ref().borrow().get_left_child(),
                     left,
@@ -221,7 +225,7 @@ impl Node {
                         if let Some(node_left) = node.as_ref().borrow().get_left_child() {
                             node_left.as_ref().borrow().name.clone()
                         } else {
-                            String::new()
+                            (0,0)
                         }
                     };
 
@@ -248,7 +252,7 @@ impl Node {
                         if let Some(node_right) = node.as_ref().borrow().get_right_child() {
                             node_right.as_ref().borrow().name.clone()
                         } else {
-                            String::new()
+                            (0,0)
                         }
                     };
                     if right.as_ref().borrow().name != node_right_name {
@@ -327,34 +331,34 @@ impl Node {
         }
     }
 
-    pub fn get_child_names(&self) -> (String, String) {
-        if self.is_leaf() {
-            return (String::from(""), String::from(""));
-        }
+    // pub fn get_child_names(&self) -> (String, String) {
+    //     if self.is_leaf() {
+    //         return (String::from(""), String::from(""));
+    //     }
 
-        return (
-            self.get_left_child()
-                .as_ref()
-                .unwrap()
-                .as_ref()
-                .borrow()
-                .get_name(),
-            self.get_right_child()
-                .as_ref()
-                .unwrap()
-                .as_ref()
-                .borrow()
-                .get_name(),
-        );
+    //     return (
+    //         self.get_left_child()
+    //             .as_ref()
+    //             .unwrap()
+    //             .as_ref()
+    //             .borrow()
+    //             .get_name(),
+    //         self.get_right_child()
+    //             .as_ref()
+    //             .unwrap()
+    //             .as_ref()
+    //             .borrow()
+    //             .get_name(),
+    //     );
+    // }
+
+    pub fn get_name(&self) -> (usize, usize) {
+        self.name
     }
 
-    pub fn get_name(&self) -> String {
-        self.name.clone()
-    }
-
-    pub fn get_id(&self) -> i32 {
-        i32::from_str_radix(self.name.as_str(), 16).unwrap_or(-1)
-    }
+    // pub fn get_id(&self) -> i32 {
+    //     i32::from_str_radix(self.name.as_str(), 16).unwrap_or(-1)
+    // }
     pub fn get_x(&self) -> f32 {
         self.x
     }

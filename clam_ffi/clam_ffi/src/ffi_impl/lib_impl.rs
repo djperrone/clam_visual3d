@@ -1,4 +1,4 @@
-use core::num;
+use core::{ffi, num};
 use std::collections::HashSet;
 use std::ffi::{c_char, CStr};
 
@@ -16,7 +16,7 @@ use crate::{
     CBFnNameSetter, CBFnNodeVisitor,
 };
 
-use super::{cluster_data::ClusterData, cluster_data_wrapper::ClusterDataWrapper};
+use super::cluster_data::ClusterData;
 
 /// Function that calls the `for_each_dft` method on the handle
 ///
@@ -37,14 +37,15 @@ use super::{cluster_data::ClusterData, cluster_data_wrapper::ClusterDataWrapper}
 pub unsafe fn for_each_dft_impl(
     ptr: InHandlePtr,
     node_visitor: CBFnNodeVisitor,
-    start_node: *const c_char,
+    offset : usize,
+    cardinality : usize,
     max_depth: i32,
 ) -> FFIError {
     if let Some(handle) = ptr {
-        if !start_node.is_null() {
-            let c_str = unsafe { CStr::from_ptr(start_node) };
-            let r_str = c_str.to_str().unwrap();
-            return handle.for_each_dft(node_visitor, r_str.to_string(), max_depth);
+        if offset != 0 && cardinality != 0 {
+            // let c_str = unsafe { CStr::from_ptr(start_node) };
+            // let r_str = c_str.to_str().unwrap();
+            return handle.for_each_dft(node_visitor, offset, cardinality, max_depth);
         } else {
             return FFIError::InvalidStringPassed;
         }
@@ -71,16 +72,11 @@ pub unsafe fn for_each_dft_impl(
 pub unsafe fn set_names_impl(
     ptr: InHandlePtr,
     node_visitor: CBFnNameSetter,
-    start_node: *const c_char,
+    offset : i32,
+    cardinality : i32
 ) -> FFIError {
     if let Some(handle) = ptr {
-        return if !start_node.is_null() {
-            let c_str = unsafe { CStr::from_ptr(start_node) };
-            let r_str = c_str.to_str().unwrap();
-            handle.set_names(node_visitor, r_str.to_string())
-        } else {
-            FFIError::InvalidStringPassed
-        };
+            return handle.set_names(node_visitor, offset as usize, cardinality as usize);
     }
     FFIError::NullPointerPassed
 }
@@ -147,14 +143,14 @@ pub unsafe fn tree_height_impl(ptr: InHandlePtr) -> i32 {
 /// # Returns
 ///
 /// The tree cardinality as an `i32`
-pub unsafe fn tree_cardinality_impl(ptr: InHandlePtr) -> i32 {
+pub unsafe fn tree_cardinality_impl(ptr: InHandlePtr) -> usize {
     if let Some(handle) = ptr {
         if let Some(tree) = handle.tree() {
-            return tree.cardinality() as i32;
+            return tree.cardinality();
         }
     }
     debug!("handle not created");
-    -1
+    0
 }
 
 /// Function that returns the vertex degree of a cluster in the handle
@@ -171,11 +167,11 @@ pub unsafe fn tree_cardinality_impl(ptr: InHandlePtr) -> i32 {
 /// # Returns
 ///
 /// The vertex degree as an `i32` or -1 if the handle is not created
-pub unsafe fn vertex_degree_impl(ptr: InHandlePtr, cluster_id: *const c_char) -> i32 {
+pub unsafe fn vertex_degree_impl(ptr: InHandlePtr, offset : i32, cardinality : i32) -> i32 {
     if let Some(handle) = ptr {
         if let Some(clam_graph) = handle.clam_graph() {
-            let cluster_id = helpers::c_char_to_string(cluster_id);
-            if let Ok(cluster) = handle.get_cluster_from_string(cluster_id) {
+            // let cluster_id = helpers::c_char_to_string(cluster_id);
+            if let Ok(cluster) = handle.get_cluster(offset as usize, cardinality as usize) {
                 if let Ok(degree) = clam_graph.vertex_degree(cluster) {
                     return degree as i32;
                 }
@@ -200,14 +196,14 @@ pub unsafe fn vertex_degree_impl(ptr: InHandlePtr, cluster_id: *const c_char) ->
 /// # Returns
 ///
 /// The cluster label as an `i32` or -1 if the handle is not created
-pub unsafe fn get_cluster_label_impl(ptr: InHandlePtr, cluster_id: *const c_char) -> i32 {
+pub unsafe fn get_cluster_label_impl(ptr: InHandlePtr,  offset : usize, cardinality: usize) -> i32 {
     // If the handle and label exist
     if let Some(handle) = ptr {
         if let Some(labels) = handle.labels() {
             // Get the cluster id as a string
-            let cluster_id = helpers::c_char_to_string(cluster_id);
+            // let cluster_id = helpers::c_char_to_string(cluster_id);
             // If the cluster exists in the handle, get the cluster label
-            if let Ok(cluster) = handle.get_cluster_from_string(cluster_id) {
+            if let Ok(cluster) = handle.get_cluster(offset, cardinality) {
                 let num_unique_labels = {
                     let unique_labels: HashSet<_> = labels.iter().cloned().collect();
                     unique_labels.len()
@@ -440,11 +436,11 @@ fn color_helper(root: Option<&Vertexf32>, labels: &[u8], node_visitor: CBFnNodeV
     // If the root exists
     if let Some(cluster) = root {
         // Get the cluster data
-        let mut cluster_data = ClusterDataWrapper::from_cluster(cluster);
-        cluster_data.data_mut().color = calc_cluster_entropy_color(cluster, labels);
+        let mut cluster_data = ClusterData::from_clam(cluster);
+        cluster_data.color = calc_cluster_entropy_color(cluster, labels);
 
         // Visit the node
-        node_visitor(Some(cluster_data.data()));
+        node_visitor(Some(&cluster_data));
 
         // If the cluster has children, color the children
         if let Some([left, right]) = cluster.children() {
@@ -485,12 +481,12 @@ pub fn color_clusters_by_dominant_label_impl(
                 }
                 // Color the clusters by the dominant label
                 for c in root.subtree() {
-                    let mut cluster_data = ClusterDataWrapper::from_cluster(c);
+                    let mut cluster_data = ClusterData::from_clam(c);
                     if let Ok(color) =
                         calc_cluster_dominant_color(c, labels, num_unique_labels, &colors)
                     {
-                        cluster_data.data_mut().color = color;
-                        node_visitor(Some(cluster_data.data()));
+                        cluster_data.color = color;
+                        node_visitor(Some(&cluster_data));
                     } else {
                         return FFIError::ColoringFailed;
                     }
@@ -526,25 +522,26 @@ pub unsafe fn color_by_dist_to_query_impl(
     node_visitor: CBFnNodeVisitor,
 ) -> FFIError {
     // If the handle and cluster data exist
-    if let Some(handle) = context {
-        if arr_ptr.is_null() {
-            return FFIError::NullPointerPassed;
-        }
-        // Get the cluster data from the pointer
-        let arr = std::slice::from_raw_parts(arr_ptr, len as usize);
+    // if let Some(handle) = context {
+    //     if arr_ptr.is_null() {
+    //         return FFIError::NullPointerPassed;
+    //     }
+    //     // Get the cluster data from the pointer
+    //     let arr = std::slice::from_raw_parts(arr_ptr, len as usize);
 
-        let mut ids = Vec::new();
+    //     let mut ids = Vec::new();
 
-        // Get the ids of the clusters
-        for node in arr {
-            ids.push(node.id.as_string().unwrap());
-        }
+    //     // Get the ids of the clusters
+    //     for node in arr {
+    //         ids.push(node.id.as_string().unwrap());
+    //     }
 
-        // Color the clusters by the distance to the query
-        handle.color_by_dist_to_query(ids.as_slice(), node_visitor)
-    } else {
-        FFIError::NullPointerPassed
-    }
+    //     // Color the clusters by the distance to the query
+    //     handle.color_by_dist_to_query(ids.as_slice(), node_visitor)
+    // } else {
+    //     FFIError::NullPointerPassed
+    // }
+    FFIError::NotImplemented
 }
 
 /// Function that returns the distance to the other cluster
@@ -568,23 +565,24 @@ pub unsafe fn distance_to_other_impl(
     node_name2: *const c_char,
 ) -> f32 {
     // If the handle exists
-    if let Some(handle) = ptr {
-        let node1 = handle.get_cluster_from_string(helpers::c_char_to_string(node_name1));
-        let node2 = handle.get_cluster_from_string(helpers::c_char_to_string(node_name2));
+    // if let Some(handle) = ptr {
+    //     let node1 = handle.get_cluster_from_string(helpers::c_char_to_string(node_name1));
+    //     let node2 = handle.get_cluster_from_string(helpers::c_char_to_string(node_name2));
 
-        // Return the distance to the other cluster or -1.0 if it doesn't exist
-        return if let Ok(node1) = node1 {
-            if let Ok(node2) = node2 {
-                node1.distance_to_other(handle.data().unwrap(), node2)
-            } else {
-                -1f32
-            }
-        } else {
-            -1f32
-        };
-    }
+    //     // Return the distance to the other cluster or -1.0 if it doesn't exist
+    //     return if let Ok(node1) = node1 {
+    //         if let Ok(node2) = node2 {
+    //             node1.distance_to_other(handle.data().unwrap(), node2)
+    //         } else {
+    //             -1f32
+    //         }
+    //     } else {
+    //         -1f32
+    //     };
+    // }
 
     -1f32
+    // FFIError::NotImplemented
 }
 
 // pub unsafe fn test_cakes_rnn_query_impl(

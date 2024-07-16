@@ -45,7 +45,7 @@ public class Edge : MonoBehaviour
         //m_LineRenderer.startWidth = 0.1f;
         //m_LineRenderer.endWidth = 0.1f;
         //m_LineRenderer.useWorldSpace = true;
-        gameObject.name = node1.GetComponent<Node>().GetId() + node2.GetComponent<Node>().GetId();
+        gameObject.name = (node1.GetComponent<Node>().GetId(),node2.GetComponent<Node>().GetId()).ToString();
 
         m_Node1 = node1;
         m_Node2 = node2;

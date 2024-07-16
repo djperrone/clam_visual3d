@@ -36,16 +36,16 @@ namespace Clam
             // -------------------------------------  Tree helpers ------------------------------------- 
 
             [DllImport(__DllName, EntryPoint = "for_each_dft", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-            private static extern FFIError for_each_dft(IntPtr ptr, NodeVisitor callback, string startNode, int maxDepth);
+            private static extern FFIError for_each_dft(IntPtr ptr, NodeVisitor callback, nuint offset, nuint cardinality, int maxDepth);
 
             [DllImport(__DllName, EntryPoint = "set_names", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-            private static extern FFIError set_names(IntPtr ptr, NameSetter callback, string startNode);
+            private static extern FFIError set_names(IntPtr ptr, NameSetter callback, nuint offset, nuint cardinality);
 
             [DllImport(__DllName, EntryPoint = "tree_height", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
             private static extern int tree_height(IntPtr handle);
 
             [DllImport(__DllName, EntryPoint = "tree_cardinality", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-            private static extern int tree_cardinality(IntPtr handle);
+            private static extern nuint tree_cardinality(IntPtr handle);
 
             [DllImport(__DllName, EntryPoint = "max_lfd", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
             private static extern float max_lfd(IntPtr handle);
@@ -54,10 +54,10 @@ namespace Clam
             private static extern int max_vertex_degree(IntPtr handle);
 
             [DllImport(__DllName, EntryPoint = "vertex_degree", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-            private static extern int vertex_degree(IntPtr handle, string cluster_id);
+            private static extern int vertex_degree(IntPtr handle, nuint offset, nuint cardinality);
 
             [DllImport(__DllName, EntryPoint = "get_cluster_label", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-            private static extern int get_cluster_label(IntPtr handle, string cluster_id);
+            private static extern int get_cluster_label(IntPtr handle, nuint offset, nuint cardinality);
 
             [DllImport(__DllName, EntryPoint = "color_clusters_by_entropy", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
             private static extern FFIError color_clusters_by_entropy(IntPtr ptr, NodeVisitor callback);
@@ -73,23 +73,26 @@ namespace Clam
             [DllImport(__DllName, EntryPoint = "create_cluster_data", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
             private static extern FFIError create_cluster_data(IntPtr ptr, string id, out ClusterData data);
 
+            [DllImport(__DllName, EntryPoint = "get_cluster_data", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+            private static extern FFIError get_cluster_data(IntPtr ptr, nuint offset, nuint cardinality, out ClusterData data);
+
             [DllImport(__DllName, EntryPoint = "alloc_string", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
             private static extern FFIError alloc_string(string value, out StringFFI data);
 
             [DllImport(__DllName, EntryPoint = "create_cluster_ids", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
             private static extern FFIError create_cluster_ids(IntPtr ptr, string id, out ClusterIDs data);
 
-            [DllImport(__DllName, EntryPoint = "delete_cluster_data", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-            private static extern FFIError delete_cluster_data(ref ClusterData inData, out ClusterData outData);
+            //[DllImport(__DllName, EntryPoint = "delete_cluster_data", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+            //private static extern FFIError delete_cluster_data(ref ClusterData inData, out ClusterData outData);
 
             [DllImport(__DllName, EntryPoint = "free_string", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
             private static extern FFIError free_string(ref StringFFI inData, out ClusterData outData);
 
-            [DllImport(__DllName, EntryPoint = "delete_cluster_ids", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-            private static extern FFIError delete_cluster_ids(ref ClusterIDs inData, out ClusterIDs outData);
+            //[DllImport(__DllName, EntryPoint = "delete_cluster_ids", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+            //private static extern FFIError delete_cluster_ids(ref ClusterIDs inData, out ClusterIDs outData);
 
-            [DllImport(__DllName, EntryPoint = "set_message", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-            private static extern FFIError set_message(string msg, out ClusterData outData);
+            //[DllImport(__DllName, EntryPoint = "set_message", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+            //private static extern FFIError set_message(string msg, out ClusterData outData);
 
             [DllImport(__DllName, EntryPoint = "distance_to_other", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
             private static unsafe extern float distance_to_other(IntPtr handle, string node1, string node2);
@@ -109,7 +112,7 @@ namespace Clam
 
             [System.Security.SecurityCritical]
             [DllImport(__DllName, EntryPoint = "init_graph_vertices", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-            private static unsafe extern void init_graph_vertices(IntPtr handle, NodeVisitorMut edge_cb);
+            private static unsafe extern void init_graph_vertices(IntPtr handle, NameSetter edge_cb);
 
             [DllImport(__DllName, EntryPoint = "run_triangle_test", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
             private static unsafe extern void run_triangle_test(IntPtr handle, bool last_run, string outPath, NodeVisitorMut edge_cb);

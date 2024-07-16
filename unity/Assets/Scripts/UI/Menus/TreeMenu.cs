@@ -30,8 +30,16 @@ public class TreeMenu
         m_ColorOptions.RegisterValueChangedCallback(ColorChangeCallback);
 
         // root id
-        var foundRoot = NativeMethods.GetRootData(out var rootData);
-        m_Layout = new TreeLayout(rootData.Data.id.AsString);
+        (FFIError err, ClusterData rootData) = NativeMethods.GetRootData();
+        if (err == FFIError.Ok)
+        {
+            m_Layout = new TreeLayout(new ClusterID(rootData.offset, rootData.cardinality));
+
+        }
+        else
+        {
+            Debug.LogError("Erro finding root" + err.ToString());
+        }
 
         m_DepthField = new IntTextField("TreeDepth", m_UIDocument, 0, Clam.FFI.NativeMethods.TreeHeight(), InputFieldChangeCallback);
 
@@ -66,8 +74,8 @@ public class TreeMenu
             //MenuEventManager.SwitchState(Menu.DestroyGraph);
             //MenuEventManager.SwitchState(Menu.DestroyTree);
             Cakes.Tree.ResetTree();
-            var foundRoot = NativeMethods.GetRootData(out var rootData);
-            m_Layout = new TreeLayout(rootData.Data.id.AsString);
+            (FFIError err, ClusterData rootData) = NativeMethods.GetRootData();
+            m_Layout = new TreeLayout(rootData.ID());
             var depthLabel = m_UIDocument.rootVisualElement.Q<Label>("TreeDepthButtonLabel");
             depthLabel.text = "visible depth (max " + Clam.FFI.NativeMethods.TreeHeight().ToString() + "):";
             m_DepthValue.text = m_Layout.CurrentDepth().ToString();
@@ -108,45 +116,49 @@ public class TreeMenu
         }
         else
         {
-            NativeMethods.ForEachDFT(choices[changeEvent.newValue]);
+            NativeMethods.ForEachDFT(choices[changeEvent.newValue], new ClusterID(0, NativeMethods.TreeCardinality()));
         }
     }
 
     void ColorByRadius(ref Clam.FFI.ClusterData nodeData)
     {
-        bool hasValue = Cakes.Tree.GetTree().TryGetValue(nodeData.id.AsString, out var node);
+        bool hasValue = Cakes.Tree.GetTree().TryGetValue(nodeData.ID_AsTuple(), out var node);
         if (hasValue)
         {
-            var rootFound = NativeMethods.GetRootData(out var rootWrapper);
-            float ratio = 1.0f - (float)nodeData.radius / (float)rootWrapper.Data.radius;
+            (FFIError err, ClusterData rootData) = NativeMethods.GetRootData();
+
+
+            float ratio = 1.0f - nodeData.radius / rootData.radius;
             node.GetComponent<Node>().Deselect();
             node.GetComponent<Node>().SetColor(new Color(ratio, ratio, ratio));
         }
         else
         {
-            Debug.LogWarning("cluster key not found - color by radius - " + nodeData.id);
+            Debug.LogWarning("cluster key not found - color by radius - " + nodeData.ID_AsTuple());
         }
     }
 
     void ColorByCardinality(ref Clam.FFI.ClusterData nodeData)
     {
-        bool hasValue = Cakes.Tree.GetTree().TryGetValue(nodeData.id.AsString, out var node);
+        bool hasValue = Cakes.Tree.GetTree().TryGetValue(nodeData.ID_AsTuple(), out var node);
         if (hasValue)
         {
-            var rootFound = NativeMethods.GetRootData(out var rootWrapper);
-            float ratio = 1.0f - (float)nodeData.cardinality / (float)rootWrapper.Data.cardinality;
+            //var rootFound = NativeMethods.GetRootData(out var rootWrapper);
+            (FFIError err, ClusterData rootData) = NativeMethods.GetRootData();
+
+            float ratio = 1.0f - (float)nodeData.cardinality / (float)rootData.cardinality;
             node.GetComponent<Node>().Deselect();
             node.GetComponent<Node>().SetColor(new Color(ratio, ratio, ratio));
         }
         else
         {
-            Debug.LogWarning("cluster key not found - color by card - " + nodeData.id);
+            Debug.LogWarning("cluster key not found - color by card - " + nodeData.ID_AsTuple());
         }
     }
 
     void ColorByDepth(ref Clam.FFI.ClusterData nodeData)
     {
-        bool hasValue = Cakes.Tree.GetTree().TryGetValue(nodeData.id.AsString, out var node);
+        bool hasValue = Cakes.Tree.GetTree().TryGetValue(nodeData.ID_AsTuple(), out var node);
         if (hasValue)
         {
             float ratio = 1.0f - (float)nodeData.depth / (float)NativeMethods.TreeHeight();
@@ -155,12 +167,12 @@ public class TreeMenu
         }
         else
         {
-            Debug.LogWarning("cluster key not found - color by lfd - " + nodeData.id);
+            Debug.LogWarning("cluster key not found - color by lfd - " + nodeData.ID_AsTuple());
         }
     }
     void ColorByLFD(ref Clam.FFI.ClusterData nodeData)
     {
-        bool hasValue = Cakes.Tree.GetTree().TryGetValue(nodeData.id.AsString, out var node);
+        bool hasValue = Cakes.Tree.GetTree().TryGetValue(nodeData.ID_AsTuple(), out var node);
         if (hasValue)
         {
             float ratio = 1.0f - nodeData.lfd / m_MaxLFD;
@@ -168,29 +180,29 @@ public class TreeMenu
         }
         else
         {
-            Debug.LogWarning("cluster key not found - color by lfd - " + nodeData.id);
+            Debug.LogWarning("cluster key not found - color by lfd - " + nodeData.ID_AsTuple());
         }
     }
 
     void ColorByVertexDegree(ref Clam.FFI.ClusterData nodeData)
     {
-        bool hasValue = Cakes.Tree.GetTree().TryGetValue(nodeData.id.AsString, out var node);
+        bool hasValue = Cakes.Tree.GetTree().TryGetValue(nodeData.ID_AsTuple(), out var node);
         if (hasValue)
         {
             int maxVertexDegree = NativeMethods.MaxVertexDegree();
-            int vertexDegree = NativeMethods.VertexDegree(nodeData.id.AsString);
+            int vertexDegree = NativeMethods.VertexDegree(nodeData.ID_AsTuple());
             float ratio = 1.0f - (float)vertexDegree / (float)maxVertexDegree;
             node.GetComponent<Node>().SetColor(new Color(ratio, ratio, ratio));
         }
         else
         {
-            Debug.LogWarning("cluster key not found - color by lfd - " + nodeData.id);
+            Debug.LogWarning("cluster key not found - color by lfd - " + nodeData.ID_AsTuple());
         }
     }
 
     void ColorByLabel(ref Clam.FFI.ClusterData nodeData)
     {
-        bool hasValue = Cakes.Tree.GetTree().TryGetValue(nodeData.id.AsString, out var node);
+        bool hasValue = Cakes.Tree.GetTree().TryGetValue(nodeData.ID_AsTuple(), out var node);
         if (hasValue)
         {
             //Debug.Log("setting color to" + nodeData.color.AsVector3.ToString());
@@ -199,7 +211,7 @@ public class TreeMenu
         }
         else
         {
-            Debug.LogWarning("cluster key not found - color by label - " + nodeData.id);
+            Debug.LogWarning("cluster key not found - color by label - " + nodeData.ID_AsTuple());
         }
     }
 }

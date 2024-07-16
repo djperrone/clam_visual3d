@@ -17,8 +17,8 @@ namespace Clam
 
         public TreeStartupData m_TreeData;
 
-        private Dictionary<string, GameObject> m_Tree;
-        private Dictionary<string, GameObject> m_EdgeCache;
+        private Dictionary<(nuint, nuint), GameObject> m_Tree;
+        private Dictionary<((nuint, nuint), (nuint, nuint)), GameObject> m_EdgeCache;
         public bool m_IsPhysicsRunning = false;
 
         public FFIError Init(GameObject nodePrefab, GameObject springPrefab)
@@ -51,20 +51,20 @@ namespace Clam
                 }
             }
 
-            m_Tree = new Dictionary<string, GameObject>();
-            m_EdgeCache = new Dictionary<string, GameObject>();
+            m_Tree = new Dictionary<(nuint, nuint), GameObject>();
+            m_EdgeCache = new Dictionary<((nuint, nuint), (nuint, nuint)), GameObject>();
 
-            FFIError e = Clam.FFI.NativeMethods.SetNames(SetNodeNames);
+            FFIError e = Clam.FFI.NativeMethods.SetNames(SetNodeNames, 0, NativeMethods.TreeCardinality());
 
             if (e == FFIError.Ok)
             {
-                Debug.Log("ok)");
+                Debug.Log("set names complete)");
             }
             else
             {
                 Debug.Log("ERROR " + e);
             }
-            //Clam.FFI.NativeMethods.DrawHierarchy(PositionUpdater);
+            Clam.FFI.NativeMethods.DrawHierarchy(PositionUpdater);
             //Clam.FFI.NativeMethods.ColorClustersByEntropy(ColorFiller);
             var colorErr = Clam.FFI.NativeMethods.ColorClustersByDominantLabel(ColorFiller);
             if (colorErr != FFIError.Ok)
@@ -73,12 +73,13 @@ namespace Clam
             }
 
 
-            Clam.FFI.NativeMethods.ForEachDFT(EdgeDrawer);
-            //PopulateEdgeDictionary();
+            Clam.FFI.NativeMethods.ForEachDFT(EdgeDrawer, new ClusterID(0, NativeMethods.TreeCardinality()));
 
-            if (Clam.FFI.NativeMethods.GetRootData(out var rootData) == FFIError.Ok)
+            (FFIError err, ClusterData rootData) = NativeMethods.GetRootData();
+
+            if (err == FFIError.Ok)
             {
-                Debug.Log(System.String.Format("created tree with num nodes {0}.", rootData.Data.cardinality));
+                Debug.Log(System.String.Format("created tree with num nodes {0}.", rootData.cardinality));
             }
             else
             {
@@ -89,39 +90,11 @@ namespace Clam
             return FFIError.Ok;
         }
 
-        //private void PopulateEdgeDictionary()
-        //{
-        //    foreach((var id, var cluster) in m_Tree)
-        //    {
-        //        if (!cluster.GetComponent<Node>().IsLeaf())
-        //        {
-                   
-        //        }
-                
-        //    }
-
-        //    //Debug.Log("Populting edge keya");
-        //    //m_EdgeCache = new Dictionary<string, GameObject>();
-        //    //Edge[] edges = GameObject.FindObjectsOfType<Edge>(true);
-        //    //foreach (Edge edge in edges)
-        //    //{
-        //    //    (var node1, var node2) = edge.GetComponent<Edge>().GetNodes();
-        //    //    string edgeKey = node1.GetComponent<Node>().GetId() + node2.GetComponent<Node>().GetId();
-
-        //    //    if (!m_EdgeCache.ContainsKey(edgeKey))
-        //    //    {
-        //    //        m_EdgeCache[edgeKey] = edge.gameObject;
-        //    //    }
-        //    //    else
-        //    //    {
-        //    //        Debug.LogWarning("Duplicate edge key found: " + edgeKey);
-        //    //    }
-        //    //}
-        //}
+  
 
         public void ResetTree()
         {
-            FFIError e = Clam.FFI.NativeMethods.SetNames(SetNodeNames);
+            FFIError e = Clam.FFI.NativeMethods.SetNames(SetNodeNames, 0, NativeMethods.TreeCardinality());
 
             if (e == FFIError.Ok)
             {
@@ -137,7 +110,7 @@ namespace Clam
 
             Clam.FFI.NativeMethods.DrawHierarchy(PositionUpdater);
             Clam.FFI.NativeMethods.ColorClustersByDominantLabel(ColorFiller);
-            Clam.FFI.NativeMethods.ForEachDFT(EdgeDrawer);
+            Clam.FFI.NativeMethods.ForEachDFT(EdgeDrawer, new ClusterID(0, NativeMethods.TreeCardinality()));
             //PopulateEdgeDictionary();
         }
 
@@ -160,12 +133,13 @@ namespace Clam
             //edges = GameObject.FindObjectsOfType<Edge>(true);
             //Debug.Log("after2 num edges" + edges.Length.ToString());
             //m_EdgeCache.Clear();
-            m_EdgeCache = new Dictionary<string, GameObject>();
+            m_EdgeCache = new Dictionary<((nuint, nuint), (nuint, nuint)), GameObject>();
         }
 
         public void EdgeDrawer(ref FFI.ClusterData nodeData)
         {
-            if (m_Tree.TryGetValue(nodeData.id.AsString, out var node))
+            Debug.Log("Edge Drawer");
+            if (m_Tree.TryGetValue(nodeData.ID_AsTuple(), out var node))
             {
                 if (!node.GetComponent<Node>().IsLeaf())
                 {
@@ -175,7 +149,7 @@ namespace Clam
                         edge.GetComponent<Edge>().InitLineRenderer(node, lc, Edge.SpringType.heirarchal);
 
                         (var node1, var node2) = edge.GetComponent<Edge>().GetNodes();
-                        string edgeKey = node1.GetComponent<Node>().GetId() + node2.GetComponent<Node>().GetId();
+                        ((nuint, nuint), (nuint, nuint)) edgeKey = (node1.GetComponent<Node>().GetId(), node2.GetComponent<Node>().GetId());
 
                         if (!m_EdgeCache.ContainsKey(edgeKey))
                         {
@@ -195,7 +169,7 @@ namespace Clam
                         edge.GetComponent<Edge>().InitLineRenderer(node, rc, Edge.SpringType.heirarchal);
 
                         (var node1, var node2) = edge.GetComponent<Edge>().GetNodes();
-                        string edgeKey = node1.GetComponent<Node>().GetId() + node2.GetComponent<Node>().GetId();
+                        ((nuint, nuint), (nuint, nuint)) edgeKey = (node1.GetComponent<Node>().GetId(), node2.GetComponent<Node>().GetId());
 
                         if (!m_EdgeCache.ContainsKey(edgeKey))
                         {
@@ -210,60 +184,68 @@ namespace Clam
                 }
             }
         }
-        public Dictionary<string, GameObject> GetTree()
+        public Dictionary<(nuint, nuint), GameObject> GetTree()
         {
             return m_Tree;
         }
 
-        public Dictionary<string, GameObject> GetEdges()
+        public Dictionary<((nuint, nuint), (nuint, nuint)), GameObject> GetEdges()
         {
             return m_EdgeCache;
         }
 
-        public void Set(Dictionary<string, GameObject> tree)
+        public void Set(Dictionary<(nuint, nuint), GameObject> tree)
         {
             m_Tree = tree;
         }
 
-        public bool Contains(string id)
+        public bool Contains((nuint, nuint) id)
         {
             return m_Tree.ContainsKey(id);
         }
 
-        public GameObject Add(string id)
+        public GameObject Add((nuint, nuint) id)
         {
-            var wrapper = new RustResourceWrapper<ClusterIDs>(ClusterIDs.Alloc(id));
+            //var wrapper = new RustResourceWrapper<ClusterIDs>(ClusterIDs.Alloc(id));
+            (FFIError err, ClusterData cluster) = NativeMethods.GetClusterData(id);
 
-            if (wrapper.result == FFIError.Ok)
+
+            if (err == FFIError.Ok)
             {
                 GameObject node = Instantiate(m_NodePrefab);
-                node.GetComponent<Node>().SetID(wrapper.Data.id.AsString);
-                node.GetComponent<Node>().SetLeft(wrapper.Data.leftID.AsString);
-                node.GetComponent<Node>().SetRight(wrapper.Data.rightID.AsString);
+                node.GetComponent<Node>().SetID(cluster.ID_AsTuple());
+                node.GetComponent<Node>().SetLeft(cluster.ID_AsTuple());
+                node.GetComponent<Node>().SetRight(cluster.ID_AsTuple());
                 m_Tree.Add(id, node);
                 return node;
             }
             return null;
         }
 
-        public GameObject GetOrAdd(string id)
+        public GameObject GetOrAdd((nuint, nuint) id)
         {
             if (m_Tree.ContainsKey(id))
             {
                 return m_Tree.GetValueOrDefault(id);
             }
-            var wrapper = new RustResourceWrapper<ClusterIDs>(ClusterIDs.Alloc(id));
-            if (wrapper.result == FFIError.Ok)
+
+            (FFIError err, ClusterData cluster) = NativeMethods.GetClusterData(id);
+
+            //var wrapper = new RustResourceWrapper<ClusterIDs>(ClusterIDs.Alloc(id));
+            if (err == FFIError.Ok)
             {
                 GameObject node = Instantiate(m_NodePrefab);
-                node.GetComponent<Node>().SetID(wrapper.Data.id.AsString);
-                node.GetComponent<Node>().SetLeft(wrapper.Data.leftID.AsString);
-                node.GetComponent<Node>().SetRight(wrapper.Data.rightID.AsString);
+                node.GetComponent<Node>().SetID(cluster.ID_AsTuple());
+                node.GetComponent<Node>().SetLeft(cluster.ID_AsTuple());
+                node.GetComponent<Node>().SetRight(cluster.ID_AsTuple());
                 m_Tree.Add(id, node);
                 return node;
             }
             else
             {
+                Debug.Log("Get or add");
+                Debug.Log(id.ToString());
+                Debug.LogError(err.ToString());
                 return null;
             }
         }
@@ -273,10 +255,12 @@ namespace Clam
             foreach (var kvp in m_Tree.ToList())
             {
                 var cluster = kvp.Value;
-                var wrapper = new RustResourceWrapper<ClusterData>(ClusterData.Alloc(kvp.Key));
-                if (wrapper.result == FFIError.Ok)
+                //var wrapper = new RustResourceWrapper<ClusterData>(ClusterData.Alloc(kvp.Key));
+                (FFIError err, ClusterData clusterData) = NativeMethods.GetClusterData(kvp.Key);
+                if (err == FFIError.Ok)
+
                 {
-                    if (wrapper.Data.depth > maxDepth)
+                    if (clusterData.depth > maxDepth)
                     {
                         cluster.GetComponent<Node>().Deselect();
                         cluster.SetActive(false);
@@ -291,25 +275,25 @@ namespace Clam
         }
         unsafe void SetNodeNames(ref Clam.FFI.ClusterIDs nodeData)
         {
-            if (!m_Tree.ContainsKey(nodeData.id.AsString))
+            if (!m_Tree.ContainsKey(nodeData.id.AsTuple()))
             {
                 GameObject node = Instantiate(m_NodePrefab);
-                node.GetComponent<Node>().SetID(nodeData.id.AsString);
-                node.GetComponent<Node>().SetLeft(nodeData.leftID.AsString);
-                node.GetComponent<Node>().SetRight(nodeData.rightID.AsString);
-                m_Tree.Add(nodeData.id.AsString, node);
+                node.GetComponent<Node>().SetID(nodeData.id.AsTuple());
+                node.GetComponent<Node>().SetLeft(nodeData.leftID.AsTuple());
+                node.GetComponent<Node>().SetRight(nodeData.rightID.AsTuple());
+                m_Tree.Add(nodeData.id.AsTuple(), node);
             }
         }
 
         unsafe void PositionUpdater(ref Clam.FFI.ClusterData nodeData)
         {
-            if (m_Tree.TryGetValue(nodeData.id.AsString, out var node))
+            if (m_Tree.TryGetValue(nodeData.ID_AsTuple(), out var node))
             {
                 node.GetComponent<Node>().SetPosition(nodeData.pos.AsVector3);
             }
             else
             {
-                Debug.Log("reingoldify key not found - " + nodeData.id);
+                Debug.Log("reingoldify key not found - " + nodeData.ID_AsString());
             }
         }
 
@@ -317,14 +301,14 @@ namespace Clam
         {
             GameObject node;
 
-            bool hasValue = m_Tree.TryGetValue(nodeData.id.AsString, out node);
+            bool hasValue = m_Tree.TryGetValue(nodeData.ID_AsTuple(), out node);
             if (hasValue)
             {
                 node.GetComponent<Node>().SetColor(nodeData.color.AsColor);
             }
             else
             {
-                Debug.Log("cluster key not found - color filler - " + nodeData.id);
+                Debug.Log("cluster key not found - color filler - " + nodeData.ID_AsString());
             }
         }
     }

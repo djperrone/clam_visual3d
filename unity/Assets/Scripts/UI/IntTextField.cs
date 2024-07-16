@@ -208,13 +208,13 @@ namespace Clam
             return new Tuple<int, int>(int.Parse(m_MinField.value), int.Parse(m_MaxField.value));
         }
 
-        public bool IsWithinRange(FFI.RustResourceWrapper<ClusterData> wrapper)
+        public bool IsWithinRange(ref ClusterData data)
         {
             List<Tuple<string, int>> comparisons = new List<Tuple<string, int>>();
-            comparisons.Add(new Tuple<string, int>("Depth", wrapper.GetData().depth));
-            comparisons.Add(new Tuple<string, int>("Cardinality", wrapper.GetData().cardinality));
-            comparisons.Add(new Tuple<string, int>("ArgRadius", wrapper.GetData().argRadial));
-            comparisons.Add(new Tuple<string, int>("ArgCenter", wrapper.GetData().argCenter));
+            comparisons.Add(new Tuple<string, int>("Depth", data.depth));
+            comparisons.Add(new Tuple<string, int>("Cardinality", (int)data.cardinality));
+            comparisons.Add(new Tuple<string, int>("ArgRadius", data.argRadial));
+            comparisons.Add(new Tuple<string, int>("ArgCenter", data.argCenter));
 
             foreach ((string name, int value) in comparisons)
             {
