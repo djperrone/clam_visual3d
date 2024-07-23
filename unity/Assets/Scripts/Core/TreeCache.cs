@@ -138,7 +138,6 @@ namespace Clam
 
         public void EdgeDrawer(ref FFI.ClusterData nodeData)
         {
-            Debug.Log("Edge Drawer");
             if (m_Tree.TryGetValue(nodeData.ID_AsTuple(), out var node))
             {
                 if (!node.GetComponent<Node>().IsLeaf())

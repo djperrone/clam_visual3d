@@ -61,7 +61,7 @@ pub unsafe fn init_clam_impl(
     ptr: OutHandlePtr,
     data_name: *const u8,
     name_len: i32,
-    cardinality: u32,
+    cardinality: usize,
     distance_metric: DistanceMetric,
 ) -> FFIError {
     let data_name = match helpers::csharp_to_rust_utf8(data_name, name_len) {
@@ -72,7 +72,7 @@ pub unsafe fn init_clam_impl(
         }
     };
 
-    match Handle::new(&data_name, cardinality as usize, distance_metric, false) {
+    match Handle::new(&data_name, cardinality, distance_metric, false) {
         Ok(handle) => {
             if let Some(out_handle) = ptr {
                 *out_handle = Box::into_raw(Box::new(handle));

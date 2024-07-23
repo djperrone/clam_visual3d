@@ -164,6 +164,6 @@ pub fn build_force_directed_graph<'a>(
     }
 
     create_intercomponent_edges(tree.data(), clam_graph, &mut springs, 3);
-
+    
     ForceDirectedGraph::new(graph, springs, scalar, max_iters)
 }

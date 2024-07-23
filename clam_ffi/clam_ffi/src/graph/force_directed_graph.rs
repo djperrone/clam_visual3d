@@ -8,7 +8,7 @@ use crate::ffi_impl::cluster_ids::{ClusterID, ClusterIDs};
 // use crate::ffi_impl::cluster_data_wrapper::ClusterDataWrapper;
 use crate::utils::error::FFIError;
 use crate::utils::types::{Graphf32, Treef32};
-use crate::{debug, utils, CBFnNameSetter, CBFnNodeVisitor, CBFnNodeVisitorMut};
+use crate::{debug, CBFnNameSetter, CBFnNodeVisitor};
 use std::collections::HashMap;
 
 use std::sync::{Condvar, Mutex};
@@ -272,16 +272,11 @@ pub unsafe fn force_shutdown(force_directed_graph: &ForceDirectedGraph) -> FFIEr
     force_directed_graph.force_shutdown()
 }
 
+// The offset of the right id represents i f this edge is real or not
 pub fn init_unity_edges(force_directed_graph: &ForceDirectedGraph, init_edges: CBFnNameSetter) {
     for edge in &force_directed_graph.edges {
         let (id1, id2) = edge.get_node_ids();
-        let mut data = ClusterIDs::new(*id1, *id2, ClusterID::new(0, 0));
-        // data.set(id1.clone());
-        // let mut msg = (edge.is_real as i32).to_string();
-        // msg.push(' ');
-        // msg.push_str(id2.clone().as_str());
-        // data_wrapper.data_mut().set_message(msg);
-
+        let mut data = ClusterIDs::new(*id1, *id2, ClusterID::new(edge.is_real as usize, 0));
         init_edges(Some(&mut data));
     }
 }

@@ -31,7 +31,7 @@ use crate::utils::types::{DataSetf32, Vertexf32};
 use crate::utils::{self, anomaly_readers};
 
 use crate::CBFnNameSetter;
-use crate::{debug, CBFnNodeVisitor, CBFnNodeVisitorMut};
+use crate::{debug, CBFnNodeVisitor};
 
 use crate::ffi_impl::cluster_data::ClusterData;
 // use crate::ffi_impl::cluster_data_wrapper::ClusterDataWrapper;
@@ -310,7 +310,7 @@ impl<'a> Handle<'a> {
     pub fn init_clam_graph(
         &'a mut self,
         scoring_function: ScoringFunction,
-        min_depth: i32,
+        min_depth: usize,
         cluster_selector: CBFnNodeVisitor,
     ) -> FFIError {
         // If the tree exists
@@ -319,7 +319,7 @@ impl<'a> Handle<'a> {
             match enum_to_function(&scoring_function) {
                 Ok(scorer) => {
                     // Create the graph from the tree and the scoring function
-                    if let Ok(graph) = Graph::from_tree(tree, &scorer, min_depth as usize) {
+                    if let Ok(graph) = Graph::from_tree(tree, &scorer, min_depth) {
                         self.clam_graph = Some(graph);
                         for cluster in self.clam_graph().unwrap().ordered_clusters() {
                             let data = ClusterData::from_clam(cluster);
@@ -528,7 +528,6 @@ impl<'a> Handle<'a> {
         cardinality: usize,
         max_depth: i32,
     ) -> FFIError {
-        debug!("fir eacgh dft");
         if let Some(tree) = self.tree(){
            if let Some(start_cluster) = tree.get_cluster(offset, cardinality){
                     Self::for_each_dft_helper(start_cluster, node_visitor, max_depth);
@@ -536,33 +535,7 @@ impl<'a> Handle<'a> {
            }
         }
         return FFIError::NullPointerPassed;
-        // If the tree exists
-        // return if self.tree().is_some() {
-        //     if offset == 0 && cardinality == tree {
-        //         // If the start node is the root, iterate through the tree
-        //         if let Some(node) = self.root() {
-        //             Self::for_each_dft_helper(node, node_visitor, max_depth);
-        //             FFIError::Ok
-        //         } else {
-        //             FFIError::HandleInitFailed
-        //         }
-        //     } else {
-        //         // If the start node is not the root, get the cluster from the string
-        //         match Self::get_cluster_from_string(self, start_node) {
-        //             Ok(root) => {
-        //                 // Iterate through the tree
-        //                 Self::for_each_dft_helper(root, node_visitor, max_depth);
-        //                 FFIError::Ok
-        //             }
-        //             Err(e) => {
-        //                 debug!("{:?}", e);
-        //                 FFIError::InvalidStringPassed
-        //             }
-        //         }
-        //     }
-        // } else {
-        //     FFIError::NullPointerPassed
-        // };
+      
     }
 
     /// Function to set the names of the clusters
@@ -591,32 +564,6 @@ impl<'a> Handle<'a> {
 
         }
         return FFIError::NullPointerPassed;
-        // If the tree exists
-        // return if self.tree().is_some() {
-        //     // If the start node is the root, set the names of the clusters
-        //     if start_node == "root" {
-        //         if let Some(node) = self.root() {
-        //             Self::set_names_helper(node, node_visitor);
-        //             FFIError::Ok
-        //         } else {
-        //             FFIError::HandleInitFailed
-        //         }
-        //     } else {
-        //         // If the start node is not the root, get the cluster from the string
-        //         match Self::get_cluster_from_string(self, start_node) {
-        //             Ok(root) => {
-        //                 Self::set_names_helper(root, node_visitor);
-        //                 FFIError::Ok
-        //             }
-        //             Err(e) => {
-        //                 debug!("{:?}", e);
-        //                 FFIError::InvalidStringPassed
-        //             }
-        //         }
-        //     }
-        // } else {
-        //     FFIError::NullPointerPassed
-        // };
     }
 
     /// Helper function for name definition
@@ -738,9 +685,9 @@ impl<'a> Handle<'a> {
     /// # Returns
     ///
     /// An `i32` containing the number of nodes in the tree or 0 if the tree does not exist
-    pub fn get_num_nodes(&self) -> i32 {
+    pub fn get_num_nodes(&self) -> usize {
         if let Some(tree) = self.tree() {
-            tree.cardinality() as i32
+            tree.cardinality()
         } else {
             0
         }
@@ -768,9 +715,9 @@ impl<'a> Handle<'a> {
     /// # Returns
     ///
     /// An `i32` containing the height of the tree or 0 if the tree does not exist
-    pub fn tree_height(&self) -> i32 {
+    pub fn tree_height(&self) -> usize {
         if let Some(tree) = self.tree() {
-            tree.depth() as i32
+            tree.depth()
         } else {
             0
         }

@@ -28,28 +28,21 @@ public class TreeLayout
         //var dataWrapper = new RustResourceWrapper<ClusterData>(ClusterData.Alloc(rootId));
         m_RootDepth = clusterData.depth;
 
-        Debug.Log("root depth: " + m_RootDepth);
-        Debug.Log("root o: " + clusterData.offset);
-        Debug.Log("root c: " + clusterData.cardinality);
 
         m_CurrentDepth = m_RootDepth + 1;
         m_MaxDepth = m_CurrentDepth + m_IntervalStep;
-        Debug.Log("before draw heir");
 
         NativeMethods.DrawHierarchyOffsetFrom(ref clusterData, UpdatePositionCallback, m_RootDepth, m_CurrentDepth, m_MaxDepth);
-        Debug.Log("after draw heir");
         NativeMethods.ForEachDFT(ClusterVisibilityCallback, m_RootID);
-        Debug.Log("after clsuter vis");
 
         NativeMethods.ForEachDFT(EdgeVisibilityCallback, m_RootID);
-        Debug.Log("after edge vis");
 
     }
 
     public void ShowMore()
     {
         int nextDepth = m_CurrentDepth + 1;
-        if (nextDepth > NativeMethods.TreeHeight())
+        if (nextDepth > (int)NativeMethods.TreeHeight())
         {
             Debug.Log("Tree layout height is at max");
             return;
@@ -92,15 +85,13 @@ public class TreeLayout
 
     void UpdateNodeVisibility(int newDepth)
     {
-        Debug.Log("update noe vis cab");
 
-        NativeMethods.ForEachDFT(ClusterVisibilityCallback, m_RootID, m_CurrentDepth + 1);
-        NativeMethods.ForEachDFT(EdgeVisibilityCallback, m_RootID, m_CurrentDepth + 1);
+        NativeMethods.ForEachDFT(ClusterVisibilityCallback, m_RootID, (nuint)m_CurrentDepth + 1);
+        NativeMethods.ForEachDFT(EdgeVisibilityCallback, m_RootID, (nuint)m_CurrentDepth + 1);
     }
 
     void UpdatePositionCallback(ref ClusterData data)
     {
-        Debug.Log("update pos cab");
         var id = data.ID_AsTuple();
         GameObject clusterObject = Cakes.Tree.GetOrAdd(id);
         clusterObject.GetComponent<Clam.Node>().SetPosition(data.pos.AsVector3);
@@ -108,26 +99,21 @@ public class TreeLayout
 
     void ClusterVisibilityCallback(ref ClusterData data)
     {
-        Debug.Log("cb vis cab");
 
         var id = data.ID_AsTuple();
         GameObject clusterObject = Cakes.Tree.GetOrAdd(id);
         if (data.depth <= m_CurrentDepth)
         {
-            Debug.Log("setting active");
             clusterObject.SetActive(true);
         }
         else
         {
-            Debug.Log("setting INactive");
-
             clusterObject.SetActive(false);
         }
     }
 
     public void EdgeVisibilityCallback(ref Clam.FFI.ClusterData nodeData)
     {
-        Debug.Log("edge vis callbv");
         if (Cakes.Tree.GetTree().TryGetValue(nodeData.ID_AsTuple(), out var node))
         {
             if (node.activeSelf && !node.GetComponent<Node>().IsLeaf())

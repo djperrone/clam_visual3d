@@ -42,7 +42,7 @@ public class TreeMenu
             Debug.LogError("Erro finding root" + err.ToString());
         }
 
-        m_DepthField = new IntTextField("TreeDepth", m_UIDocument, 0, Clam.FFI.NativeMethods.TreeHeight(), InputFieldChangeCallback);
+        m_DepthField = new IntTextField("TreeDepth", m_UIDocument, 0, (int)Clam.FFI.NativeMethods.TreeHeight(), InputFieldChangeCallback);
 
         m_ShowMore = m_UIDocument.rootVisualElement.Q<Button>("TreeDepthMoreButton");
         m_ResetLayout = m_UIDocument.rootVisualElement.Q<Button>("ResetTreeLayout");

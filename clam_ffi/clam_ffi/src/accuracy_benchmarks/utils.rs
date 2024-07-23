@@ -15,7 +15,7 @@ use crate::{
     // ffi_impl::cluster_data_wrapper::ClusterDataWrapper,
     graph::force_directed_graph::ForceDirectedGraph,
     utils::types::{Treef32, Vertexf32},
-    CBFnNodeVisitorMut,
+    
 };
 
 use super::false_nearest_neighbors::FNN_Wrapper;

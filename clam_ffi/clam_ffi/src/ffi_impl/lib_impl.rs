@@ -75,11 +75,11 @@ pub unsafe fn for_each_dft_impl(
 pub unsafe fn set_names_impl(
     ptr: InHandlePtr,
     node_visitor: CBFnNameSetter,
-    offset : i32,
-    cardinality : i32
+    offset : usize,
+    cardinality : usize
 ) -> FFIError {
     if let Some(handle) = ptr {
-            return handle.set_names(node_visitor, offset as usize, cardinality as usize);
+            return handle.set_names(node_visitor, offset, cardinality);
     }
     FFIError::NullPointerPassed
 }
@@ -124,12 +124,11 @@ pub fn free_resource<T: Clone + Cleanup>(
 /// # Returns
 ///
 /// The tree height as an `i32`
-pub unsafe fn tree_height_impl(ptr: InHandlePtr) -> i32 {
+pub unsafe fn tree_height_impl(ptr: InHandlePtr) -> usize {
     if let Some(handle) = ptr {
         return handle.tree_height() + 1;
     }
     debug!("handle not created");
-
     0
 }
 
@@ -170,7 +169,7 @@ pub unsafe fn tree_cardinality_impl(ptr: InHandlePtr) -> usize {
 /// # Returns
 ///
 /// The vertex degree as an `i32` or -1 if the handle is not created
-pub unsafe fn vertex_degree_impl(ptr: InHandlePtr, offset : i32, cardinality : i32) -> i32 {
+pub unsafe fn vertex_degree_impl(ptr: InHandlePtr, offset : usize, cardinality : usize) -> i32 {
     if let Some(handle) = ptr {
         if let Some(clam_graph) = handle.clam_graph() {
             // let cluster_id = helpers::c_char_to_string(cluster_id);
@@ -182,7 +181,7 @@ pub unsafe fn vertex_degree_impl(ptr: InHandlePtr, offset : i32, cardinality : i
         }
     }
     debug!("handle not created");
-    -1
+    0
 }
 
 /// Function that returns the cluster label of a cluster in the handle

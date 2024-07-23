@@ -33,7 +33,7 @@ public class ClusterMenu
         {
             m_IntInputFields = new Dictionary<string, IntTextField>
             {
-                { "Depth", new IntTextField("ClusterDepth", m_UIDocument, 0, Clam.FFI.NativeMethods.TreeHeight(), new Func<bool>(InputFieldChangeCallback)) },
+                { "Depth", new IntTextField("ClusterDepth", m_UIDocument, 0, (int)Clam.FFI.NativeMethods.TreeHeight(), new Func<bool>(InputFieldChangeCallback)) },
                 { "Cardinality", new IntTextField("ClusterCardinality", m_UIDocument, 0, (int)clusterData.cardinality, new Func<bool>(InputFieldChangeCallback)) },
             };
         }

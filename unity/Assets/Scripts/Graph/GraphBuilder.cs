@@ -58,6 +58,11 @@ public class GraphBuilder : MonoBehaviour
 
         int numNodes = m_Graph.Count;
         int numEdges = Clam.FFI.NativeMethods.GetNumGraphEdges();
+
+        if (numEdges < 0)
+        {
+            Debug.LogError("num edges error"); return;
+        }
         Debug.Log("num edges in graph : " + numEdges + ", num nodes " + numNodes);
 
         m_Vertices = new Vector3[numNodes];
@@ -113,27 +118,36 @@ public class GraphBuilder : MonoBehaviour
 
     public void EdgeDrawer(ref Clam.FFI.ClusterIDs nodeData)
     {
-        //string msg = nodeData.message.AsString;
-        //var values = msg.Split(' ').ToList();
-        //string otherID = values[1];
-        //bool isDetected = values[0][0] == '1';
-        //var oc = otherID.Split("-").ToList();
-        if (m_Graph.TryGetValue(nodeData.id.AsTuple(), out var node))
+        // If the edge is a chaoda detected edge
+        if (nodeData.rightID.Offset == 1)
         {
-            if (m_Graph.TryGetValue(nodeData.leftID.AsTuple(), out var other))
+            if (m_IndexCounter < m_Indices.Length)
             {
-                var id1 = node.GetComponent<Node>().IndexBufferID;
-                var id2 = other.GetComponent<Node>().IndexBufferID;
-                m_Indices[m_IndexCounter++] = id1;
-                m_Indices[m_IndexCounter++] = id2;
-                if (m_IndexCounter == m_Indices.Length)
+                if (m_Graph.TryGetValue(nodeData.id.AsTuple(), out var node))
                 {
-                    GetComponent<MeshFilter>().mesh.SetIndices(m_Indices, MeshTopology.Lines, 0);
-                    Debug.Log("all edges drawn");
+                    if (m_Graph.TryGetValue(nodeData.leftID.AsTuple(), out var other))
+                    {
+                        var id1 = node.GetComponent<Node>().IndexBufferID;
+                        var id2 = other.GetComponent<Node>().IndexBufferID;
+                        m_Indices[m_IndexCounter++] = id1;
+                        m_Indices[m_IndexCounter++] = id2;
+                        if (m_IndexCounter == m_Indices.Length)
+                        {
+                            GetComponent<MeshFilter>().mesh.SetIndices(m_Indices, MeshTopology.Lines, 0);
+                            Debug.Log("all edges drawn");
+                        }
 
+                    }
                 }
             }
+            else
+            {
+                Debug.Log("tHIS SHOULDNT RUN!!!! index counter" + m_IndexCounter.ToString() + ", / " + Clam.FFI.NativeMethods.GetNumGraphEdges().ToString());
+                m_IndexCounter++;
+                m_IndexCounter++;
+            }
         }
+
     }
 
     public void ToggleEdgeVisibility(bool value)

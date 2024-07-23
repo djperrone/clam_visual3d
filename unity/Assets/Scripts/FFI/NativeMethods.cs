@@ -3,11 +3,8 @@
 #pragma warning disable CS8981
 using Clam;
 using System;
-using System.Collections.Generic;
 using System.Text;
-using UnityEditorInternal;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 namespace Clam
 {
@@ -50,7 +47,7 @@ namespace Clam
                 return e;
             }
 
-            public static FFIError InitClamGraph(ScoringFunction scoringFunction, int minDepth, NodeVisitor clusterSelector)
+            public static FFIError InitClamGraph(ScoringFunction scoringFunction, nuint minDepth, NodeVisitor clusterSelector)
             {
                 var e = init_clam_graph(m_Handle, scoringFunction, minDepth, clusterSelector);
                 if (e == FFIError.Ok)
@@ -109,9 +106,9 @@ namespace Clam
             // -------------------------------------  Tree helpers ------------------------------------- 
 
             
-            public static FFIError ForEachDFT(NodeVisitor callback, ClusterID startID, int maxDepth = -1)
+            public static FFIError ForEachDFT(NodeVisitor callback, ClusterID startID, nuint maxDepth = 0)
             {
-                if (maxDepth == -1)
+                if (maxDepth == 0)
                 {
                     return for_each_dft(m_Handle, callback, startID.Offset, startID.Cardinality, NativeMethods.TreeHeight());
                 }
@@ -132,14 +129,14 @@ namespace Clam
 
             }
 
-            public static int TreeHeight()
+            public static nuint TreeHeight()
             {
                 return tree_height(m_Handle);
             }
 
             public static int VertexDegree((nuint, nuint) id)
             {
-                return vertex_degree(m_Handle, id.Item1, id.Item2);
+                return (int)vertex_degree(m_Handle, id.Item1, id.Item2);
             }
 
             public static int MaxVertexDegree()

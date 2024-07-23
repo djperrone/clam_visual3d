@@ -76,7 +76,7 @@ public class ClamGraphBuildMenu
 
         int minDepthValue = int.Parse(textField.value);
 
-        if (minDepthValue < 0 || minDepthValue > NativeMethods.TreeHeight())
+        if (minDepthValue < 0 || minDepthValue > (int)NativeMethods.TreeHeight())
         {
             textField.value = changeEvent.previousValue;
             return;
@@ -166,7 +166,7 @@ public class ClamGraphBuildMenu
         m_Graph = new Dictionary<(nuint, nuint), GameObject>();
 
 
-        var graphResult = Clam.FFI.NativeMethods.InitClamGraph((ScoringFunction)System.Enum.Parse(typeof(ScoringFunction), m_ScoringSelector.value),int.Parse(m_MinDepth.value), graphFillerCallback);
+        var graphResult = Clam.FFI.NativeMethods.InitClamGraph((ScoringFunction)System.Enum.Parse(typeof(ScoringFunction), m_ScoringSelector.value),(nuint)int.Parse(m_MinDepth.value), graphFillerCallback);
         if (graphResult != FFIError.Ok)
         {
             string errorMessage = "Error building graph (" + graphResult.ToString() + ")";

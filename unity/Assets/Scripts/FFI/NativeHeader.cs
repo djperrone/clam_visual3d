@@ -14,10 +14,10 @@ namespace Clam
             // ------------------------------------- Startup/Shutdown -------------------------------------
 
             [DllImport(__DllName, EntryPoint = "init_clam", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-            private static extern FFIError init_clam(out IntPtr ptr, byte[] data_name, int name_len, uint cardinality, DistanceMetric distanceMetric);
+            private static extern FFIError init_clam(out IntPtr ptr, byte[] data_name, int name_len, nuint cardinality, DistanceMetric distanceMetric);
 
             [DllImport(__DllName, EntryPoint = "init_clam_graph", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-            private static extern FFIError init_clam_graph(IntPtr ptr,ScoringFunction scoringFunction, int min_depth,  NodeVisitor cluster_selector);
+            private static extern FFIError init_clam_graph(IntPtr ptr,ScoringFunction scoringFunction, nuint min_depth,  NodeVisitor cluster_selector);
 
             [DllImport(__DllName, EntryPoint = "init_clam_struct", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
             private static extern FFIError init_clam(out IntPtr ptr, ref TreeStartupDataFFI data);
@@ -36,13 +36,13 @@ namespace Clam
             // -------------------------------------  Tree helpers ------------------------------------- 
 
             [DllImport(__DllName, EntryPoint = "for_each_dft", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-            private static extern FFIError for_each_dft(IntPtr ptr, NodeVisitor callback, nuint offset, nuint cardinality, int maxDepth);
+            private static extern FFIError for_each_dft(IntPtr ptr, NodeVisitor callback, nuint offset, nuint cardinality, nuint maxDepth);
 
             [DllImport(__DllName, EntryPoint = "set_names", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
             private static extern FFIError set_names(IntPtr ptr, NameSetter callback, nuint offset, nuint cardinality);
 
             [DllImport(__DllName, EntryPoint = "tree_height", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-            private static extern int tree_height(IntPtr handle);
+            private static extern nuint tree_height(IntPtr handle);
 
             [DllImport(__DllName, EntryPoint = "tree_cardinality", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
             private static extern nuint tree_cardinality(IntPtr handle);
@@ -54,7 +54,7 @@ namespace Clam
             private static extern int max_vertex_degree(IntPtr handle);
 
             [DllImport(__DllName, EntryPoint = "vertex_degree", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-            private static extern int vertex_degree(IntPtr handle, nuint offset, nuint cardinality);
+            private static extern nuint vertex_degree(IntPtr handle, nuint offset, nuint cardinality);
 
             [DllImport(__DllName, EntryPoint = "get_cluster_label", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
             private static extern int get_cluster_label(IntPtr handle, nuint offset, nuint cardinality);
@@ -70,8 +70,8 @@ namespace Clam
             [DllImport(__DllName, EntryPoint = "get_root_data", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
             private static extern int get_root_data(IntPtr handle);
 
-            [DllImport(__DllName, EntryPoint = "create_cluster_data", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-            private static extern FFIError create_cluster_data(IntPtr ptr, string id, out ClusterData data);
+            //[DllImport(__DllName, EntryPoint = "create_cluster_data", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+            //private static extern FFIError create_cluster_data(IntPtr ptr, string id, out ClusterData data);
 
             [DllImport(__DllName, EntryPoint = "get_cluster_data", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
             private static extern FFIError get_cluster_data(IntPtr ptr, nuint offset, nuint cardinality, out ClusterData data);
@@ -79,8 +79,8 @@ namespace Clam
             [DllImport(__DllName, EntryPoint = "alloc_string", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
             private static extern FFIError alloc_string(string value, out StringFFI data);
 
-            [DllImport(__DllName, EntryPoint = "create_cluster_ids", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-            private static extern FFIError create_cluster_ids(IntPtr ptr, string id, out ClusterIDs data);
+            //[DllImport(__DllName, EntryPoint = "create_cluster_ids", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+            //private static extern FFIError create_cluster_ids(IntPtr ptr, string id, out ClusterIDs data);
 
             //[DllImport(__DllName, EntryPoint = "delete_cluster_data", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
             //private static extern FFIError delete_cluster_data(ref ClusterData inData, out ClusterData outData);

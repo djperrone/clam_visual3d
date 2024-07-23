@@ -13,7 +13,6 @@ use crate::ffi_impl::lib_impl::{
 };
 use crate::ffi_impl::tree_startup_data_ffi::TreeStartupDataFFI;
 use crate::file_io::load_save::save_cakes_single_impl;
-use distances::Number;
 use ffi_impl::{
     cluster_data::ClusterData, cluster_ids::ClusterIDs, lib_impl::*, string_ffi::StringFFI,
 };
@@ -34,7 +33,7 @@ use crate::utils::scoring_functions::ScoringFunction;
 type CBFnNodeVisitor = extern "C" fn(Option<&ClusterData>) -> ();
 
 type CBFnNameSetter = extern "C" fn(Option<&ClusterIDs>) -> ();
-type CBFnNodeVisitorMut = extern "C" fn(Option<&mut ClusterData>) -> ();
+// type CBFnNodeVisitorMut = extern "C" fn(Option<&mut ClusterData>) -> ();
 
 // #[no_mangle]
 // pub unsafe extern "C" fn create_cluster_data(
@@ -66,26 +65,19 @@ pub unsafe extern "C" fn get_cluster_data(
     outgoing: Option<&mut ClusterData>,
 ) -> FFIError {
     if let Some(handle) = ptr {
-        // let outgoing = outgoing.unwrap();
-        // let id = utils::helpers::c_char_to_string(id);
         return match handle.get_cluster(offset, cardinality) {
             Ok(cluster) => {
                 let cluster_data = ClusterData::from_clam(cluster);
-                // if let Some(outgoing) = outgoing{
                 let outgoing = outgoing.unwrap();
                     *outgoing = cluster_data;
 
                     FFIError::Ok
-                // }
-               
             }
             Err(_) =>{
             debug!("Could not get cluster data with o,c {}, {}", offset, cardinality);
              FFIError::InvalidStringPassed
             }
         };
-
-        
     }
     FFIError::NullPointerPassed
 }
@@ -121,25 +113,26 @@ pub unsafe extern "C" fn free_string(
 
 #[no_mangle]
 pub unsafe extern "C" fn create_cluster_ids(
-    ptr: InHandlePtr,
-    offset : i32,
-    cardinality: i32,
-    outgoing: Option<&mut ClusterIDs>,
+    _ptr: InHandlePtr,
+    _offset : usize,
+    _cardinality: usize,
+    _outgoing: Option<&mut ClusterIDs>,
 ) -> FFIError {
-    if let Some(handle) = ptr {
-        let outgoing = outgoing.unwrap();
-        // let id = utils::helpers::c_char_to_string(id);
-        return match handle.get_cluster(offset as usize, cardinality as usize){
-            Ok(cluster) => {
-                let cluster_data = ClusterIDs::from_clam(cluster);
+    // if let Some(handle) = ptr {
+    //     let outgoing = outgoing.unwrap();
+    //     // let id = utils::helpers::c_char_to_string(id);
+    //     return match handle.get_cluster(offset, cardinality){
+    //         Ok(cluster) => {
+    //             let cluster_data = ClusterIDs::from_clam(cluster);
 
-                *outgoing = cluster_data;
-                FFIError::Ok
-            }
-            Err(_) => FFIError::InvalidStringPassed,
-        };
-    }
-    FFIError::NullPointerPassed
+    //             *outgoing = cluster_data;
+    //             FFIError::Ok
+    //         }
+    //         Err(_) => FFIError::InvalidStringPassed,
+    //     };
+    // }
+    // FFIError::NullPointerPassed
+    FFIError::NotImplemented
 }
 
 //noinspection ALL
@@ -166,12 +159,6 @@ pub unsafe extern "C" fn create_cluster_ids(
 //     }
 // }
 
-#[repr(C)]
-pub struct Context {
-    pub foo: bool,
-    pub bar: i32,
-    pub baz: u64,
-}
 
 // ------------------------------------- Startup/Shutdown -------------------------------------
 
@@ -180,7 +167,7 @@ pub unsafe extern "C" fn init_clam(
     ptr: OutHandlePtr,
     data_name: *const u8,
     name_len: i32,
-    cardinality: u32,
+    cardinality: usize,
     distance_metric: DistanceMetric,
 ) -> FFIError {
     init_clam_impl(ptr, data_name, name_len, cardinality, distance_metric)
@@ -220,7 +207,7 @@ pub unsafe extern "C" fn shutdown_clam(context_ptr: OutHandlePtr) -> FFIError {
 pub extern "C" fn init_clam_graph(
     context: InHandlePtr,
     scoring_function: ScoringFunction,
-    min_depth: i32,
+    min_depth: usize,
     cluster_selector: CBFnNodeVisitor,
 ) -> FFIError {
     if let Some(handle) = context {
@@ -246,19 +233,19 @@ pub unsafe extern "C" fn for_each_dft(
 pub unsafe extern "C" fn set_names(
     ptr: InHandlePtr,
     node_visitor: CBFnNameSetter,
-    offset : i32,
-    cardinality: i32
+    offset : usize,
+    cardinality: usize
 ) -> FFIError {
     set_names_impl(ptr, node_visitor, offset, cardinality)
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn tree_height(ptr: InHandlePtr) -> i32 {
+pub unsafe extern "C" fn tree_height(ptr: InHandlePtr) -> usize {
     if let Some(handle) = ptr {
         return handle.tree_height() + 1;
     }
     debug!("handle not created");
-    -1
+    0
 }
 
 #[no_mangle]
@@ -267,7 +254,7 @@ pub unsafe extern "C" fn tree_cardinality(ptr: InHandlePtr) -> usize {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn vertex_degree(ptr: InHandlePtr, offset : i32, cardinality: i32) -> i32 {
+pub unsafe extern "C" fn vertex_degree(ptr: InHandlePtr, offset : usize, cardinality: usize) -> i32 {
     vertex_degree_impl(ptr, offset, cardinality)
 }
 
