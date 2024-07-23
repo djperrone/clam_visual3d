@@ -3,10 +3,7 @@
 
 use abd_clam::Cluster;
 
-use super::cluster_ids::ClusterID;
-use super::string_ffi::StringFFI;
 use crate::tree_layout::reingold_impl;
-// use crate::utils::types::Vertexf32;
 use crate::utils::types::Vertexf32;
 
 #[repr(C)]

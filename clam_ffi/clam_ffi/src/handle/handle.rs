@@ -1,26 +1,21 @@
 extern crate nalgebra as na;
 
-use std::collections::HashMap;
 use std::path::Path;
 use std::path::PathBuf;
 use std::sync::Arc;
-use std::thread;
 use std::thread::JoinHandle;
 
 use abd_clam::graph::Graph;
 use abd_clam::Cluster;
-use abd_clam::Dataset;
 // use abd_clam::criteria::detect_edges;
 use abd_clam::Tree;
 use abd_clam::VecDataset;
-use abd_clam::{graph, PartitionCriteria};
+use abd_clam::PartitionCriteria;
 
-use crate::ffi_impl::cluster_ids::ClusterID;
 use crate::ffi_impl::cluster_ids::ClusterIDs;
 // use crate::ffi_impl::cluster_ids_wrapper::ClusterIDsWrapper;
 // use crate::graph;
 use crate::graph::force_directed_graph::{self, ForceDirectedGraph};
-use crate::graph::spring;
 use crate::tree_layout::reingold_tilford;
 use crate::utils::distances::DistanceMetric;
 use crate::utils::error::FFIError;
@@ -36,14 +31,11 @@ use crate::{debug, CBFnNodeVisitor};
 use crate::ffi_impl::cluster_data::ClusterData;
 // use crate::ffi_impl::cluster_data_wrapper::ClusterDataWrapper;
 use crate::ffi_impl::tree_startup_data_ffi::TreeStartupDataFFI;
-use crate::graph::physics_node::PhysicsNode;
 use crate::utils::scoring_functions::ScoringFunction;
-use spring::Spring;
 
 pub struct Handle<'a> {
     tree: Option<Treef32>,
     clam_graph: Option<Graphf32<'a>>,
-    edges: Option<Vec<Spring>>,
     current_query: Option<Vec<f32>>,
     force_directed_graph: Option<(JoinHandle<()>, Arc<ForceDirectedGraph>)>,
 }
@@ -188,7 +180,6 @@ impl<'a> Handle<'a> {
                 Ok(Handle {
                     tree: Some(tree),
                     clam_graph: None,
-                    edges: None,
                     current_query: None,
                     force_directed_graph: None,
                 })
@@ -237,7 +228,6 @@ impl<'a> Handle<'a> {
             Ok(Handle {
                 tree: Some(tree),
                 clam_graph: None,
-                edges: None,
                 current_query: None,
                 force_directed_graph: None,
             })
@@ -482,8 +472,8 @@ impl<'a> Handle<'a> {
     /// * `node_visitor` - The node visitor function
     pub unsafe fn color_by_dist_to_query(
         &self,
-        id_arr: &[String],
-        node_visitor: CBFnNodeVisitor,
+        _id_arr: &[String],
+        _node_visitor: CBFnNodeVisitor,
     ) -> FFIError {
         // If the current query exists
         // for id in id_arr {

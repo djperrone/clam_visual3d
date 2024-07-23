@@ -9,7 +9,7 @@ use std::{
 use abd_clam::{graph::Vertex, Cluster};
 use csv::{Writer, WriterBuilder};
 use distances::Number;
-use rand::{rngs::ThreadRng, seq::SliceRandom, thread_rng};
+use rand::{rngs::ThreadRng, seq::SliceRandom};
 
 use crate::{
     // ffi_impl::cluster_data_wrapper::ClusterDataWrapper,

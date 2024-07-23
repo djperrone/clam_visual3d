@@ -2,7 +2,7 @@
 #![allow(unused_variables)]
 #![allow(unreachable_code)]
 
-use abd_clam::{graph::Vertex, Cluster};
+use abd_clam::Cluster;
 use std::{cell::RefCell, rc::Rc};
 
 use crate::utils::types::Vertexf32;

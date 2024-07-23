@@ -1,6 +1,5 @@
 use abd_clam::Cluster;
 
-use super::string_ffi::StringFFI;
 use crate::utils::types::Vertexf32;
 
 #[repr(C)]

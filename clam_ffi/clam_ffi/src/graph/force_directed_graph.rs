@@ -73,7 +73,7 @@ impl ForceDirectedGraph {
 
                 Self::apply_forces(&mut g.1);
             }
-            Err(e) => {}
+            Err(_) => {}
         }
     }
 

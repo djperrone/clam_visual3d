@@ -239,6 +239,19 @@ pub unsafe extern "C" fn set_names(
     set_names_impl(ptr, node_visitor, offset, cardinality)
 }
 
+/// Function that returns the tree height of the handle
+///
+/// # Safety
+///
+/// This function is unsafe because it dereferences the pointer passed to it
+///
+/// # Arguments
+///
+/// * `ptr` - A pointer to the handle
+///
+/// # Returns
+///
+/// The tree height as an `i32`
 #[no_mangle]
 pub unsafe extern "C" fn tree_height(ptr: InHandlePtr) -> usize {
     if let Some(handle) = ptr {

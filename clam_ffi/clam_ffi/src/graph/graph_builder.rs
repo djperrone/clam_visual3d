@@ -8,8 +8,7 @@ use abd_clam::Cluster;
 use rand::{seq::SliceRandom, Rng};
 
 use crate::{
-    debug,
-    ffi_impl::{cluster_data::ClusterData, cluster_ids::ClusterID},
+    ffi_impl::cluster_ids::ClusterID,
     graph,
     handle::handle::Handle,
     utils::{
@@ -18,12 +17,12 @@ use crate::{
     },
 };
 
-type Edge = (String, String, f32, bool);
+// type Edge = (String, String, f32, bool);
 
 use super::{
     force_directed_graph::ForceDirectedGraph,
     physics_node::PhysicsNode,
-    spring::{self, Spring},
+    spring::Spring,
 };
 
 fn get_k_key_clusters<'a>(
@@ -164,6 +163,6 @@ pub fn build_force_directed_graph<'a>(
     }
 
     create_intercomponent_edges(tree.data(), clam_graph, &mut springs, 3);
-    
+
     ForceDirectedGraph::new(graph, springs, scalar, max_iters)
 }

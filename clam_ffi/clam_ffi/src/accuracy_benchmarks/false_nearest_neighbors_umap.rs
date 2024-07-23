@@ -13,7 +13,7 @@ use crate::{
     utils::{
         distances::DistanceMetric,
         scoring_functions::{enum_to_function, ScoringFunction},
-        types::{DataSetf32, Graphf32, Treef32, Vertexf32},
+        types::{Graphf32, Treef32},
     },
 };
 

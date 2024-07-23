@@ -1,10 +1,7 @@
-use core::{ffi, num};
 use std::collections::HashSet;
-use std::ffi::{c_char, CStr};
+use std::ffi::c_char;
 
 use abd_clam::Cluster;
-use distances::Number;
-
 use crate::ffi_impl::cleanup::Cleanup;
 use crate::{
     debug,
@@ -111,26 +108,8 @@ pub fn free_resource<T: Clone + Cleanup>(
     }
 }
 
-/// Function that returns the tree height of the handle
-///
-/// # Safety
-///
-/// This function is unsafe because it dereferences the pointer passed to it
-///
-/// # Arguments
-///
-/// * `ptr` - A pointer to the handle
-///
-/// # Returns
-///
-/// The tree height as an `i32`
-pub unsafe fn tree_height_impl(ptr: InHandlePtr) -> usize {
-    if let Some(handle) = ptr {
-        return handle.tree_height() + 1;
-    }
-    debug!("handle not created");
-    0
-}
+
+
 
 /// Function that returns the tree cardinality of the handle
 ///
@@ -216,7 +195,7 @@ pub unsafe fn get_cluster_label_impl(ptr: InHandlePtr,  offset : usize, cardinal
                     return -1;
                 }
                 // Get the dominant label of the cluster and return it or -1 if it doesn't exist
-                match calc_cluster_dominant_label(cluster, labels, num_unique_labels, &colors) {
+                match calc_cluster_dominant_label(cluster, labels, num_unique_labels) {
                     Some(label) => {
                         return label as i32;
                     }
@@ -381,7 +360,7 @@ fn calc_cluster_dominant_color(
     color_choices: &Vec<glam::Vec3>,
 ) -> Result<glam::Vec3, String> {
     // Calculate the dominant label of the cluster
-    let max_index = calc_cluster_dominant_label(cluster, labels, num_unique_labels, color_choices);
+    let max_index = calc_cluster_dominant_label(cluster, labels, num_unique_labels);
 
     // Return the dominant color or an error message
     match max_index {
@@ -408,7 +387,6 @@ fn calc_cluster_dominant_label(
     cluster: &Vertexf32,
     labels: &[u8],
     num_unique_labels: usize,
-    color_choices: &Vec<glam::Vec3>,
 ) -> Option<usize> {
     let indices = cluster.indices();
     // let unique_values: HashSet<_> = labels.iter().cloned().collect();
@@ -517,34 +495,34 @@ pub fn color_clusters_by_dominant_label_impl(
 /// # Returns
 ///
 /// An `FFIError` enum
-pub unsafe fn color_by_dist_to_query_impl(
-    context: InHandlePtr,
-    arr_ptr: *mut ClusterData,
-    len: i32,
-    node_visitor: CBFnNodeVisitor,
-) -> FFIError {
-    // If the handle and cluster data exist
-    // if let Some(handle) = context {
-    //     if arr_ptr.is_null() {
-    //         return FFIError::NullPointerPassed;
-    //     }
-    //     // Get the cluster data from the pointer
-    //     let arr = std::slice::from_raw_parts(arr_ptr, len as usize);
+// pub unsafe fn color_by_dist_to_query_impl(
+//     _context: InHandlePtr,
+//     _arr_ptr: *mut ClusterData,
+//     _len: i32,
+//     _node_visitor: CBFnNodeVisitor,
+// ) -> FFIError {
+//     // If the handle and cluster data exist
+//     // if let Some(handle) = context {
+//     //     if arr_ptr.is_null() {
+//     //         return FFIError::NullPointerPassed;
+//     //     }
+//     //     // Get the cluster data from the pointer
+//     //     let arr = std::slice::from_raw_parts(arr_ptr, len as usize);
 
-    //     let mut ids = Vec::new();
+//     //     let mut ids = Vec::new();
 
-    //     // Get the ids of the clusters
-    //     for node in arr {
-    //         ids.push(node.id.as_string().unwrap());
-    //     }
+//     //     // Get the ids of the clusters
+//     //     for node in arr {
+//     //         ids.push(node.id.as_string().unwrap());
+//     //     }
 
-    //     // Color the clusters by the distance to the query
-    //     handle.color_by_dist_to_query(ids.as_slice(), node_visitor)
-    // } else {
-    //     FFIError::NullPointerPassed
-    // }
-    FFIError::NotImplemented
-}
+//     //     // Color the clusters by the distance to the query
+//     //     handle.color_by_dist_to_query(ids.as_slice(), node_visitor)
+//     // } else {
+//     //     FFIError::NullPointerPassed
+//     // }
+//     FFIError::NotImplemented
+// }
 
 /// Function that returns the distance to the other cluster
 ///
@@ -562,9 +540,9 @@ pub unsafe fn color_by_dist_to_query_impl(
 ///
 /// The distance to the other cluster as an `f32` or -1.0 otherwise
 pub unsafe fn distance_to_other_impl(
-    ptr: InHandlePtr,
-    node_name1: *const c_char,
-    node_name2: *const c_char,
+    _ptr: InHandlePtr,
+    _node_name1: *const c_char,
+    _node_name2: *const c_char,
 ) -> f32 {
     // If the handle exists
     // if let Some(handle) = ptr {
