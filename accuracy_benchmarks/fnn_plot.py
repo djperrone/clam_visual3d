@@ -16,7 +16,7 @@ import seaborn as sns
 
 from typing import Dict, Tuple
 
-# example usage: python3 clam/umap fnn_plot.py arrhythmia f1-score
+# example usage: python3 fnn_plot.py clam/umap arrhythmia f1-score
 
 def process_directory(directory, test_name):
 

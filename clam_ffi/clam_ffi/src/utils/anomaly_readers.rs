@@ -47,7 +47,6 @@ pub fn read_anomaly_data(
         let p = data_dir.to_str().unwrap_or("path is empty");
         return Err(FFIError::PathNotFound);
     }
-    debug!("herer");
     let features = {
         let mut path = data_dir.clone();
         path.push(if normalized {
@@ -70,7 +69,6 @@ pub fn read_anomaly_data(
         features.outer_iter().map(|row| row.to_vec()).collect()
     };
 
-    debug!("herer2");
 
     let scores = {
         let mut path = data_dir.clone();
@@ -85,7 +83,6 @@ pub fn read_anomaly_data(
             FFIError::PathNotFound
         })?;
 
-        debug!("herer3");
 
         features.to_vec()
     };

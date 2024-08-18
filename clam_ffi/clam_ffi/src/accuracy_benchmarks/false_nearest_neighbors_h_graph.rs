@@ -1,3 +1,6 @@
+// usage: cargo test h_graph_test
+
+
 use core::panic;
 use std::{
     cmp::{Ordering, Reverse},
