@@ -8,6 +8,7 @@ using UnityEngine.UIElements;
 
 namespace Clam
 {
+
     public class Cakes : MonoBehaviour
     {
         private static GameObject m_NodePrefab;
@@ -18,7 +19,7 @@ namespace Clam
 
         static public void BuildGraphWithSelected()
         {
-            Dictionary<string, GameObject> graph = new Dictionary<string, GameObject>();
+            Dictionary<(nuint, nuint), GameObject> graph = new Dictionary<(nuint, nuint), GameObject>();
 
             foreach(var (id, node) in Tree.GetTree())
             {
@@ -38,7 +39,7 @@ namespace Clam
 
         static public void BuildGraphWithinParams()
         {
-            Dictionary<string, GameObject> graph = new Dictionary<string, GameObject>();
+            Dictionary<(nuint, nuint), GameObject> graph = new Dictionary<(nuint, nuint), GameObject>();
 
             foreach (var (id, node) in Tree.GetTree())
             {

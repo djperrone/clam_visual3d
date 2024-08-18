@@ -10,7 +10,7 @@ public class GraphBuilder : MonoBehaviour
     private int m_VertexCounter;
     private int m_IndexCounter;
     private bool m_IsPhysicsRunning;
-    Dictionary<string, GameObject> m_Graph;
+    Dictionary<(nuint, nuint), GameObject> m_Graph;
 
     //private float m_EdgeScalar = 25.0f;
 
@@ -42,7 +42,7 @@ public class GraphBuilder : MonoBehaviour
         }
     }
 
-    public void Init(System.Collections.Generic.Dictionary<string, GameObject> graph, float edgeScalar, int numIters)
+    public void Init(System.Collections.Generic.Dictionary<(nuint, nuint), GameObject> graph, float edgeScalar, int numIters)
     {
         m_Graph = graph;
         GetComponent<MeshFilter>().mesh = new Mesh();
@@ -58,6 +58,11 @@ public class GraphBuilder : MonoBehaviour
 
         int numNodes = m_Graph.Count;
         int numEdges = Clam.FFI.NativeMethods.GetNumGraphEdges();
+
+        if (numEdges < 0)
+        {
+            Debug.LogError("num edges error"); return;
+        }
         Debug.Log("num edges in graph : " + numEdges + ", num nodes " + numNodes);
 
         m_Vertices = new Vector3[numNodes];
@@ -89,7 +94,7 @@ public class GraphBuilder : MonoBehaviour
 
     public void PositionUpdater(ref Clam.FFI.ClusterData nodeData)
     {
-        string id = nodeData.id.AsString;
+        var id = nodeData.ID_AsTuple();
         if (m_Graph.TryGetValue(id, out var node))
         {
             node.GetComponent<Node>().SetPosition(nodeData.pos.AsVector3);
@@ -111,32 +116,38 @@ public class GraphBuilder : MonoBehaviour
         }
     }
 
-    public void EdgeDrawer(ref Clam.FFI.ClusterData nodeData)
+    public void EdgeDrawer(ref Clam.FFI.ClusterIDs nodeData)
     {
-        string msg = nodeData.message.AsString;
-        var values = msg.Split(' ').ToList();
-        string otherID = values[1];
-        bool isDetected = values[0][0] == '1';
-
-        if (m_Graph.TryGetValue(nodeData.id.AsString, out var node))
+        // If the edge is a chaoda detected edge
+        if (nodeData.rightID.Offset == 1)
         {
-            if (m_Graph.TryGetValue(otherID, out var other))
+            if (m_IndexCounter < m_Indices.Length)
             {
-                if (isDetected)
+                if (m_Graph.TryGetValue(nodeData.id.AsTuple(), out var node))
                 {
-                    var id1 = node.GetComponent<Node>().IndexBufferID;
-                    var id2 = other.GetComponent<Node>().IndexBufferID;
-                    m_Indices[m_IndexCounter++] = id1;
-                    m_Indices[m_IndexCounter++] = id2;
-                    if (m_IndexCounter == m_Indices.Length)
+                    if (m_Graph.TryGetValue(nodeData.leftID.AsTuple(), out var other))
                     {
-                        GetComponent<MeshFilter>().mesh.SetIndices(m_Indices, MeshTopology.Lines, 0);
-                        Debug.Log("all edges drawn");
+                        var id1 = node.GetComponent<Node>().IndexBufferID;
+                        var id2 = other.GetComponent<Node>().IndexBufferID;
+                        m_Indices[m_IndexCounter++] = id1;
+                        m_Indices[m_IndexCounter++] = id2;
+                        if (m_IndexCounter == m_Indices.Length)
+                        {
+                            GetComponent<MeshFilter>().mesh.SetIndices(m_Indices, MeshTopology.Lines, 0);
+                            Debug.Log("all edges drawn");
+                        }
 
                     }
                 }
             }
+            else
+            {
+                Debug.Log("tHIS SHOULDNT RUN!!!! index counter" + m_IndexCounter.ToString() + ", / " + Clam.FFI.NativeMethods.GetNumGraphEdges().ToString());
+                m_IndexCounter++;
+                m_IndexCounter++;
+            }
         }
+
     }
 
     public void ToggleEdgeVisibility(bool value)

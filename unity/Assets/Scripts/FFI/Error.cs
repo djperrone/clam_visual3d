@@ -29,6 +29,7 @@ namespace Clam
         NotInCache,
         TooManyLabels,
         ColoringFailed,
+        NotImplemented,
 
     }
 }

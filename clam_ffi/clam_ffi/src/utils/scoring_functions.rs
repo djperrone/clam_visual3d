@@ -55,7 +55,6 @@ pub fn enum_to_string(scoring_function: &ScoringFunction) -> Result<String, FFIE
         ScoringFunction::DtEuclideanCr => Ok("dt_euclidean_cr".to_string()),
         ScoringFunction::DtEuclideanSp => Ok("dt_euclidean_sp".to_string()),
         ScoringFunction::DtEuclideanVd => Ok("dt_euclidean_vd".to_string()),
-        _ => Err(FFIError::ScoringFunctionNotFound),
     }
 }
 

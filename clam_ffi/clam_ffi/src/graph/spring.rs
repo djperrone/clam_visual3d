@@ -2,18 +2,18 @@ use std::collections::HashMap;
 
 use super::physics_node::PhysicsNode;
 
-use crate::graph;
+use crate::{ffi_impl::cluster_ids::ClusterID, graph};
 #[derive(Debug)]
 pub struct Spring {
     nat_len: f32,
     k: f32,
-    node1: String, //String's reference hash table
-    node2: String,
+    node1: ClusterID, //String's reference hash table
+    node2: ClusterID,
     pub is_real: bool,
 }
 
 impl Spring {
-    pub fn new(nat_len: f32, hash_code1: String, hash_code2: String, real: bool) -> Self {
+    pub fn new(nat_len: f32, hash_code1: ClusterID, hash_code2: ClusterID, real: bool) -> Self {
         Spring {
             nat_len, //: nat_len.min(1.0),
             k: 0.005,
@@ -23,20 +23,20 @@ impl Spring {
         }
     }
 
-    pub fn get_node_ids(&self) -> (&String, &String) {
+    pub fn get_node_ids(&self) -> (&ClusterID, &ClusterID) {
         (&self.node1, &self.node2)
     }
 
     //apply acceleration to both nodes at each end of spring
     pub fn move_nodes(
         &self,
-        nodes: &mut HashMap<String, PhysicsNode>,
+        nodes: &mut HashMap<(usize, usize), PhysicsNode>,
         longest_edge: f32,
         scalar: f32,
     ) {
         //borrow ownership of nodes spring is connected to
-        let node1 = nodes.get(&self.node1).unwrap();
-        let node2 = nodes.get(&self.node2).unwrap();
+        let node1 = nodes.get(&self.node1.to_tuple()).unwrap();
+        let node2 = nodes.get(&self.node2.to_tuple()).unwrap();
         let force = node2.get_position() - node1.get_position();
         let force_magnitude = force.length();
         // let min_length = 20.;
@@ -54,12 +54,12 @@ impl Spring {
 
         let mut new_force = graph::helpers::set_magnitude(force, new_magnitude);
 
-        let node1 = nodes.get_mut(&self.node1).unwrap();
+        let node1 = nodes.get_mut(&self.node1.to_tuple()).unwrap();
         node1.accelerate(new_force);
         //reverse direction of force for node on opposite side
         new_force *= -1.;
 
-        let node2 = nodes.get_mut(&self.node2).unwrap();
+        let node2 = nodes.get_mut(&self.node2.to_tuple()).unwrap();
         node2.accelerate(new_force);
     }
 

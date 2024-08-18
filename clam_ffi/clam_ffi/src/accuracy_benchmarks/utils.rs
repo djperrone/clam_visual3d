@@ -9,13 +9,13 @@ use std::{
 use abd_clam::{graph::Vertex, Cluster};
 use csv::{Writer, WriterBuilder};
 use distances::Number;
-use rand::{rngs::ThreadRng, seq::SliceRandom, thread_rng};
+use rand::{rngs::ThreadRng, seq::SliceRandom};
 
 use crate::{
-    ffi_impl::cluster_data_wrapper::ClusterDataWrapper,
+    // ffi_impl::cluster_data_wrapper::ClusterDataWrapper,
     graph::force_directed_graph::ForceDirectedGraph,
     utils::types::{Treef32, Vertexf32},
-    CBFnNodeVisitorMut,
+    
 };
 
 use super::false_nearest_neighbors::FNN_Wrapper;
@@ -218,9 +218,9 @@ pub fn get_unity_triangle<'a>(
     fdg: &ForceDirectedGraph,
 ) -> Result<[(&'a str, f32); 3], String> {
     let [a, b, c] = clusters;
-    let unity_a = fdg.get_cluster_position(&a.name())?;
-    let unity_b = fdg.get_cluster_position(&b.name())?;
-    let unity_c = fdg.get_cluster_position(&c.name())?;
+    let unity_a = fdg.get_cluster_position((a.offset(), a.cardinality()))?;
+    let unity_b = fdg.get_cluster_position((b.offset(), b.cardinality()))?;
+    let unity_c = fdg.get_cluster_position((c.offset(), c.cardinality()))?;
 
     if are_collinear(unity_a, unity_b, unity_c) {}
 
