@@ -59,6 +59,14 @@ pub struct ClusterID {
    cardinality: usize,
 }
 
+impl PartialEq for ClusterID {
+    fn eq(&self, other: &Self) -> bool {
+        self.offset == other.offset && self.cardinality == other.cardinality
+    }
+}
+
+impl Eq for ClusterID {}
+
 impl ClusterID{
     pub fn new(offset : usize, cardinality : usize)->Self{
         ClusterID{
