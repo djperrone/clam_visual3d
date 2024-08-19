@@ -33,7 +33,7 @@ use crate::{
     },
 };
 
-use super::{false_nearest_neighbors::FNN_Wrapper, utils::binary_heap_to_vec};
+use super::{utils::binary_heap_to_vec, FNN_Wrapper::FNN_Wrapper};
 
 fn test_params(
     single_target: Option<String>,

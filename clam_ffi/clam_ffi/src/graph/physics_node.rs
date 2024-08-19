@@ -12,6 +12,7 @@ use crate::utils::types::Vertexf32;
 //     mass: f32,
 // }
 
+#[derive(Copy, Clone)]
 pub struct PhysicsNode {
     position: glam::Vec3,
     friction: f32,

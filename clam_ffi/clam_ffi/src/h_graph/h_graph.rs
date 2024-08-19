@@ -17,10 +17,11 @@ use crate::{ffi_impl::cluster_ids::ClusterID, utils::{
 }};
 
 use super::{
-    h_node::PhysicsNode,
+    // h_node::PhysicsNode,
     h_spring::Spring,
     utils::{self, get_children, get_cluster, max_edge_len},
 };
+use crate::graph::physics_node::PhysicsNode;
 
 pub struct ForceDirectedGraph {
     graph: HashMap<(usize, usize), PhysicsNode>,
@@ -41,43 +42,52 @@ impl ForceDirectedGraph {
         Self::build(tree, clam_graph, scalar, max_iters)
     }
 
-    pub fn old_new(
-        tree: &Treef32,
-        clam_graph: &Graphf32,
-        scalar: f32,
-        max_iters: usize,
-    ) -> Result<Self, String> {
-        let mut graph: HashMap<(usize, usize), PhysicsNode> = HashMap::new();
-        let mut rng = rand::thread_rng();
-
-        let area = PI * clam_graph.ordered_clusters().len() as f32;
-        // let area = 100.0f32;
-        let max_edge_len = max_edge_len(clam_graph.edges());
-        for c in clam_graph.ordered_clusters().iter() {
-            let x: f32 = rng.gen_range(0.0..=area);
-            let y: f32 = rng.gen_range(0.0..=area);
-            let z: f32 = rng.gen_range(0.0..=area);
-            graph.insert(ClusterID::from_cluster(c).to_tuple(), PhysicsNode::new(glam::Vec3::new(x, y, z), c));
-        }
-        let mut springs = Vec::new();
-        for e in clam_graph.edges() {
-            springs.push(Spring::new(
-                e.distance(),
-                ClusterID::from_cluster(e.left()),
-                ClusterID::from_cluster(e.right()),
-                0,
-            ));
-        }
-
-        Ok(Self {
-            graph,
-            springs,
-            max_iters,
-            cur_depth: 0,
-            scalar: Some(scalar),
-            max_edge_len: Some(max_edge_len),
-        })
+    pub fn graph(&self)-> &HashMap<(usize, usize), PhysicsNode>{
+        &self.graph
     }
+
+    pub fn graph_mut(&mut self)-> &mut HashMap<(usize, usize), PhysicsNode>{
+        &mut self.graph
+    }
+
+    pub fn springs(&self)-> &Vec<Spring>{&self.springs}
+    // pub fn old_new(
+    //     tree: &Treef32,
+    //     clam_graph: &Graphf32,
+    //     scalar: f32,
+    //     max_iters: usize,
+    // ) -> Result<Self, String> {
+    //     let mut graph: HashMap<(usize, usize), PhysicsNode> = HashMap::new();
+    //     let mut rng = rand::thread_rng();
+
+    //     let area = PI * clam_graph.ordered_clusters().len() as f32;
+    //     // let area = 100.0f32;
+    //     let max_edge_len = max_edge_len(clam_graph.edges());
+    //     for c in clam_graph.ordered_clusters().iter() {
+    //         let x: f32 = rng.gen_range(0.0..=area);
+    //         let y: f32 = rng.gen_range(0.0..=area);
+    //         let z: f32 = rng.gen_range(0.0..=area);
+    //         graph.insert(ClusterID::from_cluster(c).to_tuple(), PhysicsNode::new(glam::Vec3::new(x, y, z), c));
+    //     }
+    //     let mut springs = Vec::new();
+    //     for e in clam_graph.edges() {
+    //         springs.push(Spring::new(
+    //             e.distance(),
+    //             ClusterID::from_cluster(e.left()),
+    //             ClusterID::from_cluster(e.right()),
+    //             0,
+    //         ));
+    //     }
+
+    //     Ok(Self {
+    //         graph,
+    //         springs,
+    //         max_iters,
+    //         cur_depth: 0,
+    //         scalar: Some(scalar),
+    //         max_edge_len: Some(max_edge_len),
+    //     })
+    // }
 
     // pub fn run_old_physics(&mut self, tree: &Treef32, clam_graph: &Graphf32) {
     //     for _ in 0..self.max_iters {
@@ -124,7 +134,7 @@ impl ForceDirectedGraph {
             self.cur_depth = i;
             let nodes: Vec<(usize, usize)> = self.graph.iter().map(|c| c.0.clone()).collect();
             for _ in 0..self.max_iters {
-                self.run_single_epoch(&nodes, tree, clam_graph);
+                self.run_single_epoch(tree, clam_graph);
             }
 
             // for (_, node) in self.graph.iter() {
@@ -170,7 +180,7 @@ impl ForceDirectedGraph {
         return Ok(());
     }
 
-    fn run_single_epoch(&mut self, nodes: &Vec<(usize, usize)>, tree: &Treef32, clam_graph: &Graphf32) {
+    fn run_single_epoch(&mut self, tree: &Treef32, clam_graph: &Graphf32) {
         let max_edge_len = self.max_edge_len();
         let scalar = self.scalar();
         for spring in &mut self.springs {
@@ -180,6 +190,14 @@ impl ForceDirectedGraph {
 
         for (_, value) in &mut self.graph {
             value.update_position();
+        }
+    }
+
+    pub fn move_nodes(&mut self){
+        let max_edge_len = self.max_edge_len();
+        let scalar = self.scalar();
+        for spring in &mut self.springs {
+            spring.move_nodes(&mut self.graph,max_edge_len, scalar, None)
         }
     }
 

@@ -15,7 +15,7 @@ use abd_clam::PartitionCriteria;
 use crate::ffi_impl::cluster_ids::ClusterIDs;
 // use crate::ffi_impl::cluster_ids_wrapper::ClusterIDsWrapper;
 // use crate::graph;
-use crate::graph::force_directed_graph::{self, ForceDirectedGraph};
+use crate::graph::force_directed_graph::{self, ForceDirectedGraphAsync};
 use crate::tree_layout::reingold_tilford;
 use crate::utils::distances::DistanceMetric;
 use crate::utils::error::FFIError;
@@ -37,7 +37,7 @@ pub struct Handle<'a> {
     tree: Option<Treef32>,
     clam_graph: Option<Graphf32<'a>>,
     current_query: Option<Vec<f32>>,
-    force_directed_graph: Option<(JoinHandle<()>, Arc<ForceDirectedGraph>)>,
+    force_directed_graph: Option<(JoinHandle<()>, Arc<ForceDirectedGraphAsync>)>,
 }
 impl<'a> Handle<'a> {
     // pub fn from(
@@ -443,7 +443,7 @@ impl<'a> Handle<'a> {
     ///
     /// * `self` - The handle
     /// * `graph` - The graph to set
-    pub fn set_graph(&mut self, graph: (JoinHandle<()>, Arc<ForceDirectedGraph>)) {
+    pub fn set_graph(&mut self, graph: (JoinHandle<()>, Arc<ForceDirectedGraphAsync>)) {
         self.force_directed_graph = Some(graph);
     }
 

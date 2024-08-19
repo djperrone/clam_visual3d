@@ -13,12 +13,14 @@ use rand::{rngs::ThreadRng, seq::SliceRandom};
 
 use crate::{
     // ffi_impl::cluster_data_wrapper::ClusterDataWrapper,
-    graph::force_directed_graph::ForceDirectedGraph,
+    graph::force_directed_graph::ForceDirectedGraphAsync,
     utils::types::{Treef32, Vertexf32},
     
 };
 
-use super::false_nearest_neighbors::FNN_Wrapper;
+use super::FNN_Wrapper::FNN_Wrapper;
+
+// use super::false_nearest_neighbors::FNN_Wrapper;
 
 pub fn choose_two_random_clusters_exclusive<'a, U: Number>(
     clusters: &Vec<&'a Vertex<U>>,
@@ -215,7 +217,7 @@ pub fn compute_angles_from_edge_lengths(edges: &[(&str, f32)]) -> [f32; 3] {
 
 pub fn get_unity_triangle<'a>(
     clusters: &[&'a Vertexf32; 3],
-    fdg: &ForceDirectedGraph,
+    fdg: &ForceDirectedGraphAsync,
 ) -> Result<[(&'a str, f32); 3], String> {
     let [a, b, c] = clusters;
     let unity_a = fdg.get_cluster_position((a.offset(), a.cardinality()))?;

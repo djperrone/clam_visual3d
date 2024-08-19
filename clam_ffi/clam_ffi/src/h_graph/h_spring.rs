@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
-use super::h_node::PhysicsNode;
+// use super::h_node::PhysicsNode;
 
-use crate::{ffi_impl::cluster_ids::ClusterID, graph};
+use crate::{ffi_impl::cluster_ids::ClusterID, graph::{self, physics_node::PhysicsNode}};
 
 #[derive(Debug)]
 pub struct Spring {
