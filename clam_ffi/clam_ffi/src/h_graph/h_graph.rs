@@ -26,10 +26,12 @@ use crate::graph::physics_node::PhysicsNode;
 pub struct ForceDirectedGraph {
     graph: HashMap<(usize, usize), PhysicsNode>,
     springs: Vec<Spring>,
-    max_iters: usize,
-    cur_depth: usize,
+    pub max_iters: usize,
+    pub max_depth : usize,
+    pub cur_depth: usize,
     scalar: Option<f32>,
     max_edge_len: Option<f32>,
+    pub cur_iter : usize,
 }
 
 impl ForceDirectedGraph {
@@ -121,9 +123,11 @@ impl ForceDirectedGraph {
             graph,
             springs,
             max_iters,
-            cur_depth: 0,
+            cur_depth: 1,
             scalar: Some(scalar),
             max_edge_len: Some(normalize_len),
+            cur_iter : 0,
+            max_depth : clam_graph.max_depth(),
         })
     }
 
@@ -145,17 +149,16 @@ impl ForceDirectedGraph {
             let mut next_springs = self.split_nodes(tree, clam_graph)?;
             self.split_springs(&mut next_springs, tree, clam_graph)?;
             self.springs = next_springs;
-
             // let springs_after_split = self.springs.len();
 
             // if i == clam_graph.max_depth() - 1 {
             //     self.cleanup(clam_graph, tree, None);
             // } else
             if i % cleanup_interval == 0 {
-                self.cleanup(clam_graph, tree, Some(relation_threshold));
+                self.cleanup(tree, Some(relation_threshold));
             }
         }
-        self.cleanup(clam_graph, tree, None);
+        self.cleanup( tree, None);
 
         // let mut rng: rand::prelude::ThreadRng = rand::thread_rng();
 
@@ -180,11 +183,20 @@ impl ForceDirectedGraph {
         return Ok(());
     }
 
+    // after split, need to update node visibility and edges in unity
+    pub fn split(&mut self, tree: &Treef32, clam_graph: &Graphf32)-> Result<(), String>{
+        
+        let mut next_springs = self.split_nodes(tree, clam_graph)?;
+        self.split_springs(&mut next_springs, tree, clam_graph)?;
+        self.springs = next_springs;
+        return Ok(());
+
+    }
     fn run_single_epoch(&mut self, tree: &Treef32, clam_graph: &Graphf32) {
         let max_edge_len = self.max_edge_len();
         let scalar = self.scalar();
         for spring in &mut self.springs {
-            spring.move_nodes(&mut self.graph,max_edge_len, scalar, None)
+            spring.accumulate_forces(&mut self.graph,max_edge_len, scalar, None)
         }
         // self.accumulate_random_forces2(nodes, clam_graph, tree, self.max_edge_len(), self.scalar());
 
@@ -192,12 +204,19 @@ impl ForceDirectedGraph {
             value.update_position();
         }
     }
-
+    pub fn accumulate_forces(&mut self){
+        let temp: f32 = 1.0 * (1.0 - self.cur_iter as f32 / self.max_iters as f32);
+        let max_edge_len = self.max_edge_len();
+        let scalar = self.scalar();
+        for spring in &mut self.springs {
+            spring.accumulate_forces(&mut self.graph,max_edge_len, scalar, Some(temp))
+        }
+    }
     pub fn move_nodes(&mut self){
         let max_edge_len = self.max_edge_len();
         let scalar = self.scalar();
         for spring in &mut self.springs {
-            spring.move_nodes(&mut self.graph,max_edge_len, scalar, None)
+            spring.accumulate_forces(&mut self.graph,max_edge_len, scalar, None)
         }
     }
 
@@ -363,16 +382,18 @@ impl ForceDirectedGraph {
 
             for c1 in &clusters[0] {
                 for c2 in &clusters[1] {
-                    let optimal_distance = utils::cluster_distance_normalized_scaled(
-                        c1,
-                        c2,
-                        tree.data(),
-                        self.scalar(),
-                        self.max_edge_len(),
-                    );
+                    // let optimal_distance = utils::cluster_distance_normalized_scaled(
+                    //     c1,
+                    //     c2,
+                    //     tree.data(),
+                    //     self.scalar(),
+                    //     self.max_edge_len(),
+                    // );
+
+                    let distance = c1.distance_to_other(tree.data(), &c2);
 
                     next_springs.push(Spring::new(
-                        optimal_distance,
+                        distance,
                         ClusterID::from_cluster(c1),
                         ClusterID::from_cluster(c2),
                         spring.relation() + 1,
@@ -390,6 +411,7 @@ impl ForceDirectedGraph {
     ) -> Result<bool, String> {
         if let Some(relation_threshold) = relation_threshold {
             if spring.relation() > relation_threshold {
+                // if spring.is_
                 let ids = spring.get_node_ids();
                 let c1 = get_cluster(tree, &ids.0.to_tuple())?;
 
@@ -413,7 +435,7 @@ impl ForceDirectedGraph {
         return Ok(true);
     }
 
-    fn cleanup(&mut self, clam_graph: &Graphf32, tree: &Treef32, relation: Option<u32>) {
+    pub fn cleanup(&mut self, tree: &Treef32, relation: Option<u32>) {
         self.springs
             .retain(|spring| Self::cleanup_helper(spring, tree, relation).unwrap());
     }
@@ -496,7 +518,7 @@ impl ForceDirectedGraph {
     }
 }
 
-fn assert_graphs_equivalent(clam_graph: &Graphf32, fdg: &ForceDirectedGraph, tree: &Treef32) {
+pub fn assert_graphs_equivalent(clam_graph: &Graphf32, fdg: &ForceDirectedGraph, tree: &Treef32) {
     assert_eq!(clam_graph.ordered_clusters().len(), fdg.graph.len());
     assert_eq!(clam_graph.edges().len(), fdg.springs.len());
 

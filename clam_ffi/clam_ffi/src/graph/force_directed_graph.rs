@@ -116,15 +116,18 @@ impl ForceDirectedGraphAsync {
                 if g.0.force_shutdown {
                     g.0.data_ready = false;
                     return false;
+                }else if g.1.cur_depth == g.1.max_depth{
+                    return false;
                 } else {
+                    // g.1.move_nodes();
+                    g.1.accumulate_forces();
+                    g.1.cur_iter+=1;
                     // Self::accumulate_edge_forces(
                     //     g.1,
                     //     // g.1.springs(),
                     //     // self.max_edge_len,
                     //     // self.scalar,
                     // );
-                    g.1.move_nodes();
-
                     g.0.data_ready = true;
                 }
             }
@@ -132,7 +135,6 @@ impl ForceDirectedGraphAsync {
                 debug!("graph mutex error? {}", e);
             }
         }
-
         true
     }
 
@@ -203,11 +205,16 @@ impl ForceDirectedGraphAsync {
         }
     }
 
+    // Need to pass callback to update node visinbility and rebuilkd edge mesh
     unsafe fn try_update_unity(
         &self,
         clam_graph: &Graphf32,
         tree: &Treef32,
-        updater: CBFnNodeVisitor,
+        reset_graph_dict_cb: CBFnNodeVisitor,
+        refill_graph_dict_cb: CBFnNodeVisitor,
+        reset_mesh_cb: CBFnNodeVisitor,
+        rebuild_edges_cb: CBFnNameSetter,
+        update_pos_cb: CBFnNodeVisitor,
     ) -> FFIError {
         match self.graph.try_lock() {
             Ok(mut g) => {
@@ -218,8 +225,61 @@ impl ForceDirectedGraphAsync {
                 //     self.max_edge_len,
                 //     self.scalar,
                 // );
+                // if g.1.cur_depth == 1 && g.1.cur_iter == 0{
+                //     debug!("RESETTING UNITY GRAPH 1st");
+                   
+                //     reset_graph_dict_cb(Some(&ClusterData::default()));
+                //     for cluster in g.1.graph(){
+                //         refill_graph_dict_cb(Some(&ClusterData::from_physics(*cluster.0, cluster.1.get_position())))
+                //     }
+                //     let mut cluster_data = ClusterData::default();
+                //     cluster_data.depth = g.1.springs().len() as i32;
+                //     reset_mesh_cb(Some(&cluster_data));
+                //     init_unity_edges(self, rebuild_edges_cb)
+                //     // rebuild_edges_cb(Some(&ClusterData::default()));
+                // }
 
-                Self::apply_forces_and_update_unity(g.1.graph_mut(), updater);
+
+                if g.1.cur_iter == g.1.max_iters{
+                    if g.1.cur_depth == g.1.max_depth{
+                         // if g.1.cur_depth >= g.1.max_depth{
+                        g.1.cleanup( tree, None);
+                        g.0.force_shutdown = true;
+                        
+                        // return FFIError::Ok;
+                    // }
+                    }else{
+                        g.1.cur_iter = 0;
+                        g.1.split(tree, clam_graph);
+                        g.1.cur_depth+=1;
+                    }
+                    debug!("RESETTING UNITY GRAPH 2nc");
+
+                    reset_graph_dict_cb(Some(&ClusterData::default()));
+                    for cluster in g.1.graph(){
+                        refill_graph_dict_cb(Some(&ClusterData::from_physics(*cluster.0, cluster.1.get_position())))
+                    }
+                    let mut cluster_data = ClusterData::default();
+                    cluster_data.depth = g.1.springs().len() as i32;
+                    reset_mesh_cb(Some(&cluster_data));
+                    for edge in g.1.springs() {
+                        let (id1, id2) = edge.get_node_ids();
+                        let mut data = ClusterIDs::new(*id1, *id2, ClusterID::new(true as usize, 0));
+                        rebuild_edges_cb(Some(&mut data));
+                }
+                    // init_unity_edges(self, rebuild_edges_cb)
+                    // rebuild_edges_cb(Some(&ClusterData::default()));
+                    // need to reset unity graph?
+                    // node visinility callback
+                    // edge reset callback
+                }
+                if g.1.cur_depth <= g.1.max_depth{
+                    Self::apply_forces_and_update_unity(g.1.graph_mut(), update_pos_cb);
+                    g.1.cleanup( tree, None);
+
+                }
+
+                
 
                 g.0.data_ready = false;
                 self.cond_var.notify_one();
@@ -251,21 +311,29 @@ impl ForceDirectedGraphAsync {
 
 pub fn produce_computations(force_directed_graph: &ForceDirectedGraphAsync) {
 
-    for _ in 0..force_directed_graph.max_iters {
-        // returns false if being forced to terminate mid - simulation
-        if !force_directed_graph.compute_next_frame() {
-            return;
-        };
-    }
+    // for cur_depth in 0..force_directed_graph.max_depth {
+    //     for i in 0..force_directed_graph.max_iters {
+    //     // returns false if being forced to terminate mid - simulation
+    //     if !force_directed_graph.compute_next_frame() {
+    //         return;
+    //     };
+    //     }
+    // }
+        while force_directed_graph.compute_next_frame() {}
+
 }
 
 pub unsafe fn try_update_unity(
     force_directed_graph: &ForceDirectedGraphAsync,
     clam_graph: &Graphf32,
     tree: &Treef32,
-    updater: CBFnNodeVisitor,
+    reset_graph_dict_cb: CBFnNodeVisitor,
+    refill_graph_dict_cb: CBFnNodeVisitor,
+    reset_mesh_cb: CBFnNodeVisitor,
+    rebuild_edges_cb: CBFnNameSetter,
+    update_pos_cb: CBFnNodeVisitor,
 ) -> FFIError {
-    force_directed_graph.try_update_unity(clam_graph, tree, updater)
+    force_directed_graph.try_update_unity(clam_graph, tree, reset_graph_dict_cb, refill_graph_dict_cb,reset_mesh_cb,rebuild_edges_cb, update_pos_cb)
 }
 
 pub unsafe fn force_shutdown(force_directed_graph: &ForceDirectedGraphAsync) -> FFIError {

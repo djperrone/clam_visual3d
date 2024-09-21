@@ -6,10 +6,14 @@ use super::graph_builder;
 
 pub unsafe fn physics_update_async_impl(
     context: InHandlePtr,
-    updater: CBFnNodeVisitor,
+    reset_graph_dict_cb: CBFnNodeVisitor,
+    refill_graph_dict_cb: CBFnNodeVisitor,
+    reset_mesh_cb: CBFnNodeVisitor,
+    rebuild_edges_cb: CBFnNameSetter,
+    update_pos_cb: CBFnNodeVisitor,
 ) -> FFIError {
     if let Some(handle) = context {
-        handle.physics_update_async(updater)
+        handle.physics_update_async(reset_graph_dict_cb,refill_graph_dict_cb,  reset_mesh_cb,rebuild_edges_cb, update_pos_cb)
     } else {
         FFIError::NullPointerPassed
     }

@@ -412,7 +412,13 @@ impl<'a> Handle<'a> {
     /// # Returns
     ///
     /// An `FFIError` indicating if the physics was updated successfully or not
-    pub unsafe fn physics_update_async(&mut self, updater: CBFnNodeVisitor) -> FFIError {
+    pub unsafe fn physics_update_async(&mut self,  
+        reset_graph_dict_cb: CBFnNodeVisitor,
+        refill_graph_dict_cb: CBFnNodeVisitor,
+        reset_mesh_cb: CBFnNodeVisitor,
+        rebuild_edges_cb: CBFnNameSetter,
+
+        update_pos_cb: CBFnNodeVisitor,) -> FFIError {
         // If the force directed graph exists, update the physics
         if let Some(force_directed_graph) = &self.force_directed_graph {
             // If the physics is finished, join the thread and set the force directed graph to `None`
@@ -429,7 +435,11 @@ impl<'a> Handle<'a> {
                     &force_directed_graph.1,
                     self.clam_graph().as_ref().unwrap(),
                     self.tree().as_ref().unwrap(),
-                    updater,
+                    reset_graph_dict_cb,
+                    refill_graph_dict_cb,
+                    reset_mesh_cb,
+                    rebuild_edges_cb,
+                    update_pos_cb,
                 )
             };
         }

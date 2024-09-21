@@ -119,7 +119,7 @@ namespace Clam
 
             [System.Security.SecurityCritical]
             [DllImport(__DllName, EntryPoint = "physics_update_async", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-            private static unsafe extern FFIError physics_update_async(IntPtr handle, NodeVisitor cb_fn);
+            private static unsafe extern FFIError physics_update_async(IntPtr handle, NodeVisitor reset_graph_dict_cb, NodeVisitor refill_graph_dict_cb, NodeVisitor reset_mesh_cb, NameSetter rebuild_Edges_cb, NodeVisitor update_pos_cb);
 
             //[DllImport(__DllName, EntryPoint = "shutdown_physics", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
             //private static extern FFIError shutdown_physics(IntPtr handle);
@@ -129,6 +129,10 @@ namespace Clam
 
             [DllImport(__DllName, EntryPoint = "get_num_edges_in_graph", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
             private static extern int get_num_edges_in_graph(IntPtr ptr);
+            
+
+            [DllImport(__DllName, EntryPoint = "get_cur_num_edges_fdg", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+            private static extern int get_cur_num_edges_fdg(IntPtr ptr);
 
             [DllImport(__DllName, EntryPoint = "get_num_graph_components", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
             private static extern int get_num_graph_components(IntPtr ptr);

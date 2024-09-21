@@ -12,6 +12,7 @@ pub struct Spring {
     node1: ClusterID, //String's reference hash table
     node2: ClusterID,
     relation: u32,
+    // is_real : bool,
 }
 
 impl Spring {
@@ -20,6 +21,7 @@ impl Spring {
         hash_code1: ClusterID,
         hash_code2: ClusterID,
         relation: u32,
+        // is_real : bool ,
         // normalize_len: Option<f32>,
         // scalar: Option<f32>,
     ) -> Self {
@@ -33,6 +35,7 @@ impl Spring {
             node1: hash_code1,
             node2: hash_code2,
             relation,
+            // is_real
         }
     }
 
@@ -45,7 +48,7 @@ impl Spring {
     }
 
     //apply acceleration to both nodes at each end of spring
-    pub fn move_nodes(&self, nodes: &mut HashMap<(usize, usize), PhysicsNode>, longest_edge: f32,
+    pub fn accumulate_forces(&self, nodes: &mut HashMap<(usize, usize), PhysicsNode>, longest_edge: f32,
         scalar: f32, temp: Option<f32>) {
         //borrow ownership of nodes spring is connected to
         let node1 = nodes.get(&self.node1.to_tuple()).unwrap();

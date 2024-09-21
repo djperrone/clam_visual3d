@@ -354,9 +354,13 @@ pub unsafe extern "C" fn init_graph_vertices(
 #[no_mangle]
 pub unsafe extern "C" fn physics_update_async(
     context: InHandlePtr,
-    updater: CBFnNodeVisitor,
+    reset_graph_dict_cb: CBFnNodeVisitor,
+refill_graph_dict_cb: CBFnNodeVisitor,
+reset_mesh_cb: CBFnNodeVisitor,
+rebuild_edges_cb: CBFnNameSetter,
+update_pos_cb: CBFnNodeVisitor,
 ) -> FFIError {
-    physics_update_async_impl(context, updater)
+    physics_update_async_impl(context, reset_graph_dict_cb, refill_graph_dict_cb,reset_mesh_cb,rebuild_edges_cb, update_pos_cb)
 }
 
 // #[no_mangle]

@@ -273,9 +273,9 @@ namespace Clam
                 run_triangle_test(m_Handle, lastRun, outPath, clusterGetter);
             }
 
-            public static FFIError PhysicsUpdateAsync(NodeVisitor cb_fn)
+            public static FFIError PhysicsUpdateAsync(NodeVisitor reset_graph_dict_cb, NodeVisitor refill_graph_dict_cb, NodeVisitor reset_mesh_cb, NameSetter rebuild_edges_cb, NodeVisitor update_pos_cb)
             {
-                return physics_update_async(m_Handle, cb_fn);
+                return physics_update_async(m_Handle, reset_graph_dict_cb, refill_graph_dict_cb, reset_mesh_cb, rebuild_edges_cb, update_pos_cb);
             }
 
             //public static FFIError ShutdownPhysics()
@@ -292,6 +292,11 @@ namespace Clam
             {
                 return get_num_edges_in_graph(m_Handle);
             }
+
+            //public static int GetCurNumEdgesFDG()
+            //{
+            //    return get_cur_edges_fdg(m_Handle);
+            //}
 
             // -1 if no graph
             public static int GetGraphClusterCardinality()

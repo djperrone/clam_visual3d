@@ -66,7 +66,7 @@ public class ClamGraphBuildMenu
         {
             return;
         }
-        
+
         var textField = changeEvent.target as TextField;
         if (!UIHelpers.ValidateCharacters(changeEvent.newValue, "0123456789"))
         {
@@ -148,7 +148,7 @@ public class ClamGraphBuildMenu
         {
             return;
         }
-        
+
 
         if (m_ScoringSelector.value == null)
         {
@@ -166,7 +166,7 @@ public class ClamGraphBuildMenu
         m_Graph = new Dictionary<(nuint, nuint), GameObject>();
 
 
-        var graphResult = Clam.FFI.NativeMethods.InitClamGraph((ScoringFunction)System.Enum.Parse(typeof(ScoringFunction), m_ScoringSelector.value),(nuint)int.Parse(m_MinDepth.value), graphFillerCallback);
+        var graphResult = Clam.FFI.NativeMethods.InitClamGraph((ScoringFunction)System.Enum.Parse(typeof(ScoringFunction), m_ScoringSelector.value), (nuint)int.Parse(m_MinDepth.value), graphFillerCallback);
         if (graphResult != FFIError.Ok)
         {
             string errorMessage = "Error building graph (" + graphResult.ToString() + ")";
@@ -215,10 +215,11 @@ public class ClamGraphBuildMenu
         {
             if (!m_Graph.ContainsKey(id))
             {
-                GameObject.Destroy(node);
+                //GameObject.Destroy(node);
+                node.SetActive(false);
             }
         }
-        Cakes.Tree.Set(m_Graph);
+        //Cakes.Tree.Set(m_Graph);
 
         MenuEventManager.SwitchState(Menu.DestroyGraph);
         MenuEventManager.SwitchState(Menu.DestroyHierarchyEdges);
@@ -275,6 +276,10 @@ public class ClamGraphBuildMenu
         m_Graph[id] = cluster;
     }
 
+    
+
+
+
     void InitLabelFilter()
     {
         var baseMenu = m_Document.rootVisualElement.Q<VisualElement>("GraphLabelFilter");
@@ -299,7 +304,7 @@ public class ClamGraphBuildMenu
             baseMenu.Add(t);
         }
     }
-    
+
     void ToggleLabelCallback(ChangeEvent<bool> evt)
     {
         Debug.Log("triggered toggle callback");
@@ -315,5 +320,5 @@ public class ClamGraphBuildMenu
     }
 
 
-    
+
 }
