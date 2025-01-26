@@ -116,7 +116,7 @@ impl ForceDirectedGraphAsync {
                 if g.0.force_shutdown {
                     g.0.data_ready = false;
                     return false;
-                }else if g.1.cur_depth == g.1.max_depth{
+                }else if g.1.cur_depth == g.1.max_depth + 1{
                     return false;
                 } else {
                     // g.1.move_nodes();
@@ -241,7 +241,7 @@ impl ForceDirectedGraphAsync {
 
 
                 if g.1.cur_iter == g.1.max_iters{
-                    if g.1.cur_depth == g.1.max_depth{
+                    if g.1.cur_depth == g.1.max_depth + 1{
                          // if g.1.cur_depth >= g.1.max_depth{
                         g.1.cleanup( tree, None);
                         g.0.force_shutdown = true;
